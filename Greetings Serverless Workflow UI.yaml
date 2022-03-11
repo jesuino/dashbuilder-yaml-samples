@@ -25,14 +25,16 @@ layoutTemplates:
                                    "properties":{
                                       "workflowdata": {
                                           "title": "JSON Greet",
+                                          "default": { "language": "English" },
                                           "type": "object",
                                           "properties": {
                                               "name":{
-                                                 "type":"string"
+                                                 "type":"string",
+                                                 "defaultValue": "test"
                                               },
                                               "language":{
                                                  "type":"string",
-                                                 "allowedValues": ["", "English", "Spanish"]
+                                                 "allowedValues": ["English", "Spanish"]
                                               }
                                           },
                                           "required":[
@@ -58,6 +60,7 @@ layoutTemplates:
                                    "properties":{
                                       "workflowdata": {
                                           "title": "YAML Greet",
+                                          "default": { "language": "English" },
                                           "type": "object",
                                           "properties": {
                                               "name":{
@@ -66,7 +69,7 @@ layoutTemplates:
                                               "language":{
                                                  "type":"string",
                                                  "defaultValue": "English",
-                                                 "allowedValues": ["", "English", "Spanish"]
+                                                 "allowedValues": ["English", "Spanish"]
                                               }
                                           },
                                           "required":[
