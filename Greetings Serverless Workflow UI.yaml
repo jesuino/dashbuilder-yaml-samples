@@ -1,0 +1,174 @@
+datasets:
+  - uuid: workflows
+    expression: >-
+                $.data.ProcessInstances.[ start, processId ]
+    url: https://data-index-secure-dashbuilder.kie-tooling-0ad6762cc85bcef5745bb684498c2436-0000.us-south.containers.appdomain.cloud/graphql/?query=%7B%0A%20%20ProcessInstances%20%7B%0A%09%09start%0A%20%20%20%20processId%0A%20%20%7D%0A%7D%0A
+    columns:
+        - id: startDate
+          type: date
+        - id: processId
+          type: LABEL
+layoutTemplates:
+  - name: JSON Greet
+    rows:
+      - layoutColumns:
+          - layoutComponents:
+              - type: EXTERNAL
+                properties:
+                    height: 400px
+                    componentId: uniforms
+                    uniforms.url: https://swf-persistence-monitoring-secure-dashbuilder.kie-tooling-0ad6762cc85bcef5745bb684498c2436-0000.us-south.containers.appdomain.cloud/jsongreet
+                    uniforms.schema: >-
+                                {
+                                   "title":"",
+                                   "type":"object",
+                                   "properties":{
+                                      "workflowdata": {
+                                          "title": "JSON Greet",
+                                          "type": "object",
+                                          "properties": {
+                                              "name":{
+                                                 "type":"string"
+                                              },
+                                              "language":{
+                                                 "type":"string",
+                                                 "allowedValues": ["", "English", "Spanish"]
+                                              }
+                                          },
+                                          "required":[
+                                             "name", "language"
+                                          ]
+                                      }
+                                      
+                                   }
+                                }
+  - name: YAML Greet
+    rows:
+      - layoutColumns:
+          - layoutComponents:
+              - type: EXTERNAL
+                properties:
+                    height: 400px
+                    componentId: uniforms
+                    uniforms.url: https://swf-persistence-monitoring-secure-dashbuilder.kie-tooling-0ad6762cc85bcef5745bb684498c2436-0000.us-south.containers.appdomain.cloud/yamlgreet
+                    uniforms.schema: >-
+                                {
+                                   "title":"",
+                                   "type":"object",
+                                   "properties":{
+                                      "workflowdata": {
+                                          "title": "YAML Greet",
+                                          "type": "object",
+                                          "properties": {
+                                              "name":{
+                                                 "type":"string"
+                                              },
+                                              "language":{
+                                                 "type":"string",
+                                                 "defaultValue": "English",
+                                                 "allowedValues": ["", "English", "Spanish"]
+                                              }
+                                          },
+                                          "required":[
+                                             "name", "language"
+                                          ]
+                                      }
+                                      
+                                   }
+                                }
+  - name: index
+    rows:
+        - layoutColumns:
+          - layoutComponents:
+            - type: HTML
+              properties:
+                HTML_CODE: >-
+                                <h2><strong>Greeting Serverless Workflow sample</strong></h2>
+                                <p>
+                                    This is a demo for the <a href="https://github.com/kiegroup/kogito-examples/tree/stable/kogito-quarkus-examples/serverless-workflow-greeting-quarkus">Greeting Serverless Workflow</a>. Use the form to submit new data and you should see the result instantly at the bottom report.
+                                </p>
+                margin-bottom: 40px
+        - layoutColumns:
+          - layoutComponents:
+            - type: org.dashbuilder.client.navigation.layout.editor.NavTabListDragComponent
+              properties:
+                targetDivId: sw_forms_div
+                navGroupId: sw_forms_group
+
+            - type: org.uberfire.ext.plugin.client.perspective.editor.layout.editor.TargetDivDragComponent
+              properties:
+                width: '100%'
+                ID_PARAMETER: sw_forms_div
+        - layoutColumns:
+          - span: '3'
+            layoutComponents:
+              - type: HTML
+                properties:
+                    HTML_CODE: '<strong>Workflows Count</strong>'
+                    font-size: Medium
+              - settings:
+                  type: BARCHART
+                  filter: 
+                    enabled: 'true'
+                    listening: 'true'
+                  chart:
+                    width: '300'
+                    height: '200'
+                  refresh:
+                    interval: '3'
+                  columns:
+                    - id: Total
+                      pattern: '#'
+                  dataSetLookup:
+                    dataSetUuid: workflows
+                    groupOps:
+                      - columnGroup:
+                          source: processId
+                        groupFunctions:
+                          - source: processId
+                          - source: processId
+                            function: COUNT
+                            column: Total
+          - span: '3'
+            layoutComponents:
+              - type: HTML
+                properties:
+                    HTML_CODE: '<strong>Workflows Share</strong>'
+                    font-size: Medium
+              - settings:
+                  type: PIECHART
+                  chart:
+                    width: '300'
+                    height: '200'
+                  refresh:
+                    interval: '3'
+                  columns:
+                    - id: Total Started
+                      pattern: '#'
+                  dataSetLookup:
+                    dataSetUuid: workflows
+                    sortOps:
+                       - column: processId
+                         sortOrder: ASCENDING
+                    groupOps:
+                      - columnGroup:
+                          source: processId
+                        groupFunctions:
+                          - source: processId
+                          - source: processId
+                            function: COUNT
+                            column: Total Started
+navTree:
+  root_items:
+  - id: sw_forms_group
+    type: GROUP
+    name: Forms
+    children:
+    - id: json_nav
+      type: ITEM
+      name: JSON Greet
+      context: resourceId=JSON Greet;resourceType=PERSPECTIVE;
+    - id: yaml_nav
+      type: ITEM
+      name: YAML Greet
+      context: resourceId=YAML Greet;resourceType=PERSPECTIVE;
