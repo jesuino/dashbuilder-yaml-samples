@@ -1,0 +1,36 @@
+datasets:
+  - uuid: nodes
+    expression: >- 
+                $.data.ProcessInstances.nodes.[$join(["state-", name]), exit ? $toMillis(exit) - $toMillis(enter) : -1]
+    url: https://data-index-secure-dashbuilder.kie-tooling-0ad6762cc85bcef5745bb684498c2436-0000.us-south.containers.appdomain.cloud/graphql/?query=%7B%0A%20%20ProcessInstances(where%3A%20%7BprocessId%3A%7Bin%3A%20%5B%22jsongreet%22%2C%20%22yamlgreet%22%5D%7D%7D)%20%20%7B%0A%20%20%20%20nodes%20%7B%0A%20%20%20%20%20%20%20nodeId%0A%20%20%20%20%20%20name%0A%20%20%20%20%20%20enter%0A%20%20%20%20%20%20exit%0A%20%20%20%20%7D%0A%20%20%7D%0A%7D
+    columns:
+        - id: name
+          type: label
+        - id: time
+          type: number
+layoutTemplates:
+  - name: Hits Heatmap
+    rows:
+      - layoutColumns:
+          - layoutComponents:
+              - settings:
+                  type: EXTERNAL_COMPONENT
+                  external_component_id: svg-heatmap
+                  chart:
+                    width: '1200'
+                    height: '800'
+                  svg-heatmap:
+                    svg: https://gist.githubusercontent.com/jesuino/02a51f58de1017cde322e1e925b850a1/raw/60c8616b22ea7663ee09fbe021cee2d1ba57d129/GreetingSWF.svg
+                    containsId: 'true'
+                    blur: '0.6'
+                    size: '3.1'
+                    opacity: '0.3'
+                  dataSetLookup:
+                    dataSetUuid: nodes
+                    groupOps:
+                      - columnGroup:
+                          source: name
+                        groupFunctions:
+                          - source: name
+                          - source: name
+                            function: COUNT
