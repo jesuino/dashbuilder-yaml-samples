@@ -23,7 +23,7 @@ layoutTemplates:
                     svg: https://gist.githubusercontent.com/jesuino/02a51f58de1017cde322e1e925b850a1/raw/60c8616b22ea7663ee09fbe021cee2d1ba57d129/GreetingSWF.svg
                     containsId: 'true'
                     blur: '0.6'
-                    size: '3.1'
+                    size: '1.5'
                     opacity: '0.3'
                   dataSetLookup:
                     dataSetUuid: nodes
