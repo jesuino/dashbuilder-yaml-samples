@@ -1,7 +1,7 @@
 datasets:
   - uuid: workflows
     expression: >-
-                $.data.ProcessInstances.[ start, processId ]
+                $.data.ProcessInstances.[ $fromMillis($toMillis(start)), processId ]
     url: https://data-index-secure-dashbuilder.kie-tooling-0ad6762cc85bcef5745bb684498c2436-0000.us-south.containers.appdomain.cloud/graphql/?query=%7B%0A%20%20ProcessInstances%20%7B%0A%09%09start%0A%20%20%20%20processId%0A%20%20%7D%0A%7D%0A
     columns:
         - id: startDate
