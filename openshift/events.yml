@@ -14,18 +14,34 @@ datasets:
     - id: Namespace
       type: label
 pages:
-- name: Countries Population
+- name: Openshift Events
   components:
+    - html: Openshift events <hr />
+      properties:
+        font-size: xx-large
+    - settings:
+        type: BARCHART
+        external_component_id: filtered-table
+        external:
+            external_component_width: 100%
+            external_component_height: 500px
+        dataSetLookup:
+          uuid: events
+          group:
+            - columnGroup:
+                source: Namespace
+              groupFunctions:
+                - source: Namespace
+                - source: Event Name
+                  function: COUNT
+    - html: <hr /> All Events <hr />
+      properties:
+        font-size: xx-large
     - settings:
         type: EXTERNAL_COMPONENT
         external_component_id: filtered-table
         external:
             external_component_width: 100%
             external_component_height: 500px
-        chart:
-          resizable: 'true'
-        table:
-          sort:
-            enabled: 'true'
         dataSetLookup:
           uuid: events
