@@ -1,0 +1,31 @@
+properties:
+    token: YOUR TOKEN HERE
+    clusterUrl: YOUR CLUSTER URL HERE
+datasets:
+- uuid: events
+  url: ${clusterUrl}
+  expression: >-
+                [$.items.[metadata.name, metadata.namespace]]
+  headers:
+    Authorization: Bearer ${token}
+  columns:
+    - id: Event Name
+      type: label
+    - id: Namespace
+      type: label
+pages:
+- name: Countries Population
+  components:
+    - settings:
+        type: EXTERNAL_COMPONENT
+        external_component_id: filtered-table
+        external:
+            external_component_width: 100%
+            external_component_height: 500px
+        chart:
+          resizable: 'true'
+        table:
+          sort:
+            enabled: 'true'
+        dataSetLookup:
+          uuid: events
