@@ -3,7 +3,7 @@ properties:
     clusterUrl: YOUR CLUSTER URL HERE
 datasets:
 - uuid: events
-  url: ${clusterUrl}
+  url: ${clusterUrl}/api/v1/events
   expression: >-
                 [$.items.[metadata.name, metadata.namespace]]
   headers:
