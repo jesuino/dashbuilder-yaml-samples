@@ -21,10 +21,6 @@ pages:
         font-size: xx-large
     - settings:
         type: BARCHART
-        external_component_id: filtered-table
-        external:
-            external_component_width: 100%
-            external_component_height: 500px
         dataSetLookup:
           uuid: events
           group:
