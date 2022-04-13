@@ -1,0 +1,103 @@
+properties:
+    greetingWorkflowUrl: https://swf-persistence-monitoring-secure-dashbuilder.kie-tooling-0ad6762cc85bcef5745bb684498c2436-0000.us-south.containers.appdomain.cloud
+pages:
+  - name: JSON Greet
+    rows:
+      - columns:
+          - components:
+              - type: EXTERNAL
+                properties:
+                    height: 400px
+                    componentId: uniforms
+                    uniforms.url: ${greetingWorkflowUrl}/jsongreet
+                    uniforms.schema: >-
+                                {
+                                   "title":"",
+                                   "type":"object",
+                                   "properties":{
+                                      "workflowdata": {
+                                          "title": "JSON Greet",
+                                          "default": { "language": "English" },
+                                          "type": "object",
+                                          "properties": {
+                                              "name":{
+                                                 "type":"string",
+                                                 "defaultValue": "test"
+                                              },
+                                              "language":{
+                                                 "type":"string",
+                                                 "allowedValues": ["English", "Spanish"]
+                                              }
+                                          },
+                                          "required":[
+                                             "name", "language"
+                                          ]
+                                      }
+                                      
+                                   }
+                                }
+  - name: YAML Greet
+    rows:
+      - columns:
+          - components:
+              - type: EXTERNAL
+                properties:
+                    height: 400px
+                    componentId: uniforms
+                    uniforms.url: ${greetingWorkflowUrl}/yamlgreet
+                    uniforms.schema: >-
+                                {
+                                   "title":"",
+                                   "type":"object",
+                                   "properties":{
+                                      "workflowdata": {
+                                          "title": "YAML Greet",
+                                          "default": { "language": "English" },
+                                          "type": "object",
+                                          "properties": {
+                                              "name":{
+                                                 "type":"string"
+                                              },
+                                              "language":{
+                                                 "type":"string",
+                                                 "defaultValue": "English",
+                                                 "allowedValues": ["English", "Spanish"]
+                                              }
+                                          },
+                                          "required":[
+                                             "name", "language"
+                                          ]
+                                      }
+                                      
+                                   }
+                                }
+  - name: index
+    rows:
+        - columns:
+          - components:
+            - html: >-
+                    <h2><strong>Greeting Serverless Workflow</strong></h2>
+                    <p>
+                        This is a form for the <a href="https://github.com/kiegroup/kogito-examples/tree/stable/kogito-quarkus-examples/serverless-workflow-greeting-quarkus">Greeting Serverless Workflow</a>. Use the form to start new workflows.
+                    </p>
+              properties:
+                margin-bottom: 40px
+        - columns:
+          - components:
+            - type: org.dashbuilder.client.navigation.layout.editor.NavTabListDragComponent
+              properties:
+                targetDivId: sw_forms_div
+                navGroupId: sw_forms_group
+
+            - type: org.uberfire.ext.plugin.client.perspective.editor.layout.editor.TargetDivDragComponent
+              properties:
+                width: '100%'
+                ID_PARAMETER: sw_forms_div
+
+navTree:
+  root_items:
+  - id: sw_forms_group
+    type: GROUP
+    children:
+    - page: JSON Greet
+    - page: YAML Greet
