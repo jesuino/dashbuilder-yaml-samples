@@ -1,0 +1,40 @@
+properties:
+    temperatureConversionWorkflowUrl: http://conversion-workflow-dashbuilder.kie-tooling-0ad6762cc85bcef5745bb684498c2436-0000.us-south.containers.appdomain.cloud
+pages:
+    - name: index
+      components:
+          - html: >-
+                <h2><strong>Temperature conversion Workflow</strong></h2>
+                <p>
+                    This is a form for the <a href="https://github.com/kiegroup/kogito-examples/tree/stable/kogito-quarkus-examples/serverless-workflow-temperature-conversion">Temperature Conversion Serverless Workflow</a>. Use the form to start new workflows.
+                </p>
+            properties:
+                margin-bottom: 40px
+          - type: EXTERNAL
+            properties:
+                height: 400px
+                componentId: uniforms
+                uniforms.url: ${temperatureConversionWorkflowUrl}/fahrenheit_to_celsius
+                uniforms.schema: >-
+                    {
+                       "title":"",
+                       "type":"object",
+                       "properties":{
+                          "workflowdata": {
+                              "title": "Fahrenheit to Celsius",
+                              "default": { "fahrenheit": 100 },
+                              "type": "object",
+                              "properties": {
+                                  "fahrenheit":{
+                                     "type":"number",
+                                     "defaultValue": "test"
+                                  }
+                                  
+                              },
+                              "required":[
+                                 "fahrenheit"
+                              ]
+                          }
+                          
+                       }
+                    }
