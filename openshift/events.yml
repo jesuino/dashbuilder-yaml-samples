@@ -1,13 +1,16 @@
 properties:
-    token: YOUR TOKEN HERE
-    clusterUrl: YOUR CLUSTER URL HERE
+    token: TOKEN HERE
+    clusterUrl: CLUSTER URL
+    proxyUrl: https://kie-sandbox-extended-services-kie-sandbox.kie-tooling-0ad6762cc85bcef5745bb684498c2436-0000.us-south.containers.appdomain.cloud/devsandbox
 datasets:
 - uuid: events
-  url: ${clusterUrl}/api/v1/events
+  url: ${proxyUrl}
   expression: >-
                 [$.items.[metadata.name, metadata.namespace]]
   headers:
     Authorization: Bearer ${token}
+    Content-Type: application/json
+    Target-Url: ${clusterUrl}/api/v1/events
   columns:
     - id: Event Name
       type: label
