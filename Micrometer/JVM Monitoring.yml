@@ -1,0 +1,136 @@
+properties:
+    # use -1 to cancel auto refresh
+    refreshInterval: 5
+datasets:
+    - uuid: pop
+      url: http://localhost:8080/q/metrics
+      columns:
+          - id: Metric
+            type: LABEL
+          - id: Labels
+            type: LABEL
+          - id: Value
+            type: NUMBER
+pages:
+    - components:
+          - html: CPU Usage <hr />
+            properties:
+                margin-top: 10px
+                font-size: x-large
+                font-weight: bolder
+          - settings:
+                type: METERCHART
+                refresh:
+                    interval: '${refreshInterval}'
+                chart:
+                    width: "300"
+                    height: "200"
+                    margin:
+                        top: '0'
+                        bottom: '60'
+                meter:
+                    end: "100"
+                    critical: "80"
+                    warning: "50"
+                columns:
+                    - id: Total
+                      expression: value * 100
+                dataSetLookup:
+                    uuid: pop
+                    filter:
+                        - column: Metric
+                          function: EQUALS_TO
+                          args:
+                              - "system_cpu_usage"
+                    sort:
+                        - column: Total
+                          sortOrder: DESCENDING
+                    group:
+                        - groupFunctions:
+                              - source: Value
+                                function: MAX
+                                column: Total
+          - html: Threads <hr />
+            properties:
+                font-size: x-large
+                font-weight: bolder
+          - settings:
+                type: BARCHART
+                refresh:
+                    interval: '${refreshInterval}'
+                chart:
+                    width: "1200"
+                    height: '200'
+                    margin:
+                        left: "90"
+                dataSetLookup:
+                    uuid: pop
+                    filter:
+                        - column: Metric
+                          function: EQUALS_TO
+                          args:
+                              - "jvm_threads_states_threads"
+                    sort:
+                        - column: Total
+                          sortOrder: DESCENDING
+                    group:
+                        - columnGroup:
+                              source: Labels
+                          groupFunctions:
+                              - source: Labels
+                              - source: Value
+                                function: MAX
+                                column: Total
+          - html: JVM Memory Used Bytes <hr />
+            properties:
+                margin-top: 10px
+                font-size: x-large
+                font-weight: bolder
+          - settings:
+                type: BARCHART
+                refresh:
+                    interval: '${refreshInterval}'
+                chart:
+                    width: "1200"
+                    height: '200'
+                    margin:
+                        left: "90"
+                dataSetLookup:
+                    uuid: pop
+                    filter:
+                        - column: Metric
+                          function: EQUALS_TO
+                          args:
+                              - "jvm_memory_used_bytes"
+                    sort:
+                        - column: Total
+                          sortOrder: DESCENDING
+                    group:
+                        - columnGroup:
+                              source: Labels
+                          groupFunctions:
+                              - source: Labels
+                              - source: Value
+                                function: MAX
+                                column: Total
+                columns:
+                    - id: Total
+                      pattern: '#'
+          - html: All Metrics <hr />
+            properties:
+                margin-top: 10px
+                font-size: x-large
+                font-weight: bolder
+          - settings:
+                type: TABLE
+                chart:
+                    resizable: "true"
+                refresh:
+                    interval: '${refreshInterval}'
+                table:
+                    show_column_picker: 'false'
+                    pageSize: '100'
+                    sort:
+                        enabled: "true"
+                dataSetLookup:
+                    uuid: pop
