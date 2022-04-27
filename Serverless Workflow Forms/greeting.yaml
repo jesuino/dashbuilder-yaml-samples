@@ -1,11 +1,11 @@
 properties:
-    greetingWorkflowUrl: https://swf-persistence-monitoring-secure-dashbuilder.kie-tooling-0ad6762cc85bcef5745bb684498c2436-0000.us-south.containers.appdomain.cloud
+    greetingWorkflowUrl: http://localhost:8080
 pages:
     - name: JSON Greet
       components:
           - type: EXTERNAL
             properties:
-                height: 400px
+                height: 500px
                 componentId: uniforms
                 uniforms.url: ${greetingWorkflowUrl}/jsongreet
                 uniforms.schema: >-
@@ -15,12 +15,11 @@ pages:
                        "properties":{
                           "workflowdata": {
                               "title": "JSON Greet",
-                              "default": { "language": "English" },
+                              "default": { "language": "English", "name": "John" },
                               "type": "object",
                               "properties": {
                                   "name":{
-                                     "type":"string",
-                                     "defaultValue": "test"
+                                     "type":"string"
                                   },
                                   "language":{
                                      "type":"string",
@@ -38,7 +37,7 @@ pages:
       components:
           - type: EXTERNAL
             properties:
-                height: 400px
+                height: 500px
                 componentId: uniforms
                 uniforms.url: ${greetingWorkflowUrl}/yamlgreet
                 uniforms.schema: >-
@@ -48,7 +47,7 @@ pages:
                        "properties":{
                           "workflowdata": {
                               "title": "YAML Greet",
-                              "default": { "language": "English" },
+                              "default": { "language": "English", "name": "John" },
                               "type": "object",
                               "properties": {
                                   "name":{
@@ -56,7 +55,6 @@ pages:
                                   },
                                   "language":{
                                      "type":"string",
-                                     "defaultValue": "English",
                                      "allowedValues": ["English", "Spanish"]
                                   }
                               },
