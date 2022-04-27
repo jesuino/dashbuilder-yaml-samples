@@ -1,0 +1,224 @@
+properties:
+  # Dataset setup
+  swfUrl: http://localhost:8080
+
+  # Charts setup
+  swfChartsWidth: 300
+  swfChartsHeight: 200
+
+  # Data update in seconds (use -1 for no update)
+  dataUpdate: 5
+
+datasets:
+  - uuid: metrics
+    url: ${swfUrl}/q/metrics
+    expression: >-
+      $map($, function($l) { [$l[0], $contains($l[1], "process_id") ? $replace($match($l[1], /process_id=".*?"/).match, "process_id", "workflow") : $l[1] , $l[2]]})
+    columns:
+      - id: metric
+        type: label
+      - id: labels
+        type: label
+      - id: value
+        type: number
+pages:
+  - rows:
+      - columns:
+          - components:
+              - html: >-
+                  <p style="font-size: xx-large; margin: 10px">Serverless Workflow </p> <hr />
+      - columns:
+          - span: "4"
+            components:
+              - html: >-
+                  <p style="font-size: large">Started </p>
+              - settings:
+                  type: BARCHART
+                  filter:
+                    enabled: "true"
+                    listening: "true"
+                  refresh:
+                    interval: "${dataUpdate}"
+                  chart:
+                    width: "${swfChartsWidth}"
+                    height: "${swfChartsHeight}"
+                    grid:
+                      x: "false"
+                      y: "false"
+                  dataSetLookup:
+                    uuid: metrics
+                    sort:
+                      - column: value
+                        sortOrder: DESCENDING
+                    filter:
+                      - column: metric
+                        function: EQUALS_TO
+                        args:
+                          - "kogito_process_instance_started_total"
+                    group:
+                      - columnGroup:
+                          source: labels
+                        groupFunctions:
+                          - source: labels
+                          - source: value
+          - span: "4"
+            components:
+              - html: >-
+                  <p style="font-size: large">Running </p>
+              - settings:
+                  type: BARCHART
+                  filter:
+                    enabled: "true"
+                    listening: "true"
+                  refresh:
+                    interval: "${dataUpdate}"
+                  chart:
+                    width: "${swfChartsWidth}"
+                    height: "${swfChartsHeight}"
+                    grid:
+                      x: "false"
+                      y: "false"
+                  dataSetLookup:
+                    uuid: metrics
+                    sort:
+                      - column: value
+                        sortOrder: DESCENDING
+                    filter:
+                      - column: metric
+                        function: EQUALS_TO
+                        args:
+                          - "kogito_process_instance_running_total"
+                    group:
+                      - columnGroup:
+                          source: labels
+                        groupFunctions:
+                          - source: labels
+                          - source: value
+      - columns:
+          - span: "4"
+            components:
+              - html: >-
+                  <p style="font-size: large">Completed </p>
+              - settings:
+                  type: BARCHART
+                  filter:
+                    enabled: "true"
+                    listening: "true"
+                  refresh:
+                    interval: "${dataUpdate}"
+                  chart:
+                    width: "${swfChartsWidth}"
+                    height: "${swfChartsHeight}"
+                    grid:
+                      x: "false"
+                      y: "false"
+                  dataSetLookup:
+                    uuid: metrics
+                    sort:
+                      - column: value
+                        sortOrder: DESCENDING
+                    filter:
+                      - column: metric
+                        function: EQUALS_TO
+                        args:
+                          - "kogito_process_instance_completed_total"
+                    group:
+                      - columnGroup:
+                          source: labels
+                        groupFunctions:
+                          - source: labels
+                          - source: value
+          - span: "4"
+            components:
+              - html: >-
+                  <p style="font-size: large">Total Duration </p>
+              - settings:
+                  type: BARCHART
+                  filter:
+                    enabled: "true"
+                    listening: "true"
+                  refresh:
+                    interval: "${dataUpdate}"
+                  chart:
+                    width: "${swfChartsWidth}"
+                    height: "${swfChartsHeight}"
+                    grid:
+                      x: "false"
+                      y: "false"
+                  dataSetLookup:
+                    uuid: metrics
+                    sort:
+                      - column: value
+                        sortOrder: DESCENDING
+                    filter:
+                      - column: metric
+                        function: EQUALS_TO
+                        args:
+                          - "kogito_process_instance_duration_seconds_sum"
+                    group:
+                      - columnGroup:
+                          source: labels
+                        groupFunctions:
+                          - source: labels
+                          - source: value
+      - columns:
+          - span: "12"
+            components:
+              - properties:
+                  width: 150px
+                  float: left
+                settings:
+                  type: SELECTOR
+                  general:
+                    visible: "true"
+                    text: "Filter"
+                  filter:
+                    enabled: "true"
+                    notification: "true"
+                  dataSetLookup:
+                    uuid: metrics
+                    filter:
+                      - column: metric
+                        function: EQUALS_TO
+                        args:
+                          - "kogito_process_instance_started_total"
+                    group:
+                      - columnGroup:
+                          source: labels
+                        groupFunctions:
+                          - source: labels
+                            column: Workflow
+      - properties:
+          position: relative
+        columns:
+          - span: "12"
+            components:
+              - properties:
+                  float: right
+                  text-align: right
+                settings:
+                  type: METRIC
+                  html:
+                    html: >-
+                      <p style="font-size: smallest; margin-right: 5px">
+                        <em ><strong>Uptime</strong> ${value}s </em>   <br />
+                        <em> Last Update: <strong id="${this}""></strong>
+                       </p>
+                    javascript: >-
+                      ${this}.textContent = new Date().toLocaleString()
+
+                  general:
+                    visible: "true"
+                    title: Uptime
+                  refresh:
+                    interval: "${dataUpdate}"
+                  dataSetLookup:
+                    uuid: metrics
+                    filter:
+                      - column: metric
+                        function: EQUALS_TO
+                        args:
+                          - "process_uptime_seconds"
+                    group:
+                      - groupFunctions:
+                          - source: value
