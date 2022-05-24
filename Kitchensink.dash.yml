@@ -1,0 +1,175 @@
+pages:
+  - name: Layout
+    rows:
+      - columns:
+          - components:
+              - html: >-
+                  <p style="margin-top: 20px">
+                    A Dashbuilder application is composed of Pages. The smallest Dashbuilder YML application contain a single page with a single component
+                      <pre>pages:
+                    - name: Page
+                      components: 
+                        - html: Hello World</pre>
+                    Currently boostrap layout is used, which means that columns and rows can be used for organization:
+                  </p>
+      - columns:
+          - properties:
+              border: solid 1px
+              text-align: center
+              margin-bottom: 10px
+            components:
+              - html: ROW1
+      - columns:
+          - properties:
+              border: solid 1px
+              text-align: center
+            span: "3"
+            components:
+              - html: ROW2 CL1 SPAN 3
+          - properties:
+              border: solid 1px
+              text-align: center
+            span: "3"
+            components:
+              - html: ROW2 CL2 SPAN 3
+          - properties:
+              border: solid 1px
+              text-align: center
+            span: "6"
+            components:
+              - html: ROW2 CL3 SPAN 6
+      - columns:
+          - properties:
+              margin-top: 10px
+            components:
+              - html: >-
+                  This is the code for the layout above: <br /><br /> 
+                  <pre>pages:
+                    - name: Layout
+                      rows:
+                      - columns:
+                        - properties:
+                            border: solid 1px
+                            text-align: center
+                            margin-bottom: 10px
+                          components:
+                            - html: ROW1
+                      - columns:
+                        - properties:
+                            border: solid 1px
+                            text-align: center
+                          span: '3'          
+                          components:
+                            - html: ROW2 CL1 SPAN 3
+                        - properties:
+                            border: solid 1px
+                            text-align: center
+                          span: '3'
+                          components:
+                            - html: ROW2 CL2 SPAN 3
+                        - properties:
+                            border: solid 1px
+                            text-align: center
+                          span: '6'
+                          components:
+                            - html: ROW2 CL3 SPAN 6</pre>
+  - name: Data Sets
+    properties:
+        margin-top: 10px
+    components:
+      - html: >-
+          <p>
+            Data is organized in Data Sets and it can be retrieved from JSON content. The content can be retrieved from a JSON URL or declared inline: <br />
+            <pre>datasets:
+              - uuid: products
+                content: >-
+                  [
+                    ["Computers", "Scanner", 5, 3],
+                    ["Computers", "Printer", 7, 4],
+                    ["Computers", "Laptop", 3, 2],
+                    ["Electronics", "Camera", 10, 7],
+                    ["Electronics", "Headphones", 5, 9]
+                  ]
+                columns:
+                  - id: Section
+                    type: LABEL
+                  - id: Product
+                    type: LABEL
+                  - id: Quantity
+                    type: NUMBER
+                  - id: Quantity2
+                    type: NUMBER
+            </pre>
+            Data Sets can be used with Displayers or External Components. For more information check <a href="https://blog.kie.org/2022/04/support-any-json-metrics-and-csv-as-dataset-in-dashbuilder.html">the article about datasets</a>.
+          </p>
+  - name: HTML & CSS
+    components:
+      - html: >-
+          <p>Dashbuilder Support HTML components using the <i>html</i> element and CSS 2 properties using <i>properties</i> 
+          object that applies to any component (pages, row, columns and component). A page with font-size xxx-large could use the following declaration:
+            <pre>pages:
+           - components:
+                - html: Hello World
+                  properties:
+                    font-size: xxx-large</pre>
+          </p>
+          <p>
+            When using HTML you can make use of any library used by Dashbuilder. Currently it used Patternfly V3. Here's a sample panel:
+            <div class="panel panel-default">
+              <div class="panel-heading">
+                <h3 class="panel-title">Patternfly 3 Components</h3>
+              </div>
+              <div class="panel-body">
+                You can use <a href="https://www.patternfly.org/v3/pattern-library/" class="alert-link">Patternfly 3</a> components. Bear in mind that libraries used by Dashbuilder can change in future, so be careful when using patternfly or other provided libraries.
+              </div>
+            </div>
+            <div class="alert alert-warning" style="margin-top: 20px">
+              <span class="pficon pficon-warning-triangle-o"></span>
+              <strong>Using internal libraries</strong> Internal visual libraries are always a subject of change. Currently Patternfly 3 is used, but this may change in future.
+            </div>
+            <div class="alert alert-info" style="margin-top: 20px">
+              <span class="pficon pficon-info"></span>
+              <strong>Javascript not supported</strong> Javascript is not supported inside HTML elements.
+            </div>
+          </p>
+  - name: Tablets
+    components:
+      - html: <h1>Tablets</h1>
+  - name: Laptops
+    components:
+      - html: <h1>Laptops</h1>
+  - name: index
+    components:
+      - html: >-
+          <strong style="font-size: xx-large; font-family: sans-serif"> Dashbuilder Kitchensink </strong>
+          <hr />
+          <p>
+          Explore all Dashbuilder Capabilities and components.
+          </p>
+          <br />
+      - type: TABS
+        properties:
+          width: 100%
+          navGroupId: MainGroup
+          targetDivId: all_div
+      - type: DIV
+        properties:
+          divId: all_div
+navTree:
+  root_items:
+    - type: GROUP
+      id: MainGroup
+      children:
+        - page: Data Sets
+        - page: HTML & CSS
+        - page: Layout
+        - type: GROUP
+          id: Electronics
+          children:
+            - page: Tablets
+            - page: Laptops
+    - type: GROUP
+      id: Electronics
+      children:
+        - page: Tablets
+        - page: Laptops
