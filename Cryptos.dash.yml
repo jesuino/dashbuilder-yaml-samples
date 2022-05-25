@@ -1,0 +1,182 @@
+properties:
+    apiBaseUrl: https://api.coingecko.com/api/v3/coins
+    vs_currency: USD
+    days: 20
+    interval: hourly
+    chartWidth: 400px
+    chartHeight: 300px
+    chartConfiguration: >-
+        >-
+                                            {
+                                                "toolbox": {
+                                                    "feature": {
+                                                        "dataZoom": {},
+                                                        "magicType": {
+                                                            "type": ["line", "bar", "stack"]
+                                                        },
+                                                        "saveAsImage": {}
+                                                    }   
+                                                },
+                                                "series": [
+                                                        { 
+                                                            "type": "line",
+                                                            "markLine": {
+                                                                "data": [
+                                                                    { "type": "max" },
+                                                                    { "type": "min" },
+                                                                    { "type": "average" }
+                                                                ]
+                                                            } 
+                                                        
+                                                        }
+                                                ]
+                                                
+                                                }
+datasets:
+    - uuid: bitcoin
+      expression: $map($.prices, function($v) { [ $fromMillis($v[0]), $v[1] ] })
+      url: ${apiBaseUrl}/bitcoin/market_chart?vs_currency=${vs_currency}&days=${days}&interval=${interval}
+      columns:
+          - id: Year
+            type: label
+          - id: Price
+            type: number
+    - uuid: ethereum
+      expression: $map($.prices, function($v) { [ $fromMillis($v[0]), $v[1] ] })
+      url: ${apiBaseUrl}/ethereum/market_chart?vs_currency=${vs_currency}&days=${days}&interval=${interval}
+      columns:
+          - id: Year
+            type: label
+          - id: Price
+            type: number
+    - uuid: doge
+      expression: $map($.prices, function($v) { [ $fromMillis($v[0]), $v[1] ] })
+      url: ${apiBaseUrl}/dogecoin/market_chart?vs_currency=${vs_currency}&days=${days}&interval=${interval}
+      columns:
+          - id: Year
+            type: label
+          - id: Price
+            type: number
+    - uuid: xrp
+      expression: $map($.prices, function($v) { [ $fromMillis($v[0]), $v[1] ] })
+      url: ${apiBaseUrl}/ripple/market_chart?vs_currency=${vs_currency}&days=${days}&interval=${interval}
+      columns:
+          - id: Year
+            type: label
+          - id: Price
+            type: number
+    - uuid: usdt
+      expression: $map($.prices, function($v) { [ $fromMillis($v[0]), $v[1] ] })
+      url: ${apiBaseUrl}/tether/market_chart?vs_currency=${vs_currency}&days=${days}&interval=${interval}
+      columns:
+          - id: Year
+            type: label
+          - id: Price
+            type: number
+    - uuid: cardano
+      expression: $map($.prices, function($v) { [ $fromMillis($v[0]), $v[1] ] })
+      url: ${apiBaseUrl}/cardano/market_chart?vs_currency=${vs_currency}&days=${days}&interval=${interval}
+      columns:
+          - id: Year
+            type: label
+          - id: Price
+            type: number
+pages:
+    - rows:
+          - columns:
+                - span: "3"
+                  properties:
+                      margin: 20px
+                  components:
+                      - settings:
+                            type: EXTERNAL_COMPONENT
+                            dataSetLookup:
+                                uuid: bitcoin
+                            external_component_id: echarts
+                            external:
+                                width: ${chartWidth}
+                                height: ${chartHeight}
+                            echarts:
+                                title:
+                                    text: Bitcoin
+                                option: ${chartConfiguration}
+                - span: "3"
+                  properties:
+                      margin: 20px
+                  components:
+                      - settings:
+                            type: EXTERNAL_COMPONENT
+                            dataSetLookup:
+                                uuid: ethereum
+                            external_component_id: echarts
+                            external:
+                                width: ${chartWidth}
+                                height: ${chartHeight}
+                            echarts:
+                                title:
+                                    text: Ethereum
+                                option: ${chartConfiguration}
+                - span: "3"
+                  properties:
+                      margin: 20px
+                  components:
+                      - settings:
+                            type: EXTERNAL_COMPONENT
+                            dataSetLookup:
+                                uuid: doge
+                            external_component_id: echarts
+                            external:
+                                width: ${chartWidth}
+                                height: ${chartHeight}
+                            echarts:
+                                title:
+                                    text: Doge
+                                option: ${chartConfiguration}
+                - span: "3"
+                  properties:
+                      margin: 20px
+                  components:
+                      - settings:
+                            type: EXTERNAL_COMPONENT
+                            dataSetLookup:
+                                uuid: xrp
+                            external_component_id: echarts
+                            external:
+                                width: ${chartWidth}
+                                height: ${chartHeight}
+                            echarts:
+                                title:
+                                    text: XRP
+                                option: ${chartConfiguration}
+                - span: "3"
+                  properties:
+                      margin: 20px
+                  components:
+                      - settings:
+                            type: EXTERNAL_COMPONENT
+                            dataSetLookup:
+                                uuid: cardano
+                            external_component_id: echarts
+                            external:
+                                width: ${chartWidth}
+                                height: ${chartHeight}
+                            echarts:
+                                title:
+                                    text: Cardano
+                                option: ${chartConfiguration}
+                - span: "3"
+                  properties:
+                      margin: 20px
+                  components:
+                      - settings:
+                            type: EXTERNAL_COMPONENT
+                            dataSetLookup:
+                                uuid: usdt
+                            external_component_id: echarts
+                            external:
+                                width: ${chartWidth}
+                                height: ${chartHeight}
+                            echarts:
+                                title:
+                                    text: USDT
+                                option: ${chartConfiguration}
