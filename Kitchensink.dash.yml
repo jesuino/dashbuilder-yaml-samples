@@ -1,4 +1,26 @@
 pages:
+  - name: index
+    properties:
+      margin: 10px
+    components:
+      - properties:
+            background-color: blue
+            opacity: 0.5
+            color: white
+            font-weight: bolder
+            padding: 20px
+            margin-bottom: 20px
+        html: >-
+          <strong style="font-size: xx-large; font-weight: bolder; font-family: sans-serif"> Dashbuilder Components </strong>
+          <br />
+      - type: TABS
+        properties:
+          width: 100%
+          navGroupId: MainGroup
+          targetDivId: all_div
+      - type: DIV
+        properties:
+          divId: all_div
   - name: Tree
     rows:
       - columns:
@@ -57,7 +79,7 @@ pages:
             width: 100%
           datasetlookup:
             uuid: timeseries
-  - name: Uniforms
+  - name: Forms
     components:
       - type: EXTERNAL
         properties:
@@ -659,25 +681,6 @@ pages:
               <strong>Javascript not supported</strong> Javascript is not supported inside HTML elements.
             </div>
           </p>
-  - name: index
-    properties:
-      margin: 10px
-    components:
-      - html: >-
-          <strong style="font-size: xx-large; font-family: sans-serif"> Dashbuilder Kitchensink </strong>
-          <hr />
-          <p>
-          Explore all Dashbuilder Capabilities and components.
-          </p>
-          <br />
-      - type: TABS
-        properties:
-          width: 100%
-          navGroupId: MainGroup
-          targetDivId: all_div
-      - type: DIV
-        properties:
-          divId: all_div
 navTree:
   root_items:
     - type: GROUP
@@ -707,7 +710,7 @@ navTree:
         - page: Timeseries
         - page: SVG Heatmap
         - page: Rich Table
-        - page: Uniforms
+        - page: Forms
     - type: GROUP
       id: Navigation
       children:
