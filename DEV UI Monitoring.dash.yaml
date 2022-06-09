@@ -1,29 +1,28 @@
 properties:
   dataIndexUrl: http://localhost:8180
 
-  # charts size
-  chartsWidth: 450
-  chartsHeight: 300
+  # seconds
+  refreshTime: -1
 
-  # cards size
-  cardsWidth: 140
+  # charts size
+  chartsWidth: 100%
+  chartsHeight: 300px
+
+  # cards size (change the template for width)
   cardsHeight: 90
 
   # cards template
   cardTemplate: >-
     >-
-                          <div id="${this}" class="card-pf card-pf-accented card-pf-aggregate-status" style="background-color: ${bgColor}; width: ${width}px; height:${height}px; margin-top:${marginTop}px; margin-right:${marginRight}px; margin-bottom:${marginBottom}px; margin-left:${marginLeft}px;">
-                            <h2 id="${this}Value">${value}</h2>
-                            <p style="font-weight: 400;" id="${this}Title">${title}</p>
+                          <div id="${this}" class="card-pf card-pf-accented card-pf-aggregate-status" style="background-color: ${bgColor}; width: 95%; height:${height}px;">
+                            <h2 style="font-weight: 600;" id="${this}Value">${value}</h2>
+                            <p style="font-weight: 400" id="${this}Title">${title}</p>
                           </div>
-
 datasets:
   - uuid: processInstances
     expression: >-
       $.data.ProcessInstances.[ id, processId, processName, serviceUrl, state, $fromMillis($toMillis(start)), $fromMillis($toMillis(lastUpdate)), end ? $toMillis(end) - $toMillis(start) : -1, error ? error.message : ""]
     url: ${dataIndexUrl}/graphql/?query=%7B%0A%20%20ProcessInstances%20%7B%0A%20%20%20%20id%0A%20%20%20%20processId%0A%20%20%20%20processName%0A%20%20%20%20serviceUrl%0A%20%20%20%20state%0A%20%20%20%20start%0A%20%20%20%20end%0A%20%20%20%20lastUpdate%0A%20%20%20%20error%20%7B%20%20%20%20%20%20%0A%20%20%20%20%20%20message%0A%20%20%20%20%7D%0A%20%20%7D%0A%7D%0A
-    cacheEnabled: "true"
-    refreshTime: "30minute"
     columns:
       - id: id
         type: LABEL
@@ -56,13 +55,14 @@ pages:
                   filter:
                     enabled: "true"
                     listening: "true"
+                  refresh:
+                    interval: "${refreshTime}"  
                   general:
                     title: Workflows
                     visible: "true"
                   html:
                     html: ${cardTemplate}
                   chart:
-                    width: "${cardsWidth}"
                     height: "${cardsHeight}"
                   columns:
                     - id: Total
@@ -82,13 +82,14 @@ pages:
                   filter:
                     enabled: "true"
                     listening: "true"
+                  refresh:
+                    interval: "${refreshTime}" 
                   general:
                     title: Completed
                     visible: "true"
                   html:
                     html: ${cardTemplate}
                   chart:
-                    width: "${cardsWidth}"
                     height: "${cardsHeight}"
                   columns:
                     - id: Total
@@ -113,13 +114,14 @@ pages:
                   filter:
                     enabled: "true"
                     listening: "true"
+                  refresh:
+                    interval: "${refreshTime}" 
                   general:
                     title: Active
                     visible: "true"
                   html:
                     html: ${cardTemplate}
                   chart:
-                    width: "${cardsWidth}"
                     height: "${cardsHeight}"
                   columns:
                     - id: Total
@@ -144,13 +146,14 @@ pages:
                   filter:
                     enabled: "true"
                     listening: "true"
+                  refresh:
+                    interval: "${refreshTime}" 
                   general:
                     title: Pending
                     visible: "true"
                   html:
                     html: ${cardTemplate}
                   chart:
-                    width: "${cardsWidth}"
                     height: "${cardsHeight}"
                   columns:
                     - id: Total
@@ -175,13 +178,14 @@ pages:
                   filter:
                     enabled: "true"
                     listening: "true"
+                  refresh:
+                    interval: "${refreshTime}" 
                   general:
                     title: Aborted
                     visible: "true"
                   html:
                     html: ${cardTemplate}
                   chart:
-                    width: "${cardsWidth}"
                     height: "${cardsHeight}"
                   columns:
                     - id: Total
@@ -206,13 +210,14 @@ pages:
                   filter:
                     enabled: "true"
                     listening: "true"
+                  refresh:
+                    interval: "${refreshTime}" 
                   general:
                     title: Error
                     visible: "true"
                   html:
                     html: ${cardTemplate}
                   chart:
-                    width: "${cardsWidth}"
                     height: "${cardsHeight}"
                   columns:
                     - id: Total
@@ -233,26 +238,22 @@ pages:
               - html: "<hr />"
       - columns:
           - span: "6"
-            properties:
-              background-color: white
             components:
-              - html: "<strong>Total by Workflow</strong>"
-                properties:
-                  font-size: Medium
               - settings:
-                  type: BARCHART
-                  axis:
-                    y:
-                      labels_show: "false"
+                  component: echarts
+                  echarts:
+                    series:
+                      type: "bar"
+                    title:
+                      text: Total
+                  external:
+                    width: "${chartsWidth}"
+                    height: "${chartsHeight}"
                   filter:
                     enabled: "true"
                     listening: "true"
-                  chart:
-                    width: "${chartsWidth}"
-                    height: "${chartsHeight}"
-                    grid:
-                      x: "false"
-                      y: "false"
+                  refresh:
+                    interval: "${refreshTime}" 
                   columns:
                     - id: Total
                       pattern: "#"
@@ -270,23 +271,21 @@ pages:
             properties:
               background-color: white
             layoutComponents:
-              - html: "<strong>Average Duration</strong>"
-                properties:
-                  font-size: Medium
               - settings:
-                  type: BARCHART
-                  axis:
-                    y:
-                      labels_show: "false"
+                  component: echarts
+                  echarts:
+                    series:
+                      type: "bar"
+                    title:
+                      text: Average Duration
+                  external:
+                    width: "${chartsWidth}"
+                    height: "${chartsHeight}"
                   filter:
                     enabled: "true"
                     listening: "true"
-                  chart:
-                    width: "${chartsWidth}"
-                    height: "${chartsHeight}"
-                    grid:
-                      x: "false"
-                      y: "false"
+                  refresh:
+                    interval: "${refreshTime}" 
                   dataSetLookup:
                     uuid: processInstances
                     group:
@@ -302,27 +301,34 @@ pages:
             properties:
               background-color: white
             layoutComponents:
-              - html: "<strong>Workflows by Start Date</strong>"
-                properties:
-                  font-size: Medium
               - settings:
-                  type: AREACHART
-                  axis:
-                    y:
-                      labels_show: "false"
+                  component: echarts
+                  echarts:
+                    series:
+                      type: "line"
+                    title:
+                      text: By Start Date
+                    option: >-
+                      {
+                          "toolbox": {
+                              "feature": {
+                                  "dataZoom": {},
+                                  "magicType": {
+                                      "type": ["line", "bar"]
+                                  }
+                              }   
+                          }
+                          
+                          
+                      }
+                  external:
+                    width: "${chartsWidth}"
+                    height: "${chartsHeight}"
                   filter:
                     enabled: "true"
                     listening: "true"
-                  chart:
-                    zoom: "true"
-                    width: "${chartsWidth}"
-                    height: "${chartsHeight}"
-                    grid:
-                      x: "false"
-                      y: "false"
-                  columns:
-                    - id: Total Started
-                      pattern: "#"
+                  refresh:
+                    interval: "${refreshTime}" 
                   dataSetLookup:
                     uuid: processInstances
                     sort:
@@ -341,27 +347,34 @@ pages:
             properties:
               background-color: white
             layoutComponents:
-              - html: "<strong>Workflows Update</strong>"
-                properties:
-                  font-size: Medium
               - settings:
-                  type: AREACHART
-                  axis:
-                    y:
-                      labels_show: "false"
+                  component: echarts
+                  echarts:
+                    series:
+                      type: "line"
+                    title:
+                      text: By Last Update
+                    option: >-
+                      {
+                          "toolbox": {
+                              "feature": {
+                                  "dataZoom": {},
+                                  "magicType": {
+                                      "type": ["line", "bar"]
+                                  }
+                              }   
+                          }
+                          
+                          
+                      }
+                  external:
+                    width: "${chartsWidth}"
+                    height: "${chartsHeight}"
                   filter:
                     enabled: "true"
                     listening: "true"
-                  chart:
-                    zoom: "true"
-                    width: "${chartsWidth}"
-                    height: "${chartsHeight}"
-                    grid:
-                      x: "false"
-                      y: "false"
-                  columns:
-                    - id: Last Update
-                      pattern: "#"
+                  refresh:
+                    interval: "${refreshTime}" 
                   dataSetLookup:
                     uuid: processInstances
                     sort:
