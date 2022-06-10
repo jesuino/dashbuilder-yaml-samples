@@ -1,0 +1,32 @@
+datasets:
+  - uuid: jvm_used_memory
+    expression: '$reduce($map($.data.result, function($v) {$map($v.values, function($r, $i) {[$v.metric.instance, $v.metric.id, $r[0] * 1000, $r[1]]})}), $append)'
+    url: http://localhost:9090/api/v1/query?query=jvm_memory_used_bytes[30m:5s]
+layoutTemplates:
+  - name: Threads
+    rows:
+      - layoutColumns:
+          - layoutComponents:
+              - type: HTML
+                properties:
+                    HTML_CODE: <br /> <strong>JVM Memory Usage</strong><hr />
+                    font-size: large
+          - layoutComponents:
+              - settings:
+                  type: EXTERNAL_COMPONENT
+                  external_component_id: timeseries
+                  timeseries:
+                    legend:
+                        bottom: '5%'
+                  external:
+                    external_component_width: 1500px
+                    external_component_height: 400px
+                  refresh:
+                    interval: '5'
+                  dataSetLookup:
+                    dataSetUuid: jvm_used_memory
+                    groupOps:
+                        - groupFunctions:
+                          - source: Column 1
+                          - source: Column 2
+                          - source: Column 3
