@@ -1,0 +1,169 @@
+datasets:
+  - uuid: workflow_duration
+    expression: '$.data.result.[metric.process_id, value[1]]'
+    url: http://localhost:9090/api/v1/query?query=kogito_process_instance_duration_seconds_sum
+    columns:
+        - id: Workflow Name
+          type: LABEL
+        - id: Duration
+          type: Number
+  - uuid: started_workflows
+    expression: '$reduce($map($.data.result, function($v) {$map($v.values, function($r, $i) {[$v.metric.process_id, $r[0] * 1000, $r[1]]})}), $append)'
+    url: http://localhost:9090/api/v1/query?query=kogito_process_instance_started_total[10m:1s]
+    columns:
+        - id: Workflow Name
+          type: LABEL
+        - id: Time
+          type: NUMBER
+        - id: Total
+          type: NUMBER          
+  - uuid: completed_workflows
+    expression: '$reduce($map($.data.result, function($v) {$map($v.values, function($r, $i) {[$v.metric.process_id, $r[0] * 1000, $r[1]]})}), $append)'
+    url: http://localhost:9090/api/v1/query?query=kogito_process_instance_completed_total[10m:1s]
+    columns:
+        - id: Workflow Name
+          type: LABEL
+        - id: Time
+          type: NUMBER
+        - id: Total
+          type: NUMBER    
+layoutTemplates:
+    - properties:
+        margin-left: 10px
+      rows:
+      - layoutColumns:
+          - layoutComponents:
+              - type: HTML
+                properties:
+                    HTML_CODE: Serverless Workflow Monitoring <hr />
+                    font-size: xx-large      
+      - layoutColumns:
+          - span: '3'
+            layoutComponents:
+              - type: HTML
+                properties:
+                    HTML_CODE: <strong>Started</strong><hr />
+                    font-size: medium
+              - settings:
+                  type: BARCHART
+                  refresh:
+                    interval: '3'
+                  columns:
+                    - id: Total
+                      pattern: '#'
+                  chart:
+                    width: '300'
+                    height: '200'
+                    margin:
+                        left: '20'
+                
+                  dataSetLookup:
+                    dataSetUuid: started_workflows
+                    groupOps:
+                        - columnGroup:
+                            source: Workflow Name
+                          groupFunctions:
+                          - source: Workflow Name
+                          - source: Total
+                            function: MAX
+          - span: '3'
+            layoutComponents:
+              - type: HTML
+                properties:
+                    HTML_CODE: <strong>Completed</strong><hr />
+                    font-size: medium            
+              - settings:
+                  type: BARCHART
+                  refresh:
+                    interval: '3'
+                  columns:
+                    - id: Total
+                      pattern: '#'
+                  chart:
+                    width: '300'
+                    height: '200'
+                    margin:
+                        left: '20'
+                  dataSetLookup:
+                    dataSetUuid: completed_workflows
+                    groupOps:
+                        - columnGroup:
+                            source: Workflow Name
+                          groupFunctions:
+                          - source: Workflow Name
+                          - source: Total
+                            function: MAX
+          - span: '3'
+            layoutComponents:
+              - type: HTML
+                properties:
+                    HTML_CODE: <strong>Total Duration</strong><hr />
+                    font-size: medium            
+              - settings:
+                  type: BARCHART
+                  refresh:
+                    interval: '3'
+                  columns:
+                    - id: Duration
+                      pattern: '#0.000'
+                  chart:
+                    width: '300'
+                    height: '200'
+                    margin:
+                        left: '20'
+                  dataSetLookup:
+                    dataSetUuid: workflow_duration
+                    groupOps:
+                        - columnGroup:
+                            source: Workflow Name
+                          groupFunctions:
+                          - source: Workflow Name
+                          - source: Duration
+                          
+      - layoutColumns:
+          - layoutComponents:
+              - type: HTML
+                properties:
+                    HTML_CODE: <br /> Activity <hr />
+                    font-size: x-large      
+      - layoutColumns:
+          - span: '4'
+            layoutComponents:
+              - settings:
+                  type: EXTERNAL_COMPONENT
+                  external_component_id: timeseries
+                  timeseries:                  
+                    title:
+                        text: 'Started'
+                  external:
+                    external_component_width: 700px
+                    external_component_height: 300px
+                  refresh:
+                    interval: '2'
+                  dataSetLookup:
+                    dataSetUuid: started_workflows
+                    groupOps:
+                        - groupFunctions:
+                          - source: Workflow Name
+                          - source: Time
+                          - source: Total
+          - span: '4'
+            layoutComponents:
+              - settings:
+                  type: EXTERNAL_COMPONENT
+                  external_component_id: timeseries
+                  timeseries:                  
+                    title:
+                        text: 'Completed'
+                  external:
+                    external_component_width: 700px
+                    external_component_height: 300px
+                  refresh:
+                    interval: '2'
+                  dataSetLookup:
+                    dataSetUuid: completed_workflows
+                    groupOps:
+                        - groupFunctions:
+                          - source: Workflow Name
+                          - source: Time
+                          - source: Total                         
