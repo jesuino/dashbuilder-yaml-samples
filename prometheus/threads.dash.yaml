@@ -1,0 +1,109 @@
+datasets:
+  - uuid: threads
+    expression: '$reduce($map($.data.result, function($v) {$map($v.values, function($r, $i) {[$v.metric.instance, $v.metric.state, $r[0] * 1000, $r[1]]})}), $append)'
+    url: http://localhost:9090/api/v1/query?query=jvm_threads_states_threads[10m:1s]
+  - uuid: live_threads
+    expression: '$.data.result.[metric.instance, value[1]]'
+    url: http://localhost:9090/api/v1/query?query=jvm_threads_live_threads
+  - uuid: daemon_threads
+    expression: '$.data.result.[metric.instance, value[1]]'
+    url: http://localhost:9090/api/v1/query?query=jvm_threads_daemon_threads
+  - uuid: peak_threads
+    expression: '$.data.result.[metric.instance, value[1]]'
+    url: http://localhost:9090/api/v1/query?query=jvm_threads_peak_threads    
+layoutTemplates:
+  - name: Threads
+    rows:
+      - layoutColumns:
+          - span: '2'
+            layoutComponents:
+                - type: HTML
+                  properties:
+                    HTML_CODE: Threads <hr />
+                    font-size: xx-large
+      - layoutColumns:
+          - span: '2'
+            layoutComponents:
+              - settings:
+                  type: METRIC
+                  general:
+                    title: Live
+                    visible: 'true'
+                  chart:
+                    width: '150'
+                    height: '90'
+                  refresh:
+                    interval: '5'
+                  columns:
+                    - id: Column 1
+                      pattern: '#'
+                  dataSetLookup:
+                    dataSetUuid: live_threads
+                    groupOps:
+                        - groupFunctions:
+                          - source: Column 1
+          - span: '2'
+            layoutComponents:
+              - settings:
+                  type: METRIC
+                  general:
+                    title: Daemon
+                    visible: 'true'
+                  chart:
+                    width: '150'
+                    height: '90'
+                  columns:
+                    - id: Column 1
+                      pattern: '#'                    
+                  refresh:
+                    interval: '5'
+                  dataSetLookup:
+                    dataSetUuid: daemon_threads
+                    groupOps:
+                        - groupFunctions:
+                          - source: Column 1
+          - span: '2'
+            layoutComponents:                          
+              - settings:
+                  type: METRIC
+                  general:
+                    title: Peak
+                    visible: 'true'
+                  chart:
+                    width: '150'
+                    height: '90'
+                  columns:
+                    - id: Column 1
+                      pattern: '#'                    
+                  refresh:
+                    interval: '5'
+                  dataSetLookup:
+                    dataSetUuid: peak_threads
+                    groupOps:
+                        - groupFunctions:
+                          - source: Column 1       
+      - layoutColumns:
+          - layoutComponents:
+              - type: HTML
+                properties:
+                    HTML_CODE: <br /> <strong>Thread States</strong><hr />
+                    font-size: large
+          - layoutComponents:
+              - settings:
+                  type: EXTERNAL_COMPONENT
+                  external_component_id: timeseries
+                  timeseries:
+                    legend:
+                        bottom: '5%'
+                  external:
+                    external_component_width: 1200px
+                    external_component_height: 400px
+                  refresh:
+                    interval: '5'
+                  dataSetLookup:
+                    dataSetUuid: threads
+                    groupOps:
+                        - groupFunctions:
+                          - source: Column 1
+                          - source: Column 2
+                          - source: Column 3
