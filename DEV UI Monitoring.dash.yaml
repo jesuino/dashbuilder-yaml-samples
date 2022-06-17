@@ -2,14 +2,14 @@ properties:
   dataIndexUrl: http://localhost:8180
 
   # seconds
-  refreshTime: -1
+  refresh: 10
 
   # charts size
   chartsWidth: 100%
-  chartsHeight: 300px
+  chartsHeight: 280px
 
   # cards size (change the template for width)
-  cardsHeight: 90
+  cardsHeight: 80
 
   # cards template
   cardTemplate: >-
@@ -19,6 +19,21 @@ properties:
                             <p style="font-weight: 400" id="${this}Title">${title}</p>
                           </div>
 datasets:
+  - uuid: nodes
+    expression: >-
+      $reduce($map($.data.ProcessInstances, function($p){
+                $map($p.nodes, function($n) {
+                    [$p.processId, $n.name, $n.exit ? $toMillis($n.exit) - $toMillis($n.enter) : -1]
+                })
+      }), $append)
+    url: ${dataIndexUrl}/graphql/?query=%7B%0A%20%20ProcessInstances%20%7B%0A%20%20%20%20processId%0A%20%20%20%20nodes%20%7B%20%20%20%20%20%20%0A%20%20%20%20%20%20nodeId%0A%20%20%20%20%20%20name%0A%20%20%20%20%20%20enter%0A%20%20%20%20%20%20exit%0A%20%20%20%20%7D%0A%20%20%7D%0A%7D%0A
+    columns:
+      - id: processId
+        type: label
+      - id: name
+        type: label
+      - id: time
+        type: number
   - uuid: processInstances
     expression: >-
       $.data.ProcessInstances.[ id, processId, processName, serviceUrl, state, $fromMillis($toMillis(start)), $fromMillis($toMillis(lastUpdate)), end ? $toMillis(end) - $toMillis(start) : -1, error ? error.message : ""]
@@ -43,11 +58,36 @@ datasets:
       - id: errorMessage
         type: LABEL
 pages:
-  - properties:
-      margin-top: 20px
-      margin-left: 10px
-    rows:
+  - rows:
       - columns:
+          - span: "11"
+            components:
+              - html: "Filter"
+                properties:
+                  font-weight: bolder
+              - properties:
+                  width: "150px"
+                  margin-bottom: "20px"
+                settings:
+                  type: SELECTOR
+                  general:
+                    visible: "true"
+                    text: "Filter"
+                  filter:
+                    enabled: "true"
+                    notification: "true"
+                  dataSetLookup:
+                    uuid: processInstances
+                    group:
+                      - columnGroup:
+                          source: processId
+                        groupFunctions:
+                          - source: processId
+                            column: Workflow
+      - properties:
+          margin-left: 30px
+          text-align: center
+        columns:
           - span: "2"
             components:
               - settings:
@@ -56,7 +96,7 @@ pages:
                     enabled: "true"
                     listening: "true"
                   refresh:
-                    interval: "${refreshTime}"  
+                    interval: "${refresh}"
                   general:
                     title: Workflows
                     visible: "true"
@@ -83,7 +123,7 @@ pages:
                     enabled: "true"
                     listening: "true"
                   refresh:
-                    interval: "${refreshTime}" 
+                    interval: "${refresh}"
                   general:
                     title: Completed
                     visible: "true"
@@ -115,7 +155,7 @@ pages:
                     enabled: "true"
                     listening: "true"
                   refresh:
-                    interval: "${refreshTime}" 
+                    interval: "${refresh}"
                   general:
                     title: Active
                     visible: "true"
@@ -147,7 +187,7 @@ pages:
                     enabled: "true"
                     listening: "true"
                   refresh:
-                    interval: "${refreshTime}" 
+                    interval: "${refresh}"
                   general:
                     title: Pending
                     visible: "true"
@@ -179,7 +219,7 @@ pages:
                     enabled: "true"
                     listening: "true"
                   refresh:
-                    interval: "${refreshTime}" 
+                    interval: "${refresh}"
                   general:
                     title: Aborted
                     visible: "true"
@@ -211,7 +251,7 @@ pages:
                     enabled: "true"
                     listening: "true"
                   refresh:
-                    interval: "${refreshTime}" 
+                    interval: "${refresh}"
                   general:
                     title: Error
                     visible: "true"
@@ -237,15 +277,20 @@ pages:
           - components:
               - html: "<hr />"
       - columns:
-          - span: "6"
-            components:
+          - components:
               - settings:
                   component: echarts
                   echarts:
                     series:
                       type: "bar"
                     title:
-                      text: Total
+                      text: Nodes Execution Time
+                    yAxis:
+                      name: Time (ms)
+                      nameLocation: middle
+                      nameGap: "35"
+                      nameTextStyle:
+                        fontStyle: italic
                   external:
                     width: "${chartsWidth}"
                     height: "${chartsHeight}"
@@ -253,49 +298,21 @@ pages:
                     enabled: "true"
                     listening: "true"
                   refresh:
-                    interval: "${refreshTime}" 
-                  columns:
-                    - id: Total
-                      pattern: "#"
+                    interval: "${refresh}"
                   dataSetLookup:
-                    dataSetUuid: processInstances
+                    dataSetUuid: nodes
+                    sort:
+                      - column: Time (ms)
+                        order: DESCENDING
                     group:
                       - columnGroup:
-                          source: processId
+                          source: name
                         functions:
-                          - source: processId
-                          - source: processId
-                            function: COUNT
-                            column: Total
-          - span: "6"
-            properties:
-              background-color: white
-            layoutComponents:
-              - settings:
-                  component: echarts
-                  echarts:
-                    series:
-                      type: "bar"
-                    title:
-                      text: Average Duration
-                  external:
-                    width: "${chartsWidth}"
-                    height: "${chartsHeight}"
-                  filter:
-                    enabled: "true"
-                    listening: "true"
-                  refresh:
-                    interval: "${refreshTime}" 
-                  dataSetLookup:
-                    uuid: processInstances
-                    group:
-                      - columnGroup:
-                          source: processId
-                        groupFunctions:
-                          - source: processId
-                          - source: duration
+                          - source: name
+                          - source: time
                             function: AVERAGE
-                            column: Total
+                            column: Time (ms)
+
       - columns:
           - span: "6"
             properties:
@@ -328,7 +345,7 @@ pages:
                     enabled: "true"
                     listening: "true"
                   refresh:
-                    interval: "${refreshTime}" 
+                    interval: "${refresh}"
                   dataSetLookup:
                     uuid: processInstances
                     sort:
@@ -374,7 +391,7 @@ pages:
                     enabled: "true"
                     listening: "true"
                   refresh:
-                    interval: "${refreshTime}" 
+                    interval: "${refresh}"
                   dataSetLookup:
                     uuid: processInstances
                     sort:
@@ -389,26 +406,3 @@ pages:
                           - source: lastUpdate
                             function: COUNT
                             column: Last Update
-      - columns:
-          - span: "12"
-            components:
-              - properties:
-                  width: "150px"
-                  margin-top: "20px"
-                  float: "right"
-                settings:
-                  type: SELECTOR
-                  general:
-                    visible: "true"
-                    text: "Filter"
-                  filter:
-                    enabled: "true"
-                    notification: "true"
-                  dataSetLookup:
-                    uuid: processInstances
-                    group:
-                      - columnGroup:
-                          source: processId
-                        groupFunctions:
-                          - source: processId
-                            column: Workflow
