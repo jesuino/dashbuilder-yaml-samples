@@ -1,287 +1,276 @@
 datasets:
-  - uuid: images
-    expression: $.[Id, Names[0], $fromMillis(Created * 1000), Size, Containers]
-    url: http://localhost:8000/images/json
-    columns:
-        - id: ID
-          type: label
-        - id: name
-          type: label
-        - id: created
-          type: date
-        - id: size
-          type: number
-        - id: containers
-          type: number
-  - uuid: containers
-    expression: $.[Id, Names[0], Image, $fromMillis(Created * 1000), State, Status]
-    url: http://localhost:8000/containers/json?filters={%22status%22:%20[%22created%22,%22running%22,%22paused%22,%22exited%22]}
-    columns:
-        - id: ID
-          type: label
-        - id: name
-          type: label
-        - id: image
-          type: label
-        - id: created
-          type: date
-        - id: State
-          type: label
-        - id: Status
-          type: label
-layoutTemplates:
-  - name: Images
-    rows:
-      - layoutColumns:
-          - layoutComponents:
-              - type: HTML
-                properties:
-                  HTML_CODE: Images <hr />
-                  font-size: x-large
-          - span: '6'
-            layoutComponents:
-              - type: HTML
-                properties:
-                  HTML_CODE: <strong>Images by Size</strong>
-                  font-size: medium
-              - settings:
-                  type: BARCHART
-                  subtype: BAR
-                  chart:
-                    width: '500'
-                    height: '350'
-                    margin:
-                      left: '120'
-                  dataSetLookup:
-                    dataSetUuid: images
-                    rowCount: 7
-                    groupOps:
-                      - columnGroup:
-                          source: name
-                        groupFunctions:
-                          - source: name
-                          - source: size
-                            column: Total Size
-                    sortOps:
-                        - column: Total Size
-                          sortOrder: DESCENDING
-          - span: '6'
-            layoutComponents:
-              - type: HTML
-                properties:
-                  HTML_CODE: <strong>Containers by Image</strong>
-                  font-size: medium
-              - settings:
-                  type: BARCHART
-                  subtype: BAR
-                  chart:
-                    width: '500'
-                    height: '350'                    
-                    margin:
-                      left: '120'
-                  columns:
-                    - id: containers total
-                      pattern: '#'
-                  dataSetLookup:
-                    dataSetUuid: images
-                    rowCount: 7
-                    groupOps:
-                      - columnGroup:
-                          source: name
-                        groupFunctions:
-                          - source: name
-                          - source: containers
-                            column: containers total
-                    sortOps:
-                        - column: containers total
-                          sortOrder: DESCENDING
-                    filterOps:
-                        - column: containers
-                          function: GREATER_THAN
-                          args:
-                            - 0
+    - uuid: images
+      expression: $.[Id, Names[0], $fromMillis(Created * 1000), Size, Containers]
+      url: http://localhost:8000/images/json
+      columns:
+          - id: ID
+            type: label
+          - id: name
+            type: label
+          - id: created
+            type: date
+          - id: size
+            type: number
+          - id: containers
+            type: number
+    - uuid: containers
+      expression: $.[Id, Names[0], Image, $fromMillis(Created * 1000), State, Status]
+      url: http://localhost:8000/containers/json?filters={%22status%22:%20[%22created%22,%22running%22,%22paused%22,%22exited%22]}
+      columns:
+          - id: ID
+            type: label
+          - id: name
+            type: label
+          - id: image
+            type: label
+          - id: created
+            type: date
+          - id: State
+            type: label
+          - id: Status
+            type: label
+pages:
+    - name: Images
+      rows:
+          - columns:
+                - components:
+                      - html: Images <hr />
+                        properties:
+                            font-size: x-large
+                - span: "6"
+                  components:
+                      - html: <strong>Images by Size</strong>
+                        properties:
+                            font-size: medium
+                      - settings:
+                            type: BARCHART
+                            subtype: BAR
+                            chart:
+                                width: "500"
+                                height: "350"
+                                margin:
+                                    left: "120"
+                            lookup:
+                                uuid: images
+                                rowCount: 7
+                                group:
+                                    - columnGroup:
+                                          source: name
+                                      functions:
+                                          - source: name
+                                          - source: size
+                                            column: Total Size
+                                sortOps:
+                                    - column: Total Size
+                                      sortOrder: DESCENDING
+                - span: "6"
+                  components:
+                      - html: <strong>Containers by Image</strong>
+                        properties:
+                            font-size: medium
+                      - settings:
+                            type: BARCHART
+                            subtype: BAR
+                            chart:
+                                width: "500"
+                                height: "350"
+                                margin:
+                                    left: "120"
+                            columns:
+                                - id: containers total
+                                  pattern: "#"
+                            lookup:
+                                dataSetUuid: images
+                                rowCount: 7
+                                group:
+                                    - columnGroup:
+                                          source: name
+                                      functions:
+                                          - source: name
+                                          - source: containers
+                                            column: containers total
+                                sort:
+                                    - column: containers total
+                                      sortOrder: DESCENDING
+                                filter:
+                                    - column: containers
+                                      function: GREATER_THAN
+                                      args:
+                                          - 0
 
-      - layoutColumns:
-          - layoutComponents:
-              - type: HTML
-                properties:
-                  HTML_CODE: <hr />Images List
-                  font-size: large          
-              - settings:
-                  type: TABLE
-                  chart:
-                    resizable: 'true'
-                  table:
-                    sort:
-                      enabled: 'true'
-                  dataSetLookup:
-                    dataSetUuid: images
-  - name: Containers
-    rows:
-      - layoutColumns:
-          - layoutComponents:
-              - type: HTML
-                properties:
-                  HTML_CODE: Containers <hr />
-                  font-size: x-large
-      - layoutColumns:
-          - layoutComponents:
-              - type: HTML
-                properties:
-                  HTML_CODE: <strong>Filters</strong>
-                  font-size: small
-      - layoutColumns:
-          - span: '2'
-            layoutComponents:
-              - properties:
-                    width: '200px'
-                settings:
-                  type: SELECTOR
-                  filter:
-                    enabled: 'true'
-                    notification: 'true'
-                  dataSetLookup:
-                    dataSetUuid: containers
-                    groupOps:
-                      - columnGroup:
-                          source: image
-                        groupFunctions:
-                          - source: image
-                            column: image
-          - span: '2'
-            layoutComponents:
-              - properties:
-                    width: '200px'
-                settings:
-                  type: SELECTOR
-                  chart:
-                    title:
-                        enabled: 'true'
-                        title: 'he'
-                  filter:
-                    enabled: 'true'
-                    notification: 'true'
-                  dataSetLookup:
-                    dataSetUuid: containers
-                    groupOps:
-                      - columnGroup:
-                          source: state
-                        groupFunctions:
-                          - source: state
-                            column: state
-      - properties:
-            margin-top: '20px'
-        layoutColumns:
-          - span: '5'
-            layoutComponents:
-              - type: HTML
-                properties:
-                  HTML_CODE: <strong>Containers by State</strong>
-                  font-size: medium
-              - settings:
-                  type: BARCHART
-                  subtype: BAR
-                  filter:
-                    enabled: 'true'
-                    listening: 'true'
-                  chart:
-                    width: '500'
-                    height: '350'
-                    margin:
-                      left: '70'
-                  columns:
-                    - id: total
-                      pattern: '#'
-                  dataSetLookup:
-                    dataSetUuid: containers
-                    rowCount: 7
-                    groupOps:
-                      - columnGroup:
-                          source: state
-                        groupFunctions:
-                          - source: state
-                          - source: state
-                            function: COUNT
-                            column: total
-          - span: '6'
-            layoutComponents:
-              - type: HTML
-                properties:
-                  HTML_CODE: <strong>Containers by Image</strong>
-                  font-size: medium
-              - settings:
-                  type: BARCHART
-                  subtype: BAR
-                  filter:
-                    enabled: 'true'
-                    listening: 'true'
-                  chart:
-                    width: '500'
-                    height: '350'
-                    margin:
-                      left: '120'
-                  dataSetLookup:
-                    dataSetUuid: containers
-                    rowCount: 7
-                    groupOps:
-                      - columnGroup:
-                          source: image
-                        groupFunctions:
-                          - source: image
-                          - source: image
-                            function: Count
-                            column: Total
-                    sortOps:
-                        - column: Total
-                          sortOrder: DESCENDING
+          - columns:
+                - components:
+                      - html: <hr />Images List
+                        properties:
+                            font-size: large
+                      - settings:
+                            type: TABLE
+                            chart:
+                                resizable: "true"
+                            table:
+                                sort:
+                                    enabled: "true"
+                            lookup:
+                                uuid: images
+    - name: Containers
+      rows:
+          - column:
+                - components:
+                      - html: Containers <hr />
+                        properties:
+                            font-size: x-large
+          - columns:
+                - components:
+                      - html: <strong>Filters</strong>
+                        properties:
+                            font-size: small
+          - columns:
+                - span: "2"
+                  components:
+                      - properties:
+                            width: "200px"
+                        settings:
+                            type: SELECTOR
+                            filter:
+                                enabled: "true"
+                                notification: "true"
+                            lookup:
+                                uuid: containers
+                                groupOps:
+                                    - columnGroup:
+                                          source: image
+                                      groupFunctions:
+                                          - source: image
+                                            column: image
+                - span: "2"
+                  components:
+                      - properties:
+                            width: "200px"
+                        settings:
+                            type: SELECTOR
+                            chart:
+                                title:
+                                    enabled: "true"
+                                    title: "he"
+                            filter:
+                                enabled: "true"
+                                notification: "true"
+                            lookup:
+                                uuid: containers
+                                groupOps:
+                                    - columnGroup:
+                                          source: state
+                                      functions:
+                                          - source: state
+                                            column: state
+          - properties:
+                margin-top: "20px"
+            columns:
+                - span: "5"
+                  components:
+                      - html: <strong>Containers by State</strong>
+                        properties:
+                            font-size: medium
+                      - settings:
+                            type: BARCHART
+                            subtype: BAR
+                            filter:
+                                enabled: "true"
+                                listening: "true"
+                            chart:
+                                width: "500"
+                                height: "350"
+                                margin:
+                                    left: "70"
+                            columns:
+                                - id: total
+                                  pattern: "#"
+                            lookup:
+                                uuid: containers
+                                rowCount: 7
+                                group:
+                                    - columnGroup:
+                                          source: state
+                                      functions:
+                                          - source: state
+                                          - source: state
+                                            function: COUNT
+                                            column: total
+                - span: "6"
+                  components:
+                      - html: <strong>Containers by Image</strong>
+                        properties:
+                            font-size: medium
+                      - settings:
+                            type: BARCHART
+                            subtype: BAR
+                            filter:
+                                enabled: "true"
+                                listening: "true"
+                            chart:
+                                width: "500"
+                                height: "350"
+                                margin:
+                                    left: "120"
+                            lookup:
+                                uuid: containers
+                                rowCount: 7
+                                group:
+                                    - columnGroup:
+                                          source: image
+                                      functions:
+                                          - source: image
+                                          - source: image
+                                            function: Count
+                                            column: Total
+                                sort:
+                                    - column: Total
+                                      sortOrder: DESCENDING
 
-      - layoutColumns:
-          - layoutComponents:
-              - type: HTML
-                properties:
-                  HTML_CODE: <hr />Containers List
-                  font-size: large          
-              - settings:
-                  type: TABLE
-                  chart:
-                    resizable: 'true'
-                  table:
-                    sort:
-                      enabled: 'true'
-                  dataSetLookup:
-                    dataSetUuid: containers
-  - name: index
-    rows:
-      - layoutColumns:
-          - layoutComponents:
-            - type: HTML
-              properties:
-                HTML_CODE: >-
-                    <h1><strong>Podman Dashboard</strong></h1>
-                    <p> This is a dashboard to provide basic information about Podman</p>
-                    <p> It uses <a href="https://docs.podman.io/en/latest/_static/api.html">Podman REST API</a>,  
-                    so make sure podman service is running on localhost on port 8000 with CORS enabled</p>
-                    <p> The following command starts the podman service: </p>
-                    <p><em>podman system service tcp:localhost:8000 --cors https://jesuino.github.io  -t 0 </em></strong></p>
-            - type: org.dashbuilder.client.navigation.layout.editor.NavTabListDragComponent
-              properties:
-                targetDivId: podman_tabs_div
-                navGroupId: podman_nav_group
-            - type: org.uberfire.ext.plugin.client.perspective.editor.layout.editor.TargetDivDragComponent
-              properties:
-                width: '100%'
-                ID_PARAMETER: podman_tabs_div
+          - columns:
+                - components:
+                      - html: <hr />Containers List
+                        properties:
+                            font-size: large
+                      - settings:
+                            type: TABLE
+                            chart:
+                                resizable: "true"
+                            table:
+                                sort:
+                                    enabled: "true"
+                            lookup:
+                                uuid: containers
+    - name: index
+      rows:
+          - columns:
+                - components:
+                      - html: >-
+                            <h1><strong>Podman Dashboard</strong></h1>
+                            <p> This is a dashboard to provide basic information about Podman</p>
+                            <p> It uses <a href="https://docs.podman.io/en/latest/_static/api.html">Podman REST API</a>,  
+                            so make sure podman service is running on localhost on port 8000 with CORS enabled</p>
+                            <p> The following command starts the podman service: </p>
+                            <p><em>podman system service tcp:localhost:8000 --cors https://jesuino.github.io  -t 0 </em></strong></p>
+                      - type: org.dashbuilder.client.navigation.layout.editor.NavTabListDragComponent
+                        properties:
+                            targetDivId: podman_tabs_div
+                            navGroupId: podman_nav_group
+                      - type: org.uberfire.ext.plugin.client.perspective.editor.layout.editor.TargetDivDragComponent
+                        properties:
+                            width: "100%"
+                            ID_PARAMETER: podman_tabs_div
 navTree:
-  root_items:
-  - id: podman_nav_group
-    type: GROUP
-    name: Podman Dashboard
-    children:
-    - id: sw_nav
-      type: ITEM
-      name: Containers
-      context: resourceId=Containers;resourceType=PERSPECTIVE;
-    - id: memory_nav
-      type: ITEM
-      name: Images
-      context: resourceId=Images;resourceType=PERSPECTIVE;
+    root_items:
+        - id: podman_nav_group
+          type: GROUP
+          name: Podman Dashboard
+          children:
+              - id: sw_nav
+                type: ITEM
+                name: Containers
+                context: resourceId=Containers;resourceType=PERSPECTIVE;
+              - id: memory_nav
+                type: ITEM
+                name: Images
+                context: resourceId=Images;resourceType=PERSPECTIVE;
