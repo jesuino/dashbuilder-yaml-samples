@@ -1,0 +1,30 @@
+datasets:
+    - uuid: nobel
+      cacheEnabled: true
+      expression: >-
+          $.laureates.[firstname & ' ' &  surname, bornCountry ? bornCountry : 'N/A', prizes[0].category, prizes[0].year]
+      url: https://api.nobelprize.org/v1/laureate.json
+      columns:
+          - id: "Name"
+            type: "Text"
+          - id: "Country"
+            type: "LABEL"
+pages:
+    - name: Nobel Prize by Country
+      components:
+          - html: <h1>Nobel Prize Laureates by Born Country</h1>
+          - settings:
+                type: MAP
+                chart:
+                    width: "600"
+                    height: "400"
+                dataSetLookup:
+                    uuid: nobel
+                    group:
+                        - columnGroup:
+                              source: Country
+                              groupStrategy: DYNAMIC
+                          functions:
+                              - source: Country
+                              - source: Country
+                                function: COUNT
