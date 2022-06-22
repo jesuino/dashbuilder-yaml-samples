@@ -1,0 +1,31 @@
+datasets:
+  - uuid: temp
+    expression: $each($.data, function($v, $k) {[$k, $v]})
+    url: https://www.ncdc.noaa.gov/cag/global/time-series/globe/land_ocean/ytd/12/1880-2016.json
+    columns:
+        - id: Year
+          type: label
+        - id: Temperature
+          type: number
+pages:
+  - name: World Temperature
+    components:
+              - html: World Temperature Change
+                properties:                  
+                  font-size: xx-large
+              - settings:
+                  type: AREACHART
+                  chart:
+                    width: '1200'
+                    margin:
+                      left: '28'
+                      bottom: '-23'
+                  dataSetLookup:
+                    uuid: temp
+                    group:
+                      - columnGroup:
+                          source: Year
+                          groupStrategy: DYNAMIC
+                        functions:
+                          - source: Year
+                          - source: Temperature
