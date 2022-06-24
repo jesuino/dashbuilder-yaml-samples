@@ -1,7 +1,7 @@
 properties:
     apiBaseUrl: https://api.coingecko.com/api/v3/coins
     vs_currency: USD
-    days: 20
+    days: 120
     interval: hourly
     chartWidth: 400px
     chartHeight: 300px
@@ -89,10 +89,9 @@ pages:
                       margin: 20px
                   components:
                       - settings:
-                            type: EXTERNAL_COMPONENT
+                            component: echarts
                             dataSetLookup:
                                 uuid: bitcoin
-                            external_component_id: echarts
                             external:
                                 width: ${chartWidth}
                                 height: ${chartHeight}
@@ -105,10 +104,9 @@ pages:
                       margin: 20px
                   components:
                       - settings:
-                            type: EXTERNAL_COMPONENT
+                            component: echarts
                             dataSetLookup:
                                 uuid: ethereum
-                            external_component_id: echarts
                             external:
                                 width: ${chartWidth}
                                 height: ${chartHeight}
@@ -121,10 +119,9 @@ pages:
                       margin: 20px
                   components:
                       - settings:
-                            type: EXTERNAL_COMPONENT
+                            component: echarts
                             dataSetLookup:
                                 uuid: doge
-                            external_component_id: echarts
                             external:
                                 width: ${chartWidth}
                                 height: ${chartHeight}
@@ -137,10 +134,9 @@ pages:
                       margin: 20px
                   components:
                       - settings:
-                            type: EXTERNAL_COMPONENT
+                            component: echarts
                             dataSetLookup:
                                 uuid: xrp
-                            external_component_id: echarts
                             external:
                                 width: ${chartWidth}
                                 height: ${chartHeight}
@@ -153,10 +149,9 @@ pages:
                       margin: 20px
                   components:
                       - settings:
-                            type: EXTERNAL_COMPONENT
+                            component: echarts
                             dataSetLookup:
                                 uuid: cardano
-                            external_component_id: echarts
                             external:
                                 width: ${chartWidth}
                                 height: ${chartHeight}
@@ -169,10 +164,9 @@ pages:
                       margin: 20px
                   components:
                       - settings:
-                            type: EXTERNAL_COMPONENT
+                            component: echarts
                             dataSetLookup:
                                 uuid: usdt
-                            external_component_id: echarts
                             external:
                                 width: ${chartWidth}
                                 height: ${chartHeight}
