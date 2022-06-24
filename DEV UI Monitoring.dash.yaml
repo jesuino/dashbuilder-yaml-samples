@@ -21,29 +21,31 @@ properties:
 datasets:
   - uuid: nodes
     expression: >-
-      $reduce($map($.data.ProcessInstances, function($p){
-                $map($p.nodes, function($n) {
-                    [$p.processId, $n.name, $n.exit ? $toMillis($n.exit) - $toMillis($n.enter) : -1]
-                })
-      }), $append)
-    url: ${dataIndexUrl}/graphql/?query=%7B%0A%20%20ProcessInstances%20%7B%0A%20%20%20%20processId%0A%20%20%20%20nodes%20%7B%20%20%20%20%20%20%0A%20%20%20%20%20%20nodeId%0A%20%20%20%20%20%20name%0A%20%20%20%20%20%20enter%0A%20%20%20%20%20%20exit%0A%20%20%20%20%7D%0A%20%20%7D%0A%7D%0A
+      $.data.ProcessInstances.(
+          $map(nodes, function($n){
+              [processId,$n.type, $n.name, $n.exit ? $toMillis($n.exit) - $toMillis($n.enter) : -1]
+          });
+      )
+    url: ${dataIndexUrl}/graphql/?query=%7BProcessInstances%7BprocessId%20nodes%7B%20nodeId%20type%20name%20enter%20exit%20%7D%7D%7D%0A
     columns:
-      - id: processId
+      - id: workflowId
+        type: label
+      - id: type
         type: label
       - id: name
         type: label
       - id: time
         type: number
-  - uuid: processInstances
+  - uuid: workflows
     expression: >-
       $.data.ProcessInstances.[ id, processId, processName, serviceUrl, state, $fromMillis($toMillis(start)), $fromMillis($toMillis(lastUpdate)), end ? $toMillis(end) - $toMillis(start) : -1, error ? error.message : ""]
     url: ${dataIndexUrl}/graphql/?query=%7B%0A%20%20ProcessInstances%20%7B%0A%20%20%20%20id%0A%20%20%20%20processId%0A%20%20%20%20processName%0A%20%20%20%20serviceUrl%0A%20%20%20%20state%0A%20%20%20%20start%0A%20%20%20%20end%0A%20%20%20%20lastUpdate%0A%20%20%20%20error%20%7B%20%20%20%20%20%20%0A%20%20%20%20%20%20message%0A%20%20%20%20%7D%0A%20%20%7D%0A%7D%0A
     columns:
       - id: id
         type: LABEL
-      - id: processId
+      - id: workflowId
         type: LABEL
-      - id: processName
+      - id: workflowName
         type: LABEL
       - id: serviceUrl
         type: LABEL
@@ -70,6 +72,8 @@ pages:
                   margin-bottom: "20px"
                 settings:
                   type: SELECTOR
+                  refresh:
+                    interval: "${refresh}"
                   general:
                     visible: "true"
                     text: "Filter"
@@ -77,12 +81,12 @@ pages:
                     enabled: "true"
                     notification: "true"
                   dataSetLookup:
-                    uuid: processInstances
+                    uuid: workflows
                     group:
                       - columnGroup:
-                          source: processId
+                          source: workflowId
                         groupFunctions:
-                          - source: processId
+                          - source: workflowId
                             column: Workflow
       - properties:
           margin-left: 30px
@@ -108,7 +112,7 @@ pages:
                     - id: Total
                       pattern: "#"
                   dataSetLookup:
-                    uuid: processInstances
+                    uuid: workflows
                     group:
                       - groupFunctions:
                           - source: Total
@@ -135,7 +139,7 @@ pages:
                     - id: Total
                       pattern: "#"
                   dataSetLookup:
-                    uuid: processInstances
+                    uuid: workflows
                     filter:
                       - column: state
                         function: EQUALS_TO
@@ -167,7 +171,7 @@ pages:
                     - id: Total
                       pattern: "#"
                   dataSetLookup:
-                    uuid: processInstances
+                    uuid: workflows
                     filter:
                       - column: state
                         function: EQUALS_TO
@@ -199,7 +203,7 @@ pages:
                     - id: Total
                       pattern: "#"
                   dataSetLookup:
-                    uuid: processInstances
+                    uuid: workflows
                     filter:
                       - column: state
                         function: EQUALS_TO
@@ -231,7 +235,7 @@ pages:
                     - id: Total
                       pattern: "#"
                   dataSetLookup:
-                    uuid: processInstances
+                    uuid: workflows
                     filter:
                       - column: state
                         function: EQUALS_TO
@@ -263,7 +267,7 @@ pages:
                     - id: Total
                       pattern: "#"
                   dataSetLookup:
-                    dataSetUuid: processInstances
+                    dataSetUuid: workflows
                     filter:
                       - column: state
                         function: EQUALS_TO
@@ -284,7 +288,10 @@ pages:
                     series:
                       type: "bar"
                     title:
-                      text: Nodes Execution Time
+                      text: Functions and States Average Duration
+                    xAxis:
+                      axisLabel:
+                        interval: "0"
                     yAxis:
                       name: Time (ms)
                       nameLocation: middle
@@ -301,6 +308,17 @@ pages:
                     interval: "${refresh}"
                   dataSetLookup:
                     dataSetUuid: nodes
+                    filter:
+                      - column: name
+                        function: NOT_IN
+                        args:
+                          - EmbeddedStart
+                          - EmbeddedEnd
+                          - Script
+                      - column: type
+                        function: NOT_IN
+                        args:
+                          - Join
                     sort:
                       - column: Time (ms)
                         order: DESCENDING
@@ -312,97 +330,38 @@ pages:
                           - source: time
                             function: AVERAGE
                             column: Time (ms)
-
       - columns:
-          - span: "6"
-            properties:
-              background-color: white
-            layoutComponents:
+          - components:
+              - html: <h3> Workflow List </h3>
+      - columns:
+          - components:
               - settings:
-                  component: echarts
-                  echarts:
-                    series:
-                      type: "line"
-                    title:
-                      text: By Start Date
-                    option: >-
-                      {
-                          "toolbox": {
-                              "feature": {
-                                  "dataZoom": {},
-                                  "magicType": {
-                                      "type": ["line", "bar"]
-                                  }
-                              }   
-                          }
-                          
-                          
-                      }
+                  component: table
                   external:
-                    width: "${chartsWidth}"
-                    height: "${chartsHeight}"
+                    width: 100%
+                    height: 500px
                   filter:
                     enabled: "true"
                     listening: "true"
-                  refresh:
-                    interval: "${refresh}"
-                  dataSetLookup:
-                    uuid: processInstances
-                    sort:
-                      - column: startDate
-                        sortOrder: ASCENDING
+                  lookup:
+                    uuid: workflows
                     group:
-                      - columnGroup:
-                          emptyIntervals: "true"
-                          source: startDate
-                        groupFunctions:
+                      - columnsGroup:
+                          source: workflowId
+                        functions:
+                          - source: id
+                            column: Instance ID
+                          - source: workflowId
+                            column: ID
+                          - source: workflowName
+                            column: Name
+                          - source: state
+                            column: State
                           - source: startDate
-                          - source: startDate
-                            function: COUNT
-                            column: Total Started
-          - span: "6"
-            properties:
-              background-color: white
-            layoutComponents:
-              - settings:
-                  component: echarts
-                  echarts:
-                    series:
-                      type: "line"
-                    title:
-                      text: By Last Update
-                    option: >-
-                      {
-                          "toolbox": {
-                              "feature": {
-                                  "dataZoom": {},
-                                  "magicType": {
-                                      "type": ["line", "bar"]
-                                  }
-                              }   
-                          }
-                          
-                          
-                      }
-                  external:
-                    width: "${chartsWidth}"
-                    height: "${chartsHeight}"
-                  filter:
-                    enabled: "true"
-                    listening: "true"
-                  refresh:
-                    interval: "${refresh}"
-                  dataSetLookup:
-                    uuid: processInstances
-                    sort:
-                      - column: lastUpdate
-                        sortOrder: ASCENDING
-                    group:
-                      - columnGroup:
-                          emptyIntervals: "true"
-                          source: lastUpdate
-                        groupFunctions:
+                            column: Start Date
                           - source: lastUpdate
-                          - source: lastUpdate
-                            function: COUNT
                             column: Last Update
+                          - source: duration
+                            column: Duration
+                          - source: errorMessage
+                            column: Error Message
