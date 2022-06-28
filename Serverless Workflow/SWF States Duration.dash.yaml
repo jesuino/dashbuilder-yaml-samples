@@ -1,0 +1,153 @@
+properties:
+  dataIndexUrl: http://localhost:8180
+
+
+  # charts size
+  chartsWidth: 90%
+  chartsHeight: 600px
+
+  workflowId: 8f60e662-6779-4358-aa3b-bc6bbdbe81c4
+
+datasets:
+  - uuid: nodes
+    expression: >-
+      $.data.ProcessInstances.(
+          $start := $min(nodes.($toMillis(enter)));
+          $end := $max(nodes.($toMillis(exit)));
+          $map(nodes, function($n) {
+              [
+                  processId, 
+                  id, 
+                  0, 
+                  $end - $start, 
+                  ($end - $start) / 2, 
+                  $n.type, 
+                  $n.name, 
+                  $toMillis($n.enter) - $start, 
+                  $n.exit ? $toMillis($n.exit) - $start  : -1,
+                  $n.exit ? $toMillis($n.exit) - $toMillis($n.enter) : -1,
+                  $toMillis($n.enter) -  $start
+              ]
+          });
+      )
+    url: ${dataIndexUrl}/graphql/?query=%7BProcessInstances(where%3A%7Bid%3A%7Bin%3A%20%5B"${workflowId}"%5D%7D%7D)%7BprocessId%20id%20start%20lastUpdate%20nodes%20%7Bid%20%20name%20%20type%20%20enter%20%20exit%7D%7D%7D
+    columns:
+      - id: workflowId
+        type: label
+      - id: id
+        type: label
+      - id: start
+        type: label
+      - id: end
+        type: label
+      - id: middle
+        type: label
+      - id: type
+        type: label
+      - id: name
+        type: label
+      - id: nodeStart
+        type: label
+      - id: nodeEnd
+        type: label
+      - id: duration
+        type: label
+      - id: point
+        type: label
+pages:
+  - rows:
+      - columns:
+          - components:
+
+              - settings:
+                  component: echarts
+                  echarts:
+                    option: >-
+                      {
+                          "xAxis":{
+                            "position": "top"
+                          },                                        
+                          "series":[
+                              {
+                                  "itemStyle": {
+                                      "color": "#b8f2c5",
+                                      "opacity": "0.5"
+                                  },
+                                  
+                                  "emphasis" : {
+                                    "disabled": "true"
+                                  },
+                                  "type":"boxplot",
+                                  "name": "Duration",
+                                  "encode":{
+                                      "x": ["start", "nodeStart", "middle", "nodeEnd", "end"],
+                                      "y": "name"
+
+                                  }
+                              },
+                              {
+                                  "name": "detail",
+                                  "type": "scatter",                                  
+                                  "symbolSize": "0",
+                                  "tooltip": {
+                                    "trigger": "item"
+                                  },
+                                  "label": {
+                                    "show": "true",
+                                    "position": "right",
+                                    "align": "left",
+                                    "verticalAlign": "middle",                                    
+                                    "fontSize": "15",
+                                    "formatter": "{@duration} ms",
+                                    "fontWeight": "bolder"
+                                  },
+                                  "itemStyle": {
+                                    "color": "#d00000"
+                                  },
+                                  "encode": {
+                                    "x": "point",
+                                    "y": "name",
+                                    "label": "Duration",
+                                    "itemName": "Duration"
+                                    
+                                  }
+                                }
+                          ]
+                      }
+                    yAxis:
+                      type: "category"
+                    title:
+                      text: ${workflowId} 
+                      left: center
+                  external:
+                    width: "${chartsWidth}"
+                    height: "${chartsHeight}"
+                  dataSetLookup:
+                    dataSetUuid: nodes
+                    filter:
+                      - column: name
+                        function: NOT_IN
+                        args:
+                          - EmbeddedStart
+                          - EmbeddedEnd
+                          - Script
+
+                      - column: type
+                        function: NOT_IN
+                        args:
+                          - Join
+                    sort:
+                      - column: nodeStart
+                        order: DESCENDING
+      - columns:
+          - components:
+              - settings:
+                  component: table
+                  external:
+                    width: 100%
+                    height: 500px
+                  filter:
+                    enabled: "true"
+                    listening: "true"
+                  lookup:
+                    uuid: nodes
