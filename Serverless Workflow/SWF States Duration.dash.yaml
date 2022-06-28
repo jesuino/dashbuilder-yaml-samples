@@ -1,26 +1,35 @@
 properties:
   dataIndexUrl: http://localhost:8180
 
-
   # charts size
-  chartsWidth: 90%
+  chartsWidth: 95%
   chartsHeight: 600px
 
+  cardsHeight: 88
+
   workflowId: 8f60e662-6779-4358-aa3b-bc6bbdbe81c4
+
+  # cards template
+  cardTemplate: >-
+    >-
+                          <div id="${this}" class="card-pf card-pf-accented card-pf-aggregate-status" style="background-color: ${bgColor}; width: 90%; height:${height}px;">
+                            <h2 style="font-weight: 600; font-size: xx-large" id="${this}Value">${value}</h2>
+                            <p style="font-weight: 400" id="${this}Title">${title}</p>
+                          </div>
 
 datasets:
   - uuid: nodes
     expression: >-
       $.data.ProcessInstances.(
           $start := $min(nodes.($toMillis(enter)));
-          $end := $max(nodes.($toMillis(exit)));
+          $end := $max(nodes.($toMillis(exit)))  - $start;
           $map(nodes, function($n) {
               [
                   processId, 
                   id, 
-                  0, 
-                  $end - $start, 
-                  ($end - $start) / 2, 
+                  0,
+                  $end , 
+                  $end / 2, 
                   $n.type, 
                   $n.name, 
                   $toMillis($n.enter) - $start, 
@@ -30,7 +39,7 @@ datasets:
               ]
           });
       )
-    url: ${dataIndexUrl}/graphql/?query=%7BProcessInstances(where%3A%7Bid%3A%7Bin%3A%20%5B"${workflowId}"%5D%7D%7D)%7BprocessId%20id%20start%20lastUpdate%20nodes%20%7Bid%20%20name%20%20type%20%20enter%20%20exit%7D%7D%7D
+    url: ${dataIndexUrl}/graphql/?query=%7BProcessInstances(where%3A%7Bid%3A%7Bin%3A%20%5B"${workflowId}"%5D%7D%7D)%7BprocessId%20id%20start%20lastUpdate%20nodes%20%7Bid%20name%20type%20enter%20exit%7D%7D%7D
     columns:
       - id: workflowId
         type: label
@@ -39,7 +48,7 @@ datasets:
       - id: start
         type: label
       - id: end
-        type: label
+        type: number
       - id: middle
         type: label
       - id: type
@@ -58,7 +67,39 @@ pages:
   - rows:
       - columns:
           - components:
-
+              - html: "Workflow <strong>${workflowId}</strong> <hr />"
+                properties:
+                  font-size: x-large
+              - settings:
+                  type: METRIC
+                  general:
+                    title: Duration (ms)
+                    visible: "true"
+                  html:
+                    html: ${cardTemplate}
+                  chart:
+                    height: "${cardsHeight}"
+                  columns:
+                    - id: end
+                      pattern: "#"
+                  dataSetLookup:
+                    uuid: nodes
+                    filter:
+                      - column: name
+                        function: NOT_IN
+                        args:
+                          - EmbeddedStart
+                          - EmbeddedEnd
+                          - Script
+                      - column: type
+                        function: NOT_IN
+                        args:
+                          - Join
+                    group:
+                      - groupFunctions:
+                          - source: end
+      - columns:
+          - components:
               - settings:
                   component: echarts
                   echarts:
@@ -66,16 +107,18 @@ pages:
                       {
                           "xAxis":{
                             "position": "top"
-                          },                                        
+                          },
                           "series":[
                               {
                                   "itemStyle": {
                                       "color": "#b8f2c5",
                                       "opacity": "0.5"
-                                  },
-                                  
+                                  },                                  
                                   "emphasis" : {
                                     "disabled": "true"
+                                  },
+                                  "tooltip": {
+                                    "formatter": "{b}"                                    
                                   },
                                   "type":"boxplot",
                                   "name": "Duration",
@@ -90,7 +133,7 @@ pages:
                                   "type": "scatter",                                  
                                   "symbolSize": "0",
                                   "tooltip": {
-                                    "trigger": "item"
+                                    "trigger": "none"                                    
                                   },
                                   "label": {
                                     "show": "true",
@@ -101,6 +144,9 @@ pages:
                                     "formatter": "{@duration} ms",
                                     "fontWeight": "bolder"
                                   },
+                                  "emphasis" : {
+                                    "disabled": "true"
+                                  },
                                   "itemStyle": {
                                     "color": "#d00000"
                                   },
@@ -109,16 +155,12 @@ pages:
                                     "y": "name",
                                     "label": "Duration",
                                     "itemName": "Duration"
-                                    
                                   }
                                 }
                           ]
                       }
                     yAxis:
                       type: "category"
-                    title:
-                      text: ${workflowId} 
-                      left: center
                   external:
                     width: "${chartsWidth}"
                     height: "${chartsHeight}"
@@ -131,7 +173,6 @@ pages:
                           - EmbeddedStart
                           - EmbeddedEnd
                           - Script
-
                       - column: type
                         function: NOT_IN
                         args:
@@ -139,15 +180,3 @@ pages:
                     sort:
                       - column: nodeStart
                         order: DESCENDING
-      - columns:
-          - components:
-              - settings:
-                  component: table
-                  external:
-                    width: 100%
-                    height: 500px
-                  filter:
-                    enabled: "true"
-                    listening: "true"
-                  lookup:
-                    uuid: nodes
