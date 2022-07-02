@@ -1,0 +1,35 @@
+properties:
+    prometheusUrl: http://localhost:9090
+    query: up
+datasets:
+- uuid: prometheus
+  expression: >-
+            $.data.(
+                {
+                    "columns": result[0].(
+                        [
+                            $each(metric, function($k, $v) {       
+                                {"id" : $v, "type": "label"}
+                            }),
+                            {"id" : "timestamp", "type": "label"}, 
+                            {"id" : "value", "type": "number"}
+                        ];
+                    ),
+                    "values": result.(        
+                            $metric := $each(metric, function($v, $k) { $v });
+                            (
+                                %.resultType = "matrix" ? $map(values, function($v){
+                                    [$metric, $v]
+                                }) :
+                                %.resultType = "vector" ? [[$metric, value]] :
+                                %.resultType = "scalar" ? $
+                            );
+                        )
+                }
+            )
+  url: ${prometheusUrl}/api/v1/query?query=${query}
+pages:
+- components:
+    - settings:
+        lookup:
+          uuid: prometheus
