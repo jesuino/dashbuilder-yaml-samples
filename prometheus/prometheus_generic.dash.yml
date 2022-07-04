@@ -1,35 +1,38 @@
 properties:
     prometheusUrl: http://localhost:9090
     query: up
+    parse: >-
+            >-
+                    $.data.(
+                        {
+                            "columns": result[0].(
+                                [
+                                    {"id" : "timestamp", "type": "number"}, 
+                                    {"id" : "value", "type": "number"},
+                                    $each(metric, function($k, $v) {       
+                                        {"id" : $v, "type": "label"}
+                                    })
+                                ];
+                            ),
+                            "values": (
+                                resultType = "scalar" ? [result[0] * 1000, result[1]] :
+                                result.(
+                                    $metric := $each(metric, function($v, $k) { $v });
+                                    %.resultType = "matrix" ? $map(values, function($v){
+                                        [$v[0] * 1000, $v[1], $metric]
+                                    }) :
+                                    %.resultType = "vector" ? [[value[0] * 1000, value[1], $metric]]
+                                )        
+                                
+                            )
+                        }
+                    )
 datasets:
-- uuid: prometheus
-  expression: >-
-            $.data.(
-                {
-                    "columns": result[0].(
-                        [
-                            $each(metric, function($k, $v) {       
-                                {"id" : $v, "type": "label"}
-                            }),
-                            {"id" : "timestamp", "type": "label"}, 
-                            {"id" : "value", "type": "number"}
-                        ];
-                    ),
-                    "values": result.(        
-                            $metric := $each(metric, function($v, $k) { $v });
-                            (
-                                %.resultType = "matrix" ? $map(values, function($v){
-                                    [$metric, $v]
-                                }) :
-                                %.resultType = "vector" ? [[$metric, value]] :
-                                %.resultType = "scalar" ? $
-                            );
-                        )
-                }
-            )
-  url: ${prometheusUrl}/api/v1/query?query=${query}
+    - uuid: prometheus
+      expression: ${parse}
+      url: ${prometheusUrl}/api/v1/query?query=${query}
 pages:
-- components:
-    - settings:
-        lookup:
-          uuid: prometheus
+    - components:
+          - settings:
+                lookup:
+                    uuid: prometheus
