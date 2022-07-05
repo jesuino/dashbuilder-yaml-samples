@@ -1,32 +1,25 @@
 properties:
     prometheusUrl: http://localhost:9090
     query: up
+
     parse: >-
-            >-
-                    $.data.(
-                        {
-                            "columns": result[0].(
-                                [
-                                    {"id" : "timestamp", "type": "number"}, 
-                                    {"id" : "value", "type": "number"},
-                                    $each(metric, function($k, $v) {       
-                                        {"id" : $v, "type": "label"}
-                                    })
-                                ];
-                            ),
-                            "values": (
-                                resultType = "scalar" ? [result[0] * 1000, result[1]] :
-                                result.(
-                                    $metric := $each(metric, function($v, $k) { $v });
-                                    %.resultType = "matrix" ? $map(values, function($v){
-                                        [$v[0] * 1000, $v[1], $metric]
-                                    }) :
-                                    %.resultType = "vector" ? [[value[0] * 1000, value[1], $metric]]
-                                )        
-                                
-                            )
-                        }
-                    )
+        >-
+                $.data.(
+                    {
+                        "columns": result[0].(
+                            [
+                                {"id" : "timestamp", "type": "number"}, 
+                                {"id" : "value", "type": "number"},
+                                $keys(metric).({"id" : $, "type": "label"})
+                            ];
+                        ),
+                        "values": (
+                            resultType = "scalar" ? [result[0] * 1000, result[1]] :
+                            resultType = "matrix" ? result.( $metric := metric.*; values.[ $[0] * 1000, $[1], $metric ] ) :
+                            resultType = "vector" ?  result.[ value[0] * 1000, value[1],  metric.* ]
+                        )
+                    }
+                )
 datasets:
     - uuid: prometheus
       expression: ${parse}
