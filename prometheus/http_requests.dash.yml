@@ -1,0 +1,163 @@
+properties:
+    prometheusUrl: http://localhost:9090
+    refreshInterval: 5
+    parse: >-
+        >-
+                $.data.(
+                    {
+                        "columns": result[0].(
+                            [
+                                {"id" : "timestamp", "type": "number"}, 
+                                {"id" : "value", "type": "number"},
+                                $keys(metric).({"id" : $, "type": "label"})
+                            ];
+                        ),
+                        "values": (
+                            resultType = "scalar" ? [result[0] * 1000, result[1]] :
+                            resultType = "matrix" ? result.( $metric := metric.*; values.[ $[0] * 1000, $[1], $metric ] ) :
+                            resultType = "vector" ?  result.[ value[0] * 1000, value[1],  metric.* ]
+                        )
+                    }
+                )
+datasets:
+    - uuid: recent_http_requests
+      expression: ${parse}
+      cacheEnabled: "true"
+      refreshTime: "${refreshInterval}second"
+      url: ${prometheusUrl}/api/v1/query?query=prometheus_http_requests_total[1m:1s]
+    - uuid: http_requests
+      expression: ${parse}
+      cacheEnabled: "true"
+      refreshTime: "${refreshInterval}second"
+      url: ${prometheusUrl}/api/v1/query?query=prometheus_http_requests_total
+pages:
+    - rows:
+          - columns:
+                - components:
+                      - html: <h1> Prometheus HTTP Requests</h1> <hr/>
+                      - html: "Filter"
+                        properties:
+                            font-weight: bolder
+                      - properties:
+                            width: "150px"
+                            margin-bottom: 30px
+                        settings:
+                            type: SELECTOR
+                            refresh:
+                                interval: "${refreshInterval}"
+                            filter:
+                                enabled: "true"
+                                notification: "true"
+                            lookup:
+                                uuid: recent_http_requests
+                                group:
+                                    - columnGroup:
+                                          source: handler
+                                      functions:
+                                          - source: handler
+          - properties:
+                margin-bottom: 60px
+            columns:
+                - span: "4"
+                  components:
+                      - settings:
+                            type: METRIC
+                            filter:
+                                enabled: "true"
+                                listening: "true"
+                            refresh:
+                                interval: "${refreshInterval}"
+                            general:
+                                title: "All"
+                                visible: "true"
+                            chart:
+                                height: "90"
+                            columns:
+                                - id: value
+                                  pattern: "#,000"
+                            lookup:
+                                uuid: http_requests
+                                group:
+                                    - functions:
+                                          - source: value
+                                            function: SUM
+                - span: "4"
+                  components:
+                      - settings:
+                            type: METRIC
+                            filter:
+                                enabled: "true"
+                                listening: "true"
+                            refresh:
+                                interval: "${refreshInterval}"
+                            general:
+                                title: "Success"
+                                visible: "true"
+                            chart:
+                                height: "90"
+                            columns:
+                                - id: value
+                                  pattern: "#,000"
+                            lookup:
+                                uuid: http_requests
+                                filter:
+                                    - column: code
+                                      function: EQUALS_TO
+                                      args:
+                                          - 200
+                                group:
+                                    - functions:
+                                          - source: value
+                                            function: SUM
+                - span: "4"
+                  components:
+                      - settings:
+                            type: METRIC
+                            filter:
+                                enabled: "true"
+                                listening: "true"
+                            refresh:
+                                interval: "${refreshInterval}"
+                            general:
+                                title: "Others"
+                                visible: "true"
+                            chart:
+                                height: "90"
+                            columns:
+                                - id: value
+                                  pattern: "#,000"
+                            lookup:
+                                uuid: http_requests
+                                filter:
+                                    - column: code
+                                      function: NOT_EQUALS_TO
+                                      args:
+                                          - 200
+                                group:
+                                    - functions:
+                                          - source: value
+                                            function: SUM
+          - columns:
+                - components:
+                      - settings:
+                            component: timeseries
+                            timeseries:
+                                title:
+                                    text: HTTP Requests
+                            refresh:
+                                interval: "${refreshInterval}"
+                            external:
+                                width: 100%
+                                height: 400px
+                            lookup:
+                                uuid: recent_http_requests
+                                filter:
+                                    - column: code
+                                      function: EQUALS_TO
+                                      args:
+                                          - 200
+                                group:
+                                    - functions:
+                                          - source: handler
+                                          - source: timestamp
+                                          - source: value
