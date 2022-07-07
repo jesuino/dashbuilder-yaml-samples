@@ -288,23 +288,22 @@ pages:
                             function: MIN
                           - source: end
                             function: MAX
-      - columns:
-          - properties:
-              width: 100%
-              margin-left: 80px
-            components:
-              - properties:
-                  width: 80%
-                settings:
-                  component: table
-                  filter:
-                    enabled: "true"
-                    listening: "true"
-                  external:
-                      width: 100%
+              - settings:
+                  type: METRIC
+                  general:
+                    title: Variables
+                    visible: "true"
+                  html:
+                    html: >-
+                        <div style="width: 85%">
+                            <h3><strong>${title}</strong></h3>
+                            <pre>${value}</pre>
+                        </div>
+                  columns:
+                    - id: end
+                      pattern: "#"
                   dataSetLookup:
-                    uuid: nodes
-                    rowCount: 1
+                    uuid: nodes                   
                     group:
-                      - functions:
+                      - groupFunctions:
                           - source: variables
