@@ -1,0 +1,42 @@
+datasets:
+    - uuid: workflows
+      url: http://localhost:8180/graphql/?query=%7BProcessInstances%7BprocessId%20processName%20state%20start%20end%20businessKey%20error%7Bmessage%7D%7D%7D%0A
+      expression: >-
+            {
+                "columns" :[
+                    {"id": "Workflow Id", "type": "label"},
+                    {"id": "Workflow Name", "type": "label"},
+                    {"id": "State", "type": "label"},
+                    {"id": "Start", "type": "label"},
+                    {"id": "End", "type": "label"},
+                    {"id": "Business Key", "type": "label"},
+                    {"id": "Error", "type": "label"}
+                ],    
+                "values" : $.data.ProcessInstances.[ processId, processName, state, start, end, businessKey ? businessKey : "", error ? error.message : ""]
+            }
+      
+pages:
+    - properties:
+        margin: 10px        
+      components:
+        - html: "<p style='font-size: x-large'>Kogito Serverless Workflows</p><em>by state</em><hr />"
+        - properties:
+            text-align: center
+          settings:
+            type: BARCHART
+            lookup:
+                uuid: workflows
+                group:
+                    - columnGroup: 
+                        source: State
+                      functions:
+                          - source: State
+                          - source: State
+                            function: COUNT
+        - settings:
+            component: table
+            external:
+                width: 100%
+                height: 500px
+            lookup:
+                uuid: workflows
