@@ -1,0 +1,9 @@
+pages:
+    - components:
+          - type: EXTERNAL
+            properties:
+                height: 500px
+                baseUrl: https://jesuino.github.io/components/
+                componentId: uniforms
+                uniforms.url: some url
+                uniforms.schema: https://raw.githubusercontent.com/jesuino/dashbuilder-data/master/ansible/sample_survey_spec.json
