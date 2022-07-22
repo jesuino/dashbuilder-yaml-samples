@@ -1,0 +1,481 @@
+properties:
+  token: {YOUR TOKEN HERE}
+  # modify if using Bearer token
+  authorizationHeader: Basic ${token}
+  towerUrl: {YOUR TOWER URL HERE}
+  proxyUrl: https://kie-sandbox-extended-services-kie-sandbox.rhba-cluster-0ad6762cc85bcef5745bb684498c2436-0000.us-south.containers.appdomain.cloud/devsandbox
+  subTitlesStyle: "font-size: large; margin: 15px 0 10px 0"
+  cardTemplate: >-
+    >-
+                                                
+                                                <div id="${this}" class="card-pf card-pf-aggregate-status" style="background-color: ${bgColor}; width: 90%; height: 80px">
+                                                  <h2 style="font-weight: 600; font-size: large" id="${this}Value">${value}</h2>
+                                                  <p style="font-weight: 400" id="${this}Title"><em id="${this}Icon" class=""></em> ${title}</p>
+                                                </div>
+datasets:
+  - uuid: metrics
+    url: ${proxyUrl}?metrics    
+    cacheEnabled: true
+    columns:
+      - id: metric
+        type: LABEL
+      - id: labels
+        type: LABEL
+      - id: Value
+        type: Number
+    headers:
+      Authorization: ${authorizationHeader}
+      Content-Type: text/plain
+      Target-Url: ${towerUrl}/api/v2/metrics/?metrics
+pages:
+  - properties:
+      margin-left: 5px
+    rows:
+      - columns:
+          - components:
+              - html: >-
+                    <p>
+                      <a href="${towerUrl}" style="font-size: xx-large">Ansible Tower</a>
+                      <small>Metrics Summary</small>
+                    </p>
+                    <hr />
+      - columns:
+          - components:
+              - html: >-
+                    <p style="${subTitlesStyle}">Access</p>
+      - columns:
+          - span: "3"
+            components:
+              - settings:
+                  type: METRIC
+                  general:
+                    title: Active Sessions
+                    visible: "true"
+                  html:                    
+                    html: ${cardTemplate}
+                    javascript:
+                          document.getElementById(${this}.id + "Icon").className = "fa fa-plug";
+                  columns:
+                    - id: value
+                      pattern: "#"
+                  lookup:
+                    uuid: metrics
+                    filter:
+                      - column: metric
+                        function: EQUALS_TO
+                        args:
+                          - awx_sessions_total
+                      - column: labels
+                        function: EQUALS_TO
+                        args:
+                          - type="all"
+                    group:
+                      - functions:
+                          - source: value
+          - span: "3"
+            components:
+              - settings:
+                  type: METRIC
+                  general:
+                    title: Users
+                    visible: "true"
+                  chart:
+                    width: "150"
+                  html:
+                    html: ${cardTemplate}
+                    javascript:
+                          document.getElementById(${this}.id + "Icon").className = "pficon-user";
+                  columns:
+                    - id: value
+                      pattern: "#"
+                  lookup:
+                    uuid: metrics
+                    filter:
+                      - column: metric
+                        function: EQUALS_TO
+                        args:
+                          - awx_users_total
+                    group:
+                      - functions:
+                          - source: value
+          - span: "3"
+            components:
+              - settings:
+                  type: METRIC
+                  general:
+                    title: Teams
+                    visible: "true"
+                  chart:
+                    width: "150"
+                  html:
+                    html: ${cardTemplate}
+                    javascript:
+                          document.getElementById(${this}.id + "Icon").className = "pficon-users";
+                  columns:
+                    - id: value
+                      pattern: "#"
+                  lookup:
+                    uuid: metrics
+                    filter:
+                      - column: metric
+                        function: EQUALS_TO
+                        args:
+                          - awx_teams_total
+                    group:
+                      - functions:
+                          - source: value
+          - span: "3"
+            components:
+              - settings:
+                  type: METRIC
+                  general:
+                    title: Organizations
+                    visible: "true"
+                  chart:
+                    width: "150"
+                  html:
+                    html: ${cardTemplate}
+                    javascript:
+                          document.getElementById(${this}.id + "Icon").className = "pficon-enterprise";
+                  columns:
+                    - id: value
+                      pattern: "#"
+                  lookup:
+                    uuid: metrics
+                    filter:
+                      - column: metric
+                        function: EQUALS_TO
+                        args:
+                          - awx_organizations_total
+                    group:
+                      - functions:
+                          - source: value
+      - columns:
+          - components:
+              - html: >-
+                    <p style="${subTitlesStyle}">Resources</p>
+      - columns:
+          - span: "3"
+            components:
+              - settings:
+                  type: METRIC
+                  general:
+                    title: Inventories
+                    visible: "true"
+                  html:
+                    html: ${cardTemplate}
+                    javascript:
+                          document.getElementById(${this}.id + "Icon").className = "fa fa-cubes";
+                  columns:
+                    - id: value
+                      pattern: "#"
+                  lookup:
+                    uuid: metrics
+                    filter:
+                      - column: metric
+                        function: EQUALS_TO
+                        args:
+                          - awx_inventories_total
+                    group:
+                      - functions:
+                          - source: value
+          - span: "3"
+            components:
+              - settings:
+                  type: METRIC
+                  general:
+                    title: Projects
+                    visible: "true"
+                  chart:
+                    width: "150"
+                  html:
+                    html: ${cardTemplate}
+                    javascript:
+                          document.getElementById(${this}.id + "Icon").className = "pficon-folder-open";
+                  columns:
+                    - id: value
+                      pattern: "#"
+                  lookup:
+                    uuid: metrics
+                    filter:
+                      - column: metric
+                        function: EQUALS_TO
+                        args:
+                          - awx_projects_total
+                    group:
+                      - functions:
+                          - source: value
+          - span: "3"
+            components:
+              - settings:
+                  type: METRIC
+                  general:
+                    title: Job Templates
+                    visible: "true"
+                  chart:
+                    width: "150"
+                  html:
+                    html: ${cardTemplate}
+                    javascript:
+                      document.getElementById(${this}.id + "Icon").className = "pficon-blueprint";
+                  columns:
+                    - id: value
+                      pattern: "#"
+                  lookup:
+                    uuid: metrics
+                    filter:
+                      - column: metric
+                        function: EQUALS_TO
+                        args:
+                          - awx_job_templates_total
+                    group:
+                      - functions:
+                          - source: value
+          - span: "3"
+            components:
+              - settings:
+                  type: METRIC
+                  general:
+                    title: Inventory Scripts
+                    visible: "true"
+                  chart:
+                    width: "150"
+                  html:
+                    html: ${cardTemplate}
+                    javascript:
+                      document.getElementById(${this}.id + "Icon").className = "fa fa-bug";
+                  columns:
+                    - id: value
+                      pattern: "#"
+                  lookup:
+                    uuid: metrics
+                    filter:
+                      - column: metric
+                        function: EQUALS_TO
+                        args:
+                          - awx_inventory_scripts_total
+                    group:
+                      - functions:
+                          - source: value
+      - columns:
+          - components:
+              - html: >-
+                    <p style="${subTitlesStyle}">Misc</p>
+      - columns:
+          - span: "3"
+            components:
+              - settings:
+                  type: METRIC
+                  general:
+                    title: Running Jobs
+                    visible: "true"
+                  html:
+                    html: ${cardTemplate}
+                    javascript:
+                      document.getElementById(${this}.id + "Icon").className = "pficon-running";
+                  columns:
+                    - id: value
+                      pattern: "#"
+                  lookup:
+                    uuid: metrics
+                    filter:
+                      - column: metric
+                        function: EQUALS_TO
+                        args:
+                          - awx_running_jobs_total
+                    group:
+                      - functions:
+                          - source: value
+          - span: "3"
+            components:
+              - settings:
+                  type: METRIC
+                  general:
+                    title: Pending Jobs
+                    visible: "true"
+                  chart:
+                    width: "150"
+                  html:
+                    html: ${cardTemplate}
+                    javascript:
+                      document.getElementById(${this}.id + "Icon").className = "fa fa-clock-o";
+                  columns:
+                    - id: value
+                      pattern: "#"
+                  lookup:
+                    uuid: metrics
+                    filter:
+                      - column: metric
+                        function: EQUALS_TO
+                        args:
+                          - awx_pending_jobs_total
+                    group:
+                      - functions:
+                          - source: value
+          - span: "3"
+            components:
+              - settings:
+                  type: METRIC
+                  general:
+                    title: All Hosts
+                    visible: "true"
+                  chart:
+                    width: "150"
+                  html:
+                    html: ${cardTemplate}
+                    javascript:
+                      document.getElementById(${this}.id + "Icon").className = "pficon-container-node";
+                  columns:
+                    - id: value
+                      pattern: "#"
+                  lookup:
+                    uuid: metrics
+                    filter:
+                      - column: metric
+                        function: EQUALS_TO
+                        args:
+                          - awx_hosts_total
+                      - column: labels
+                        function: EQUALS_TO
+                        args:
+                          - type="all"
+                    group:
+                      - functions:
+                          - source: value
+          - span: "3"
+            components:
+              - settings:
+                  type: METRIC
+                  general:
+                    title: Active Hosts
+                    visible: "true"
+                  chart:
+                    width: "150"
+                  html:
+                    html: ${cardTemplate}
+                    javascript:
+                      var cardIcon = document.getElementById(${this}.id + "Icon");
+                      cardIcon.className = "pficon-container-node";
+                      cardIcon.style.color = 'red';
+                  columns:
+                    - id: value
+                      pattern: "#"
+                  lookup:
+                    uuid: metrics
+                    filter:
+                      - column: metric
+                        function: EQUALS_TO
+                        args:
+                          - awx_hosts_total
+                      - column: labels
+                        function: EQUALS_TO
+                        args:
+                          - type="active"
+                    group:
+                      - functions:
+                          - source: value      
+      - properties:
+          margin-top: 20px
+        columns:
+          - span: "3"
+            components:
+              - settings:
+                  type: METRIC
+                  general:
+                    title: Schedules
+                    visible: "true"
+                  chart:
+                    width: "150"
+                  html:
+                    html: ${cardTemplate}
+                    javascript:
+                      document.getElementById(${this}.id + "Icon").className = "fa fa-clock-o";
+                  columns:
+                    - id: value
+                      pattern: "#"
+                  lookup:
+                    uuid: metrics
+                    filter:
+                      - column: metric
+                        function: EQUALS_TO
+                        args:
+                          - awx_schedules_total
+                    group:
+                      - functions:
+                          - source: value 
+          - span: "3"
+            components:
+              - settings:
+                  type: METRIC
+                  general:
+                    title: Virtual Envs
+                    visible: "true"
+                  html:
+                    html: ${cardTemplate}
+                    javascript:
+                      document.getElementById(${this}.id + "Icon").className = "pficon-virtual-machine";
+                  columns:
+                    - id: value
+                      pattern: "#"
+                  lookup:
+                    uuid: metrics
+                    filter:
+                      - column: metric
+                        function: EQUALS_TO
+                        args:
+                          - awx_custom_virtualenvs_total
+                    group:
+                      - functions:
+                          - source: value
+          - span: "3"
+            components:
+              - settings:
+                  type: METRIC
+                  general:
+                    title: Instance Capacity
+                    visible: "true"
+                  chart:
+                    width: "150"
+                  html:
+                    html: ${cardTemplate}
+                    javascript:
+                      document.getElementById(${this}.id + "Icon").className = "pficon-volume";
+                  columns:
+                    - id: value
+                      pattern: "#"
+                  lookup:
+                    uuid: metrics
+                    filter:
+                      - column: metric
+                        function: EQUALS_TO
+                        args:
+                          - awx_instance_capacity
+                    group:
+                      - functions:
+                          - source: value
+          - span: "3"
+            components:
+              - settings:
+                  type: METRIC
+                  general:
+                    title: Remaining Capacity
+                    visible: "true"
+                  html:
+                    html: ${cardTemplate}
+                    javascript:
+                      var cardIcon = document.getElementById(${this}.id + "Icon");
+                      cardIcon.className = "pficon-volume";
+                      cardIcon.style.color = 'blue';
+                  columns:
+                    - id: value
+                      pattern: "#"
+                  lookup:
+                    uuid: metrics
+                    filter:
+                      - column: metric
+                        function: EQUALS_TO
+                        args:
+                          - awx_instance_remaining_capacity
+                    group:
+                      - functions:
+                          - source: value 
