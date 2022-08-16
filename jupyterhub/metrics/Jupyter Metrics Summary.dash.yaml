@@ -1,0 +1,268 @@
+properties:
+  token: 3882fd204e3449e08845a42c7086186d
+  jupyterHubUrl: https://jupyterhub-redhat-ods-applications.apps.rhods-internal.61tk.p1.openshiftapps.com
+  proxyUrl: https://kie-sandbox-extended-services-kie-sandbox.rhba-cluster-0ad6762cc85bcef5745bb684498c2436-0000.us-south.containers.appdomain.cloud/devsandbox
+  cardTemplate: >-
+    >-
+                                                
+                                                <div id="${this}" class="card-pf card-pf-aggregate-status" style="background-color: ${bgColor}; width: 90%; height: 80px">
+                                                  <h2 style="font-weight: 600; font-size: large" id="${this}Value">${value}</h2>
+                                                  <p style="font-weight: 400" id="${this}Title"><em id="${this}Icon" class=""></em> ${title}</p>
+                                                </div>
+datasets:
+  - uuid: metrics
+    url: https://raw.githubusercontent.com/jesuino/dashbuilder-yaml-samples/main/jupyterhub/metrics/metrics
+    expression: >-
+      $map($, function($l) {
+              [
+                  $l[0],
+                  $l[1],
+                  $l[2]
+              ]
+          }
+      )
+    columns:
+      - id: Metric
+        type: LABEL
+      - id: Label
+        type: LABEL
+      - id: Value
+        type: NUMBER
+pages:
+  - rows:
+      - columns:
+          - components:
+              - html: Jupyter Hub Metrics Summary <hr />
+                properties:
+                  font-size: x-large
+                  margin: 13px
+      - columns:
+          - span: "3"
+            components:
+              - settings:
+                  type: METRIC
+                  general:
+                    title: Users
+                    visible: "true"
+                  chart:
+                    width: "150"
+                  html:
+                    html: ${cardTemplate}
+                    javascript: document.getElementById(${this}.id + "Icon").className = "pficon-user";
+                  columns:
+                    - id: value
+                      pattern: "#"
+                  lookup:
+                    uuid: metrics
+                    filter:
+                      - column: metric
+                        function: EQUALS_TO
+                        args:
+                          - jupyterhub_total_users
+                    group:
+                      - functions:
+                          - source: value
+          - span: "3"
+            components:
+              - settings:
+                  type: METRIC
+                  general:
+                    title: Running Servers
+                    visible: "true"
+                  chart:
+                    width: "150"
+                  html:
+                    html: ${cardTemplate}
+                    javascript: document.getElementById(${this}.id + "Icon").className = "pficon-volume";
+                  columns:
+                    - id: value
+                      pattern: "#"
+                  lookup:
+                    uuid: metrics
+                    filter:
+                      - column: metric
+                        function: EQUALS_TO
+                        args:
+                          - jupyterhub_running_servers
+                    group:
+                      - functions:
+                          - source: value
+          - span: "3"
+            components:
+              - settings:
+                  type: METRIC
+                  general:
+                    title: Memory (mb)
+                    visible: "true"
+
+                  chart:
+                    width: "150"
+                  html:
+                    html: ${cardTemplate}
+                    javascript: document.getElementById(${this}.id + "Icon").className = "fa fa-tachometer";
+                  columns:
+                    - id: value
+                      expression: value / 1014 / 1024
+                      pattern: "#"
+                  lookup:
+                    uuid: metrics
+                    filter:
+                      - column: metric
+                        function: EQUALS_TO
+                        args:
+                          - process_resident_memory_bytes
+                    group:
+                      - functions:
+                          - source: value
+          - span: "3"
+            components:
+              - settings:
+                  type: METRIC
+                  general:
+                    title: Startup (seconds)
+                    visible: "true"
+                  chart:
+                    width: "150"
+                  html:
+                    html: ${cardTemplate}
+                    javascript: document.getElementById(${this}.id + "Icon").className = "fa fa-clock-o";
+                  columns:
+                    - id: value
+                      pattern: "#"
+                  lookup:
+                    uuid: metrics
+                    filter:
+                      - column: metric
+                        function: EQUALS_TO
+                        args:
+                          - jupyterhub_hub_startup_duration_seconds_sum
+                    group:
+                      - functions:
+                          - source: value
+      - columns:
+          - components:
+              - html: <hr />
+      - columns:
+          - span: "4"
+            components:
+              - settings:
+                  component: echarts
+                  echarts:
+                    series:
+                      type: "bar"
+                      barWidth: "90%"
+                    title:
+                      text: Server Spawn
+                      left: center
+                  external:
+                    width: "100%"
+                    height: "300px"
+                  filter:
+                    enabled: "true"
+                    listening: "true"
+                  lookup:
+                    filter:
+                      - column: "Metric"
+                        function: EQUALS_TO
+                        args:
+                          - jupyterhub_server_spawn_duration_seconds_count
+                    uuid: metrics
+                    group:
+                      - columnGroup:
+                          source: Label
+                        functions:
+                          - source: Label
+                          - source: Value
+          - span: "4"
+            components:
+              - settings:
+                  component: echarts
+                  echarts:
+                    series:
+                      type: "bar"
+                    title:
+                      text: Server Stop
+                      left: center
+                  external:
+                    width: "100%"
+                    height: "300px"
+                  filter:
+                    enabled: "true"
+                    listening: "true"
+                  lookup:
+                    filter:
+                      - column: "Metric"
+                        function: EQUALS_TO
+                        args:
+                          - jupyterhub_server_stop_seconds_count
+                    uuid: metrics
+                    group:
+                      - columnGroup:
+                          source: Label
+                        functions:
+                          - source: Label
+                          - source: Value
+          - span: "4"
+            components:
+              - settings:
+                  component: echarts
+                  echarts:
+                    series:
+                      type: "bar"
+                      barWidth: "90%"
+                    title:
+                      text: Proxy Add
+                      left: center
+                  external:
+                    width: "100%"
+                    height: "300px"
+                  lookup:
+                    filter:
+                      - column: "Metric"
+                        function: EQUALS_TO
+                        args:
+                          - jupyterhub_proxy_add_duration_seconds_count
+                    uuid: metrics
+                    group:
+                      - columnGroup:
+                          source: Label
+                        functions:
+                          - source: Label
+                          - source: Value
+      - columns:
+          - components:
+              - settings:
+                  component: echarts
+                  columns:
+                    - id: Label
+                      expression: >-
+                        value.replaceAll("code=", "")
+                             .replaceAll("handler=", "")
+                             .replaceAll("method=", "")
+                             .replaceAll("\"", "")
+
+                  echarts:
+                    series:
+                      type: "bar"
+                    title:
+                      text: HTTP Requests
+                      left: center
+                  external:
+                    width: "100%"
+                    height: "300px"
+                  lookup:
+                    filter:
+                      - column: "Metric"
+                        function: EQUALS_TO
+                        args:
+                          - jupyterhub_request_duration_seconds_count
+                    uuid: metrics
+                    sort:
+                      - column: value
+                        sortOrder: DESCENDING
+                    group:
+                      - columnGroup:
+                          source: Label
+                        functions:
+                          - source: Label
+                          - source: Value
