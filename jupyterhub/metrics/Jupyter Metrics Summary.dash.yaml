@@ -9,15 +9,6 @@ properties:
 datasets:
   - uuid: metrics
     url: https://raw.githubusercontent.com/jesuino/dashbuilder-yaml-samples/main/jupyterhub/metrics/metrics
-    expression: >-
-      $map($, function($l) {
-              [
-                  $l[0],
-                  $l[1],
-                  $l[2]
-              ]
-          }
-      )
     columns:
       - id: Metric
         type: LABEL
