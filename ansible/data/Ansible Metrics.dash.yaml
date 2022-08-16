@@ -1,8 +1,7 @@
 properties:
-  token: {YOUR TOKEN HERE}
-  # modify if using Bearer token
+  token: YWRtaW46a2llLXRvb2xpbmc=
   authorizationHeader: Basic ${token}
-  towerUrl: {YOUR TOWER URL HERE}
+  towerUrl: https://ansible-tower-web-svc-kie-tools-tower.rhba-cluster-0ad6762cc85bcef5745bb684498c2436-0000.us-south.containers.appdomain.cloud
   proxyUrl: https://kie-sandbox-extended-services-kie-sandbox.rhba-cluster-0ad6762cc85bcef5745bb684498c2436-0000.us-south.containers.appdomain.cloud/devsandbox
   subTitlesStyle: "font-size: large; margin: 15px 0 10px 0"
   cardTemplate: >-
@@ -16,17 +15,19 @@ datasets:
   - uuid: metrics
     url: ${proxyUrl}?metrics    
     cacheEnabled: true
+    refreshTime: 1minute        
     columns:
       - id: metric
         type: LABEL
       - id: labels
         type: LABEL
-      - id: Value
-        type: Number
+      - id: Value      
+        type: Number        
+        
     headers:
       Authorization: ${authorizationHeader}
       Content-Type: text/plain
-      Target-Url: ${towerUrl}/api/v2/metrics/?metrics
+      Target-Url: ${towerUrl}/api/v2/metrics/?metrics      
 pages:
   - properties:
       margin-left: 5px
@@ -98,6 +99,7 @@ pages:
                     group:
                       - functions:
                           - source: value
+
           - span: "3"
             components:
               - settings:
