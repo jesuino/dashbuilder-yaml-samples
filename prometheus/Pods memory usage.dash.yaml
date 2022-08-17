@@ -1,0 +1,44 @@
+properties:
+    prometheus_url: https://prometheus-portal-kogito-tooling-rhods.rhba-cluster-0ad6762cc85bcef5745bb684498c2436-0000.us-south.containers.appdomain.cloud
+    memory_query: process_resident_memory_bytes[20m:5s]
+    parser: >-
+        >-
+                $.data.(
+                    {
+                        "columns": result[0].(
+                            [
+                                {"id" : "timestamp", "type": "number"}, 
+                                {"id" : "value", "type": "number"},
+                                $keys(metric).({"id" : $, "type": "label"})
+                            ];
+                        ),
+                        "values": (
+                            resultType = "scalar" ? [result[0] * 1000, result[1]] :
+                            resultType = "matrix" ? result.( $metric := metric.*; values.[ $[0] * 1000, $[1], $metric ] ) :
+                            resultType = "vector" ?  result.[ value[0] * 1000, value[1],  metric.* ]
+                        )
+                    }
+                )
+datasets:
+    - uuid: memory
+      url: ${prometheus_url}/api/v1/query?query=${memory_query}
+      expression: ${parser}
+pages:
+    - components:
+          - html: <strong>Pods memory usage</strong> <hr />
+            properties:
+                font-size: x-large
+          - settings:
+                component: timeseries
+                external:
+                    width: 100%
+                    height: 400px
+                refresh:
+                    interval: "5"
+                lookup:
+                    uuid: memory
+                    group:
+                        - functions:
+                              - source: pod
+                              - source: timestamp
+                              - source: value
