@@ -1,0 +1,90 @@
+properties:
+  chartHeight: 240px
+datasets:
+  - uuid: metrics
+    url: https://raw.githubusercontent.com/jesuino/dashbuilder-yaml-samples/main/jupyterhub/metrics/metrics
+    columns:
+      - id: Metric
+        type: LABEL
+      - id: Label
+        type: LABEL
+      - id: Value
+        type: NUMBER
+pages:
+  - components:
+      - html: Jupyter Hub Metrics Histograms <hr />
+        properties:
+          font-size: x-large
+          margin: 13px
+      - settings:
+          component: echarts
+          echarts:
+            series:
+              type: "bar"
+            title:
+              text: Duration for adding user routes to proxy
+              left: center
+          external:
+            width: "100%"
+            height: ${chartHeight}
+          lookup:
+            filter:
+              - column: "Metric"
+                function: EQUALS_TO
+                args:
+                  - jupyterhub_proxy_add_duration_seconds_bucket
+            uuid: metrics
+            group:
+              - columnGroup:
+                  source: Label
+                functions:
+                  - source: Label
+                  - source: Value
+      - settings:
+          component: echarts
+          echarts:
+            series:
+              type: "bar"
+            title:
+              text: Duration for deleting user routes from proxy
+              left: center
+          external:
+            width: "100%"
+            height: ${chartHeight}
+          lookup:
+            filter:
+              - column: "Metric"
+                function: EQUALS_TO
+                args:
+                  - jupyterhub_proxy_delete_duration_seconds_bucket
+            uuid: metrics
+            group:
+              - columnGroup:
+                  source: Label
+                functions:
+                  - source: Label
+                  - source: Value
+      - settings:
+          component: echarts
+          echarts:
+            series:
+              type: "bar"
+            title:
+              text: Time taken for server spawning operation
+              left: center
+          external:
+            width: "100%"
+            height: ${chartHeight}
+          lookup:
+            filter:
+              - column: "Metric"
+                function: EQUALS_TO
+                args:
+                  - jupyterhub_server_spawn_duration_seconds_bucket
+            uuid: metrics
+            group:
+              - columnGroup:
+                  source: Label
+                functions:
+                  - source: Label
+                  - source: Value
