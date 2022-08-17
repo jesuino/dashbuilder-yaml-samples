@@ -1,0 +1,103 @@
+properties:
+    # use -1 for no update
+    update: 10
+    height: 300px
+    prometheus_url: https://prometheus-portal-kogito-tooling-rhods.rhba-cluster-0ad6762cc85bcef5745bb684498c2436-0000.us-south.containers.appdomain.cloud
+    memory_query: jvm_memory_bytes_used[1h:10s]
+    parser: >-
+        >-
+                $.data.(
+                    {
+                        "columns": result[0].(
+                            [
+                                {"id" : "timestamp", "type": "number"}, 
+                                {"id" : "value", "type": "number"},
+                                $keys(metric).({"id" : $, "type": "label"})
+                            ];
+                        ),
+                        "values": (
+                            resultType = "scalar" ? [result[0] * 1000, result[1]] :
+                            resultType = "matrix" ? result.( $metric := metric.*; values.[ $[0] * 1000, $[1], $metric ] ) :
+                            resultType = "vector" ?  result.[ value[0] * 1000, value[1],  metric.* ]
+                        )
+                    }
+                )
+datasets:
+    - uuid: memory
+      url: ${prometheus_url}/api/v1/query?query=${memory_query}
+      expression: ${parser}
+pages:
+    - components:
+          - html: <strong>Kafka Memory Usage</strong> <hr />
+            properties:
+                font-size: x-large
+          - settings:
+                component: timeseries
+                timeseries:
+                    tooltip:
+                        confine: "true"
+                    title:
+                        show: true
+                        text: Kafka Instances
+                    legend:
+                        show: "true"
+                        bottom: "center"
+                        top: bottom
+                external:
+                    width: 100%
+                    height: ${height}
+                refresh:
+                    interval: "${update}"
+                lookup:
+                    uuid: memory
+                    filter:
+                        - column: area
+                          function: EQUALS_TO
+                          args:
+                              - heap
+                        - column: app_kubernetes_io_name
+                          function: EQUALS_TO
+                          args:
+                              - kafka
+                    group:
+                        - functions:
+                              - source: instance
+                              - source: timestamp
+                              - source: value
+          - properties:
+              margin-top: 50px
+            settings:
+                component: timeseries
+                timeseries:
+                    tooltip:
+                        confine: "true"
+                    title:
+                        show: true
+                        text: Zookeeper Instances
+                    legend:
+                        show: "true"
+                        bottom: "center"
+                        top: bottom
+                external:
+                    width: 100%
+                    height: ${height}
+                refresh:
+                    interval: "${update}"
+                lookup:
+                    uuid: memory                    
+                    filter:
+                        - column: area
+                          function: EQUALS_TO
+                          args:
+                              - heap
+                        - column: app_kubernetes_io_name
+                          function: EQUALS_TO
+                          args:
+                              - zookeeper
+                    group:
+                        - functions:
+                              - source: instance
+                              - source: timestamp
+                              - source: value
+                   
+
