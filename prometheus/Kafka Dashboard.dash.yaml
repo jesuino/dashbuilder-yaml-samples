@@ -1,0 +1,214 @@
+properties:
+    # use -1 for no update
+    update: -1
+    height: 300px
+    period: >-
+        [1h:10s]
+    prometheus_url: https://prometheus-portal-kogito-tooling-rhods.rhba-cluster-0ad6762cc85bcef5745bb684498c2436-0000.us-south.containers.appdomain.cloud
+    topics_messages_query: sum+by(topic)+(kafka_server_brokertopicmetrics_messagesin_total{topic=~".%2B"})
+    topics_bytein_query: sum+by(topic)+(kafka_server_brokertopicmetrics_bytesin_total{topic=~".%2B"})
+    topics_byteout_query: sum+by(topic)+(kafka_server_brokertopicmetrics_bytesout_total{topic=~".%2B"})
+    memory_query: jvm_memory_bytes_used
+    parser: >-
+        >-
+
+                $.data.(
+                    {
+                        "columns": result[0].(
+                            [
+                                {"id" : "timestamp", "type": "number"}, 
+                                {"id" : "value", "type": "number"},
+                                $keys(metric).({"id" : $, "type": "label"})
+                            ];
+                        ),
+                        "values": (
+                            resultType = "scalar" ? [result[0] * 1000, result[1]] :
+                            resultType = "matrix" ? result.( $metric := metric.*; values.[ $[0] * 1000, $[1], $metric ] ) :
+                            resultType = "vector" ?  result.[ value[0] * 1000, value[1],  metric.* ]
+                        )
+                    }
+                )
+datasets:
+    - uuid: memory
+      url: ${prometheus_url}/api/v1/query?query=${memory_query}${period}
+      expression: ${parser}
+    - uuid: topics_messages
+      url: ${prometheus_url}/api/v1/query?query=${topics_messages_query}${period}
+      expression: ${parser}
+    - uuid: topics_bytein
+      url: ${prometheus_url}/api/v1/query?query=${topics_bytein_query}${period}
+      expression: ${parser}
+    - uuid: topics_byteout
+      url: ${prometheus_url}/api/v1/query?query=${topics_byteout_query}${period}
+      expression: ${parser}
+pages:
+    - rows:
+          - columns:
+                - components:
+                      - html: <strong>Kafka Overview</strong> <hr />
+                        properties:
+                            font-size: x-large
+          ################################################### Topics
+          - columns:
+                - components:
+                      - html: <strong>Topic</strong> <hr />
+                        properties:
+                            font-size: large
+          - columns:
+                - span: "4"
+                  components:
+                      - settings:
+                            component: timeseries
+                            timeseries:
+                                tooltip:
+                                    confine: "true"
+                                title:
+                                    show: true
+                                    text: Messages In
+                                legend:
+                                    show: "true"
+                                    bottom: "center"
+                                    top: bottom
+                            external:
+                                width: 100%
+                                height: ${height}
+                            refresh:
+                                interval: "${update}"
+                            lookup:
+                                uuid: topics_messages
+                                group:
+                                    - functions:
+                                          - source: topic
+                                          - source: timestamp
+                                          - source: value
+                - span: "4"
+                  components:
+                      - settings:
+                            component: timeseries
+                            timeseries:
+                                tooltip:
+                                    confine: "true"
+                                title:
+                                    show: true
+                                    text: Bytes In
+                                legend:
+                                    show: "true"
+                                    bottom: "center"
+                                    top: bottom
+                            external:
+                                width: 100%
+                                height: ${height}
+                            refresh:
+                                interval: "${update}"
+                            lookup:
+                                uuid: topics_bytein
+                                group:
+                                    - functions:
+                                          - source: topic
+                                          - source: timestamp
+                                          - source: value
+                - span: "4"
+                  components:
+                      - settings:
+                            component: timeseries
+                            timeseries:
+                                tooltip:
+                                    confine: "true"
+                                title:
+                                    show: true
+                                    text: Bytes Out
+                                legend:
+                                    show: "true"
+                                    bottom: "center"
+                                    top: bottom
+                            external:
+                                width: 100%
+                                height: ${height}
+                            refresh:
+                                interval: "${update}"
+                            lookup:
+                                uuid: topics_byteout
+                                group:
+                                    - functions:
+                                          - source: topic
+                                          - source: timestamp
+                                          - source: value
+
+          ################################################### Memory
+          - columns:
+                - components:
+                      - html: <strong>Memory Usage</strong> <hr />
+                        properties:
+                            font-size: large
+                            margin-top: 40px
+          - columns:
+                - span: "6"
+                  components:
+                      - settings:
+                            component: timeseries
+                            timeseries:
+                                tooltip:
+                                    confine: "true"
+                                title:
+                                    show: true
+                                    text: Kafka
+                                legend:
+                                    show: "true"
+                                    bottom: "center"
+                                    top: bottom
+                            external:
+                                width: 100%
+                                height: ${height}
+                            refresh:
+                                interval: "${update}"
+                            lookup:
+                                uuid: memory
+                                filter:
+                                    - column: area
+                                      function: EQUALS_TO
+                                      args:
+                                          - heap
+                                    - column: app_kubernetes_io_name
+                                      function: EQUALS_TO
+                                      args:
+                                          - kafka
+                                group:
+                                    - functions:
+                                          - source: instance
+                                          - source: timestamp
+                                          - source: value
+                - span: "6"
+                  components:
+                      - settings:
+                            component: timeseries
+                            timeseries:
+                                tooltip:
+                                    confine: "true"
+                                title:
+                                    show: true
+                                    text: Zookeeper
+                                legend:
+                                    show: "true"
+                                    bottom: "center"
+                                    top: bottom
+                            external:
+                                width: 100%
+                                height: ${height}
+                            refresh:
+                                interval: "${update}"
+                            lookup:
+                                uuid: memory
+                                filter:
+                                    - column: area
+                                      function: EQUALS_TO
+                                      args:
+                                          - heap
+                                    - column: app_kubernetes_io_name
+                                      function: EQUALS_TO
+                                      args:
+                                          - zookeeper
+                                group:
+                                    - functions:
+                                          - source: instance
+                                          - source: timestamp
+                                          - source: value
