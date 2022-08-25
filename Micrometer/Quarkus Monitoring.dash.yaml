@@ -1,6 +1,8 @@
 properties:
     # use -1 to cancel auto refresh
     refreshInterval: -1
+    # Change to your quarkus installation URL e.g. http://localhost:8080/q/metrics
+    url: https://raw.githubusercontent.com/jesuino/dashbuilder-yaml-samples/main/Micrometer/data/quarkus/metrics
     cardTemplate: >-
         >-
                                             
@@ -11,7 +13,7 @@ properties:
 
 datasets:
     - uuid: all_metrics
-      url: http://localhost:8080/q/metrics
+      url: ${url}
       columns:
           - id: Metric
             type: LABEL
@@ -22,7 +24,7 @@ datasets:
 pages:
     - properties:
           margin: 10px
-          background-color: "#FFFFEB"
+          background-color: "#EEEEFF"
       rows:
           - columns:
                 - components:
@@ -31,12 +33,11 @@ pages:
                             font-size: x-large
                             font-weight: bold
                             vertical-align: center
-                            color: white
                             padding: 10px
-                            background-color: "#4695EB"
+                            color: "navy"
                             margin-bottom: 10px
           - properties:
-              margin-right: 10px
+                margin-right: 10px
             columns:
                 - span: "3"
                   components:
