@@ -21,13 +21,13 @@ pages:
           - settings:
                 type: METERCHART
                 refresh:
-                    interval: '${refreshInterval}'
+                    interval: "${refreshInterval}"
                 chart:
                     width: "300"
                     height: "200"
                     margin:
-                        top: '0'
-                        bottom: '60'
+                        top: "0"
+                        bottom: "60"
                 meter:
                     end: "100"
                     critical: "80"
@@ -57,10 +57,10 @@ pages:
           - settings:
                 type: BARCHART
                 refresh:
-                    interval: '${refreshInterval}'
+                    interval: "${refreshInterval}"
                 chart:
                     width: "1200"
-                    height: '200'
+                    height: "200"
                     margin:
                         left: "90"
                 dataSetLookup:
@@ -89,10 +89,10 @@ pages:
           - settings:
                 type: BARCHART
                 refresh:
-                    interval: '${refreshInterval}'
+                    interval: "${refreshInterval}"
                 chart:
                     width: "1200"
-                    height: '200'
+                    height: "200"
                     margin:
                         left: "90"
                 dataSetLookup:
@@ -115,21 +115,21 @@ pages:
                                 column: Total
                 columns:
                     - id: Total
-                      pattern: '#'
+                      pattern: "#"
           - html: All Metrics <hr />
             properties:
                 margin-top: 10px
                 font-size: x-large
                 font-weight: bolder
           - settings:
-                type: TABLE
-                chart:
-                    resizable: "true"
+                component: table
+                external:
+                    width: 100%                
                 refresh:
-                    interval: '${refreshInterval}'
+                    interval: "${refreshInterval}"
                 table:
-                    show_column_picker: 'false'
-                    pageSize: '100'
+                    show_column_picker: "false"
+                    pageSize: "100"
                     sort:
                         enabled: "true"
                 dataSetLookup:
