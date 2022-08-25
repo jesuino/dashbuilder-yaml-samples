@@ -23,12 +23,11 @@ datasets:
             type: NUMBER
 pages:
     - properties:
-          margin: 10px
-          background-color: "#EEEEFF"
+          background-color: "#EFEFFF"
       rows:
           - columns:
                 - components:
-                      - html: Quarkus Metrics 
+                      - html: Quarkus Metrics
                         properties:
                             font-size: x-large
                             font-weight: bold
