@@ -227,22 +227,3 @@ pages:
                                           - source: Value
                                             function: MAX
                                             column: Total
-          - columns:
-                - components:
-                      - html: <strong>All Metrics</strong> <hr />
-                        properties:
-                            font-size: large
-                            font-weight: bolder
-                      - settings:
-                            component: table
-                            external:
-                                width: 100%
-                            refresh:
-                                interval: "${refreshInterval}"
-                            table:
-                                show_column_picker: "false"
-                                pageSize: "100"
-                                sort:
-                                    enabled: "true"
-                            dataSetLookup:
-                                uuid: all_metrics
