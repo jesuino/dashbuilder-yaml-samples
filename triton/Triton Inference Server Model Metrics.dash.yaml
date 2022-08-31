@@ -1,0 +1,245 @@
+properties:
+    cardTemplate: >-
+        >-
+                                                    
+                                                    <div id="${this}" class="card-pf card-pf-aggregate-status" style="background-color: ${bgColor}; width: 90%; height: 80px">
+                                                      <h2 style="font-weight: 600; font-size: large" id="${this}Value">${value}</h2>
+                                                      <p style="font-weight: 400" id="${this}Title"><em id="${this}Icon" class=""></em> ${title}</p>
+                                                    </div>
+    modelSanitizeExpression: value.replaceAll("\"", "").replaceAll("model=", "").replaceAll("version=", "").replaceAll(",", " v")
+datasets:
+    - uuid: metrics
+      url: https://raw.githubusercontent.com/jesuino/dashbuilder-yaml-samples/main/triton/data/metrics
+      columns:
+          - id: metric
+            type: LABEL
+          - id: labels
+            type: LABEL
+          - id: value
+            type: NUMBER
+pages:
+    - properties:
+        margin-left: 10px
+      rows:
+          - columns:
+                - components:
+                      - html: Triton Inference Server <hr />
+                        properties:
+                            font-size: x-large
+                            margin: 13px
+          - columns:
+                - span: "3"
+                  components:
+                      - settings:
+                            type: METRIC
+                            general:
+                                title: Total Inference
+                                visible: "true"
+                            chart:
+                                width: "150"
+                            html:
+                                html: ${cardTemplate}
+                                javascript: document.getElementById(${this}.id + "Icon").className = "fa fa-tachometer";
+                            columns:
+                                - id: value
+                                  pattern: "#"
+                            lookup:
+                                uuid: metrics
+                                filter:
+                                    - column: metric
+                                      function: EQUALS_TO
+                                      args:
+                                          - nv_inference_count
+                                group:
+                                    - functions:
+                                          - source: value
+                                            function: SUM
+                - span: "3"
+                  components:
+                      - settings:
+                            type: METRIC
+                            general:
+                                title: Successful Requests
+                                visible: "true"
+                            chart:
+                                width: "150"
+                            html:
+                                html: ${cardTemplate}
+                                javascript: document.getElementById(${this}.id + "Icon").className = "pficon-ok";
+                            columns:
+                                - id: value
+                                  pattern: "#"
+                            lookup:
+                                uuid: metrics
+                                filter:
+                                    - column: metric
+                                      function: EQUALS_TO
+                                      args:
+                                          - nv_inference_request_success
+                                group:
+                                    - functions:
+                                          - source: value
+                                            function: SUM
+                - span: "3"
+                  components:
+                      - settings:
+                            type: METRIC
+                            general:
+                                title: Failure Requests
+                                visible: "true"
+
+                            chart:
+                                width: "150"
+                            html:
+                                html: ${cardTemplate}
+                                javascript: document.getElementById(${this}.id + "Icon").className = "pficon-error-circle-o";
+                            columns:
+                                - id: value
+                                  pattern: "#"
+                            lookup:
+                                uuid: metrics
+                                filter:
+                                    - column: metric
+                                      function: EQUALS_TO
+                                      args:
+                                          - nv_inference_request_failure
+                                group:
+                                    - functions:
+                                          - source: value
+                                            function: SUM
+                - span: "3"
+                  components:
+                      - settings:
+                            type: METRIC
+                            general:
+                                title: Cache Hits
+                                visible: "true"
+                            chart:
+                                width: "150"
+                            html:
+                                html: ${cardTemplate}
+                                javascript: document.getElementById(${this}.id + "Icon").className = "pficon-volume";
+                            columns:
+                                - id: value                                  
+                                  expression: value / 1000
+                                  pattern: "#"
+                            lookup:
+                                uuid: metrics
+                                filter:
+                                    - column: metric
+                                      function: EQUALS_TO
+                                      args:
+                                          - nv_cache_num_hits_per_model
+                                group:
+                                    - functions:
+                                          - source: value
+                                            function: SUM
+          - columns:
+                - properties:
+                      margin-top: 20px
+                  components:
+                      - html: >-
+                                <h2 style='text-align: center'>Inference by Model</h2> <hr />
+          - properties:
+                height: 500px
+            columns:
+                - span: "4"
+                  components:
+                      - html: <h3>Inference Count</h3>
+                        properties:
+                            text-align: center
+                      - settings:
+                            component: victory-charts
+                            victory-charts:
+                                paddingTop: "10"
+                                paddingBottom: "70"
+                                title: "Inference Count"                                
+                                gridx: "true"
+                                themeColor: green
+                            columns:
+                                - id: labels
+                                  expression: value.replaceAll("\"", "'")
+                            lookup:
+                                uuid: metrics
+                                sort:
+                                    - column: value
+                                      sortOrder: DESCENDING
+                                filter:
+                                    - column: metric
+                                      function: EQUALS_TO
+                                      args:
+                                          - nv_inference_count
+                                group:
+                                    - columnGroup:
+                                          source: labels
+                                      functions:
+                                          - source: labels
+                                          - source: value
+                                            function: SUM
+                - span: "4"
+                  components:
+                      - html: <h3>Sucessful Inferences</h3>
+                        properties:
+                            text-align: center
+                      - settings:
+                            component: victory-charts
+                            victory-charts:
+                                paddingTop: "10"
+                                paddingBottom: "70"
+                                title: "Model Request Success"
+                                gridx: "true"
+                            columns:
+                                - id: labels
+                                  expression: value.replaceAll("\"", "").replaceAll("model=", "").replaceAll("version=", "").replaceAll(",", " v")
+                            lookup:
+                                uuid: metrics
+                                sort:
+                                    - column: value
+                                      sortOrder: DESCENDING
+                                filter:
+                                    - column: metric
+                                      function: EQUALS_TO
+                                      args:
+                                          - nv_inference_request_success
+                                group:
+                                    - columnGroup:
+                                          source: labels
+                                      functions:
+                                          - source: labels
+                                          - source: value
+                                            function: SUM
+                - span: "4"
+                  components:
+                      - html: <h3>Failure Inferences</h3>
+                        properties:
+                            text-align: center
+                      - settings:
+                            component: victory-charts
+                            victory-charts:
+                                themeColor: "blue"
+                                paddingTop: "10"
+                                paddingBottom: "70"
+                                title: "Average Duration"
+                                gridx: "true"
+                            columns:
+                                - id: labels
+                                  expression: value.replaceAll("\"", "'")
+                                - id: Average Duration  
+                                  #expression: value / 1000
+                            lookup:
+                                uuid: metrics
+                                sort:
+                                    - column: value
+                                      sortOrder: DESCENDING
+                                filter:
+                                    - column: metric
+                                      function: EQUALS_TO
+                                      args:
+                                          - nv_inference_request_duration_us
+                                group:
+                                    - columnGroup:
+                                          source: labels
+                                      functions:
+                                          - source: labels
+                                          - source: value
+
