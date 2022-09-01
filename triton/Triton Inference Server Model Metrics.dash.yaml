@@ -135,8 +135,9 @@ pages:
       - columns:
           - properties:
               width: 220px
+              margin-top: 5px
             components:
-              - html: <strong>Filter by Model</strong>
+              - html: <hr /><strong>Filter by Model</strong>
               - settings:
                   type: SELECTOR
                   filter:
@@ -159,7 +160,6 @@ pages:
                           - source: labels
                             column: model
       - properties:
-          height: 250px
           margin-top: 20px
         columns:
           - span: "4"
@@ -172,9 +172,13 @@ pages:
                   filter:
                     enabled: "true"
                     listening: "true"
+                  external:
+                    width: 100%
                   victory-charts:
                     paddingTop: "10"
                     paddingBottom: "70"
+                    width: "0"
+                    height: "0"
                     title: "Inference Count"
                     gridx: "true"
                     themeColor: green
@@ -194,6 +198,10 @@ pages:
                         function: EQUALS_TO
                         args:
                           - nv_inference_count
+                      - column: value
+                        function: GREATER_THAN
+                        args:
+                          - 0
                     group:
                       - columnGroup:
                           source: labels
@@ -211,9 +219,13 @@ pages:
                   filter:
                     enabled: "true"
                     listening: "true"
+                  external:
+                    width: 100%
                   victory-charts:
                     paddingTop: "10"
                     paddingBottom: "70"
+                    width: "0"
+                    height: "0"
                     title: "Model Request Success"
                     gridx: "true"
                     fixLabelsOverlap: "true"
@@ -232,6 +244,10 @@ pages:
                         function: EQUALS_TO
                         args:
                           - nv_inference_request_success
+                      - column: value
+                        function: GREATER_THAN
+                        args:
+                          - 0
                     group:
                       - columnGroup:
                           source: labels
@@ -249,9 +265,13 @@ pages:
                   filter:
                     enabled: "true"
                     listening: "true"
+                  external:
+                    width: 100%
                   victory-charts:
                     paddingTop: "10"
                     paddingBottom: "70"
+                    width: "0"
+                    height: "0"
                     title: "Model Request Success"
                     gridx: "true"
                     fixLabelsOverlap: "true"
@@ -270,6 +290,10 @@ pages:
                         function: EQUALS_TO
                         args:
                           - nv_inference_request_failure
+                      - column: value
+                        function: GREATER_THAN
+                        args:
+                          - 0
                     group:
                       - columnGroup:
                           source: labels
@@ -278,8 +302,7 @@ pages:
                           - source: value
                             function: SUM
       - properties:
-          height: 250px
-          margin-top: 120px
+          margin-top: 20px
         columns:
           - span: "4"
             components:
@@ -291,9 +314,13 @@ pages:
                   filter:
                     enabled: "true"
                     listening: "true"
+                  external:
+                    width: 100%
                   victory-charts:
                     themeColor: "blue"
                     paddingTop: "10"
+                    width: "0"
+                    height: "0"
                     paddingBottom: "70"
                     title: "Average Duration"
                     gridx: "true"
@@ -328,8 +355,12 @@ pages:
                   filter:
                     enabled: "true"
                     listening: "true"
+                  external:
+                    width: 100%
                   victory-charts:
                     themeColor: "blue"
+                    width: "0"
+                    height: "0"
                     paddingTop: "10"
                     paddingBottom: "70"
                     title: "Average Duration"
@@ -348,6 +379,10 @@ pages:
                         function: EQUALS_TO
                         args:
                           - nv_inference_compute_infer_duration_us
+                      - column: value
+                        function: GREATER_THAN
+                        args:
+                          - 0
                     group:
                       - columnGroup:
                           source: labels
@@ -365,8 +400,12 @@ pages:
                   filter:
                     enabled: "true"
                     listening: "true"
+                  external:
+                    width: 100%
                   victory-charts:
                     themeColor: "blue"
+                    width: "0"
+                    height: "0"
                     paddingTop: "10"
                     paddingBottom: "70"
                     title: "Average Duration"
@@ -385,6 +424,10 @@ pages:
                         function: EQUALS_TO
                         args:
                           - nv_inference_queue_duration_us
+                      - column: value
+                        function: GREATER_THAN
+                        args:
+                          - 0
                     group:
                       - columnGroup:
                           source: labels
