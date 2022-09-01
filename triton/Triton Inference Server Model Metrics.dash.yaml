@@ -1,353 +1,394 @@
 properties:
-    cardTemplate: >-
-        >-
-                                                    
-                                                    <div id="${this}" class="card-pf card-pf-aggregate-status" style="background-color: ${bgColor}; width: 90%; height: 80px">
-                                                      <h2 style="font-weight: 600; font-size: large" id="${this}Value">${value}</h2>
-                                                      <p style="font-weight: 400" id="${this}Title"><em id="${this}Icon" class=""></em> ${title}</p>
-                                                    </div>
+  cardTemplate: >-
+    >-
+                                                
+                                                <div id="${this}" class="card-pf card-pf-aggregate-status" style="background-color: ${bgColor}; width: 90%; height: 80px">
+                                                  <h2 style="font-weight: 600; font-size: large" id="${this}Value">${value}</h2>
+                                                  <p style="font-weight: 400" id="${this}Title"><em id="${this}Icon" class=""></em> ${title}</p>
+                                                </div>
 datasets:
-    - uuid: metrics
-      url: https://raw.githubusercontent.com/jesuino/dashbuilder-yaml-samples/main/triton/data/metrics
-      columns:
-          - id: metric
-            type: LABEL
-          - id: labels
-            type: LABEL
-          - id: value
-            type: NUMBER
+  - uuid: metrics
+    url: https://raw.githubusercontent.com/jesuino/dashbuilder-yaml-samples/main/triton/data/metrics
+    columns:
+      - id: metric
+        type: LABEL
+      - id: labels
+        type: LABEL
+      - id: value
+        type: NUMBER
 pages:
-    - properties:
-        margin-left: 5px
-      rows:
-          - columns:
-                - components:
-                      - html: Triton Inference Server <hr />
-                        properties:
-                            font-size: x-large
-                            margin: 13px
-          - columns:
-                - span: "3"
-                  components:
-                      - settings:
-                            type: METRIC
-                            general:
-                                title: Running Models
-                                visible: "true"
-                            chart:
-                                width: "150"
-                            html:
-                                html: ${cardTemplate}
-                                javascript: document.getElementById(${this}.id + "Icon").className = "fa fa-cubes";
-                            columns:
-                                - id: labels
-                                  pattern: "#"
-                            lookup:
-                                uuid: metrics
-                                filter:
-                                    - column: metric
-                                      function: EQUALS_TO
-                                      args:
-                                          - nv_inference_count
-                                group:
-                                    - functions:
-                                          - source: labels
-                                            function: COUNT
-                - span: "3"
-                  components:
-                      - settings:
-                            type: METRIC
-                            general:
-                                title: Inference Count
-                                visible: "true"
-                            chart:
-                                width: "150"
-                            html:
-                                html: ${cardTemplate}
-                                javascript: document.getElementById(${this}.id + "Icon").className = "fa fa-tachometer";
-                            columns:
-                                - id: value
-                                  pattern: "#"
-                            lookup:
-                                uuid: metrics
-                                filter:
-                                    - column: metric
-                                      function: EQUALS_TO
-                                      args:
-                                          - nv_inference_count
-                                group:
-                                    - functions:
-                                          - source: value
-                                            function: SUM
-                - span: "3"
-                  components:
-                      - settings:
-                            type: METRIC
-                            general:
-                                title: Inference Requests Success
-                                visible: "true"
-                            chart:
-                                width: "150"
-                            html:
-                                html: ${cardTemplate}
-                                javascript: document.getElementById(${this}.id + "Icon").className = "pficon-ok";
-                            columns:
-                                - id: value
-                                  pattern: "#"
-                            lookup:
-                                uuid: metrics
-                                filter:
-                                    - column: metric
-                                      function: EQUALS_TO
-                                      args:
-                                          - nv_inference_request_success
-                                group:
-                                    - functions:
-                                          - source: value
-                                            function: SUM
-                - span: "3"
-                  components:
-                      - settings:
-                            type: METRIC
-                            general:
-                                title: Inference Requests Failure
-                                visible: "true"
+  - properties:
+      margin-left: 5px
+    rows:
+      - columns:
+          - components:
+              - html: Triton Inference Server <hr />
+                properties:
+                  font-size: x-large
+                  margin: 13px
+      - columns:
+          - span: "3"
+            components:
+              - settings:
+                  type: METRIC
+                  general:
+                    title: Running Models
+                    visible: "true"
+                  chart:
+                    width: "150"
+                  html:
+                    html: ${cardTemplate}
+                    javascript: document.getElementById(${this}.id + "Icon").className = "fa fa-cubes";
+                  columns:
+                    - id: labels
+                      pattern: "#"
+                  lookup:
+                    uuid: metrics
+                    filter:
+                      - column: metric
+                        function: EQUALS_TO
+                        args:
+                          - nv_inference_count
+                    group:
+                      - functions:
+                          - source: labels
+                            function: COUNT
+          - span: "3"
+            components:
+              - settings:
+                  type: METRIC
+                  general:
+                    title: Inference Count
+                    visible: "true"
+                  chart:
+                    width: "150"
+                  html:
+                    html: ${cardTemplate}
+                    javascript: document.getElementById(${this}.id + "Icon").className = "fa fa-tachometer";
+                  columns:
+                    - id: value
+                      pattern: "#"
+                  lookup:
+                    uuid: metrics
+                    filter:
+                      - column: metric
+                        function: EQUALS_TO
+                        args:
+                          - nv_inference_count
+                    group:
+                      - functions:
+                          - source: value
+                            function: SUM
+          - span: "3"
+            components:
+              - settings:
+                  type: METRIC
+                  general:
+                    title: Inference Requests Success
+                    visible: "true"
+                  chart:
+                    width: "150"
+                  html:
+                    html: ${cardTemplate}
+                    javascript: document.getElementById(${this}.id + "Icon").className = "pficon-ok";
+                  columns:
+                    - id: value
+                      pattern: "#"
+                  lookup:
+                    uuid: metrics
+                    filter:
+                      - column: metric
+                        function: EQUALS_TO
+                        args:
+                          - nv_inference_request_success
+                    group:
+                      - functions:
+                          - source: value
+                            function: SUM
+          - span: "3"
+            components:
+              - settings:
+                  type: METRIC
+                  general:
+                    title: Inference Requests Failure
+                    visible: "true"
 
-                            chart:
-                                width: "150"
-                            html:
-                                html: ${cardTemplate}
-                                javascript: document.getElementById(${this}.id + "Icon").className = "pficon-error-circle-o";
-                            columns:
-                                - id: value
-                                  pattern: "#"
-                            lookup:
-                                uuid: metrics
-                                filter:
-                                    - column: metric
-                                      function: EQUALS_TO
-                                      args:
-                                          - nv_inference_request_failure
-                                group:
-                                    - functions:
-                                          - source: value
-                                            function: SUM
-
+                  chart:
+                    width: "150"
+                  html:
+                    html: ${cardTemplate}
+                    javascript: document.getElementById(${this}.id + "Icon").className = "pficon-error-circle-o";
+                  columns:
+                    - id: value
+                      pattern: "#"
+                  lookup:
+                    uuid: metrics
+                    filter:
+                      - column: metric
+                        function: EQUALS_TO
+                        args:
+                          - nv_inference_request_failure
+                    group:
+                      - functions:
+                          - source: value
+                            function: SUM
+      - columns:
           - properties:
-                height: 250px
-                margin-top: 20px
-            columns:
-                - span: "4"
-                  components:
-                      - html: <h3>Inference Count</h3>
-                        properties:
-                            text-align: center
-                      - settings:
-                            component: victory-charts
-                            victory-charts:
-                                paddingTop: "10"
-                                paddingBottom: "70"
-                                title: "Inference Count"                                
-                                gridx: "true"
-                                themeColor: green
-                                fixLabelsOverlap: "true"
-                            columns:
-                                - id: labels
-                                  expression: value.replaceAll("\"", "").replaceAll("model=", "").replaceAll("version=", "").replaceAll(",", " v")
-                                - id: value
-                                  pattern: "#"
-                            lookup:
-                                uuid: metrics
-                                sort:
-                                    - column: value
-                                      sortOrder: DESCENDING
-                                filter:
-                                    - column: metric
-                                      function: EQUALS_TO
-                                      args:
-                                          - nv_inference_count
-                                group:
-                                    - columnGroup:
-                                          source: labels
-                                      functions:
-                                          - source: labels
-                                          - source: value
-                                            function: SUM
-                - span: "4"
-                  components:
-                      - html: <h3>Sucessful Inferences</h3>
-                        properties:
-                            text-align: center
-                      - settings:
-                            component: victory-charts
-                            victory-charts:
-                                paddingTop: "10"
-                                paddingBottom: "70"
-                                title: "Model Request Success"
-                                gridx: "true"
-                                fixLabelsOverlap: "true"
-                            columns:
-                                - id: labels
-                                  expression: value.replaceAll("\"", "").replaceAll("model=", "").replaceAll("version=", "").replaceAll(",", " v")
-                                - id: value
-                                  pattern: "#"
-                            lookup:
-                                uuid: metrics
-                                sort:
-                                    - column: value
-                                      sortOrder: DESCENDING
-                                filter:
-                                    - column: metric
-                                      function: EQUALS_TO
-                                      args:
-                                          - nv_inference_request_success
-                                group:
-
-                                    - columnGroup:
-                                          source: labels
-                                      functions:
-                                          - source: labels
-                                          - source: value
-                                            function: SUM
-                - span: "4"
-                  components:
-                      - html: <h3>Failure Inferences</h3>
-                        properties:
-                            text-align: center
-                      - settings:
-                            component: victory-charts
-                            victory-charts:
-                                paddingTop: "10"
-                                paddingBottom: "70"
-                                title: "Model Request Success"
-                                gridx: "true"
-                                fixLabelsOverlap: "true"
-                            columns:
-                                - id: labels
-                                  expression: value.replaceAll("\"", "").replaceAll("model=", "").replaceAll("version=", "").replaceAll(",", " v")
-                                - id: value
-                                  pattern: "#"
-                            lookup:
-                                uuid: metrics
-                                sort:
-                                    - column: value
-                                      sortOrder: DESCENDING
-                                filter:
-                                    - column: metric
-                                      function: EQUALS_TO
-                                      args:
-                                          - nv_inference_request_failure
-                                group:
-
-                                    - columnGroup:
-                                          source: labels
-                                      functions:
-                                          - source: labels
-                                          - source: value
-                                            function: SUM
-          - properties:
-                height: 250px
-                margin-top: 120px
-            columns:
-                - span: "4"
-                  components:
-                      - html: <h3>Request Total Duration</h3>
-                        properties:
-                            text-align: center
-                      - settings:
-                            component: victory-charts
-                            victory-charts:
-                                themeColor: "blue"
-                                paddingTop: "10"
-                                paddingBottom: "70"
-                                title: "Average Duration"
-                                gridx: "true"
-                                fixLabelsOverlap: "true"
-                            columns:
-                                - id: labels
-                                  expression: value.replaceAll("\"", "").replaceAll("model=", "").replaceAll("version=", "").replaceAll(",", " v")
-                            lookup:
-                                uuid: metrics
-                                sort:
-                                    - column: value
-                                      sortOrder: DESCENDING
-                                filter:
-                                    - column: metric
-                                      function: EQUALS_TO
-                                      args:
-                                          - nv_inference_request_duration_us
-                                group:
-                                    - columnGroup:
-                                          source: labels
-                                      functions:
-                                          - source: labels
-                                          - source: value
-                                            column: Duration
-                - span: "4"
-                  components:
-                      - html: <h3>Inference Total Duration</h3>
-                        properties:
-                            text-align: center
-                      - settings:
-                            component: victory-charts
-                            victory-charts:
-                                themeColor: "blue"
-                                paddingTop: "10"
-                                paddingBottom: "70"
-                                title: "Average Duration"
-                                gridx: "true"
-                                fixLabelsOverlap: "true"
-                            columns:
-                                - id: labels
-                                  expression: value.replaceAll("\"", "").replaceAll("model=", "").replaceAll("version=", "").replaceAll(",", " v")
-                            lookup:
-                                uuid: metrics
-                                sort:
-                                    - column: value
-                                      sortOrder: DESCENDING
-                                filter:
-                                    - column: metric
-                                      function: EQUALS_TO
-                                      args:
-                                          - nv_inference_compute_infer_duration_us
-                                group:
-                                    - columnGroup:
-                                          source: labels
-                                      functions:
-                                          - source: labels
-                                          - source: value
-                                            column: Duration
-                - span: "4"
-                  components:
-                      - html: <h3>Inference Queue Wait</h3>
-                        properties:
-                            text-align: center
-                      - settings:
-                            component: victory-charts
-                            victory-charts:
-                                themeColor: "blue"
-                                paddingTop: "10"
-                                paddingBottom: "70"
-                                title: "Average Duration"
-                                gridx: "true"
-                                fixLabelsOverlap: "true"
-                            columns:
-                                - id: labels
-                                  expression: value.replaceAll("\"", "").replaceAll("model=", "").replaceAll("version=", "").replaceAll(",", " v")
-                            lookup:
-                                uuid: metrics
-                                sort:
-                                    - column: value
-                                      sortOrder: DESCENDING
-                                filter:
-                                    - column: metric
-                                      function: EQUALS_TO
-                                      args:
-                                          - nv_inference_queue_duration_us
-                                group:
-                                    - columnGroup:
-                                          source: labels
-                                      functions:
-                                          - source: labels
-                                          - source: value
-                                            column: Duration
+              width: 220px
+            components:
+              - html: <strong>Filter by Model</strong>
+              - settings:
+                  type: SELECTOR
+                  filter:
+                    enabled: "true"
+                    notification: "true"
+                  columns:
+                    - id: model
+                      expression: value.replaceAll("\"", "").replaceAll("model=", "").replaceAll("version=", "").replaceAll(",", " v")
+                  lookup:
+                    uuid: metrics
+                    filter:
+                      - column: metric
+                        function: EQUALS_TO
+                        args:
+                          - nv_inference_count
+                    group:
+                      - columnGroup:
+                          source: labels
+                        functions:
+                          - source: labels
+                            column: model
+      - properties:
+          height: 250px
+          margin-top: 20px
+        columns:
+          - span: "4"
+            components:
+              - html: <h3>Inference Count</h3>
+                properties:
+                  text-align: center
+              - settings:
+                  component: victory-charts
+                  filter:
+                    enabled: "true"
+                    listening: "true"
+                  victory-charts:
+                    paddingTop: "10"
+                    paddingBottom: "70"
+                    title: "Inference Count"
+                    gridx: "true"
+                    themeColor: green
+                    fixLabelsOverlap: "true"
+                  columns:
+                    - id: labels
+                      expression: value.replaceAll("\"", "").replaceAll("model=", "").replaceAll("version=", "").replaceAll(",", " v")
+                    - id: value
+                      pattern: "#"
+                  lookup:
+                    uuid: metrics
+                    sort:
+                      - column: value
+                        sortOrder: DESCENDING
+                    filter:
+                      - column: metric
+                        function: EQUALS_TO
+                        args:
+                          - nv_inference_count
+                    group:
+                      - columnGroup:
+                          source: labels
+                        functions:
+                          - source: labels
+                          - source: value
+                            function: SUM
+          - span: "4"
+            components:
+              - html: <h3>Sucessful Inferences</h3>
+                properties:
+                  text-align: center
+              - settings:
+                  component: victory-charts
+                  filter:
+                    enabled: "true"
+                    listening: "true"
+                  victory-charts:
+                    paddingTop: "10"
+                    paddingBottom: "70"
+                    title: "Model Request Success"
+                    gridx: "true"
+                    fixLabelsOverlap: "true"
+                  columns:
+                    - id: labels
+                      expression: value.replaceAll("\"", "").replaceAll("model=", "").replaceAll("version=", "").replaceAll(",", " v")
+                    - id: value
+                      pattern: "#"
+                  lookup:
+                    uuid: metrics
+                    sort:
+                      - column: value
+                        sortOrder: DESCENDING
+                    filter:
+                      - column: metric
+                        function: EQUALS_TO
+                        args:
+                          - nv_inference_request_success
+                    group:
+                      - columnGroup:
+                          source: labels
+                        functions:
+                          - source: labels
+                          - source: value
+                            function: SUM
+          - span: "4"
+            components:
+              - html: <h3>Failure Inferences</h3>
+                properties:
+                  text-align: center
+              - settings:
+                  component: victory-charts
+                  filter:
+                    enabled: "true"
+                    listening: "true"
+                  victory-charts:
+                    paddingTop: "10"
+                    paddingBottom: "70"
+                    title: "Model Request Success"
+                    gridx: "true"
+                    fixLabelsOverlap: "true"
+                  columns:
+                    - id: labels
+                      expression: value.replaceAll("\"", "").replaceAll("model=", "").replaceAll("version=", "").replaceAll(",", " v")
+                    - id: value
+                      pattern: "#"
+                  lookup:
+                    uuid: metrics
+                    sort:
+                      - column: value
+                        sortOrder: DESCENDING
+                    filter:
+                      - column: metric
+                        function: EQUALS_TO
+                        args:
+                          - nv_inference_request_failure
+                    group:
+                      - columnGroup:
+                          source: labels
+                        functions:
+                          - source: labels
+                          - source: value
+                            function: SUM
+      - properties:
+          height: 250px
+          margin-top: 120px
+        columns:
+          - span: "4"
+            components:
+              - html: <h3>Request Total Duration</h3>
+                properties:
+                  text-align: center
+              - settings:
+                  component: victory-charts
+                  filter:
+                    enabled: "true"
+                    listening: "true"
+                  victory-charts:
+                    themeColor: "blue"
+                    paddingTop: "10"
+                    paddingBottom: "70"
+                    title: "Average Duration"
+                    gridx: "true"
+                    fixLabelsOverlap: "true"
+                  columns:
+                    - id: labels
+                      expression: value.replaceAll("\"", "").replaceAll("model=", "").replaceAll("version=", "").replaceAll(",", " v")
+                  lookup:
+                    uuid: metrics
+                    sort:
+                      - column: value
+                        sortOrder: DESCENDING
+                    filter:
+                      - column: metric
+                        function: EQUALS_TO
+                        args:
+                          - nv_inference_request_duration_us
+                    group:
+                      - columnGroup:
+                          source: labels
+                        functions:
+                          - source: labels
+                          - source: value
+                            column: Duration
+          - span: "4"
+            components:
+              - html: <h3>Inference Total Duration</h3>
+                properties:
+                  text-align: center
+              - settings:
+                  component: victory-charts
+                  filter:
+                    enabled: "true"
+                    listening: "true"
+                  victory-charts:
+                    themeColor: "blue"
+                    paddingTop: "10"
+                    paddingBottom: "70"
+                    title: "Average Duration"
+                    gridx: "true"
+                    fixLabelsOverlap: "true"
+                  columns:
+                    - id: labels
+                      expression: value.replaceAll("\"", "").replaceAll("model=", "").replaceAll("version=", "").replaceAll(",", " v")
+                  lookup:
+                    uuid: metrics
+                    sort:
+                      - column: value
+                        sortOrder: DESCENDING
+                    filter:
+                      - column: metric
+                        function: EQUALS_TO
+                        args:
+                          - nv_inference_compute_infer_duration_us
+                    group:
+                      - columnGroup:
+                          source: labels
+                        functions:
+                          - source: labels
+                          - source: value
+                            column: Duration
+          - span: "4"
+            components:
+              - html: <h3>Inference Queue Wait</h3>
+                properties:
+                  text-align: center
+              - settings:
+                  component: victory-charts
+                  filter:
+                    enabled: "true"
+                    listening: "true"
+                  victory-charts:
+                    themeColor: "blue"
+                    paddingTop: "10"
+                    paddingBottom: "70"
+                    title: "Average Duration"
+                    gridx: "true"
+                    fixLabelsOverlap: "true"
+                  columns:
+                    - id: labels
+                      expression: value.replaceAll("\"", "").replaceAll("model=", "").replaceAll("version=", "").replaceAll(",", " v")
+                  lookup:
+                    uuid: metrics
+                    sort:
+                      - column: value
+                        sortOrder: DESCENDING
+                    filter:
+                      - column: metric
+                        function: EQUALS_TO
+                        args:
+                          - nv_inference_queue_duration_us
+                    group:
+                      - columnGroup:
+                          source: labels
+                        functions:
+                          - source: labels
+                          - source: value
+                            column: Duration
