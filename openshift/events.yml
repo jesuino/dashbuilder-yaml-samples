@@ -1,12 +1,13 @@
 properties:
-    token: TOKEN HERE
-    clusterUrl: CLUSTER URL
-    proxyUrl: https://kie-sandbox-extended-services-kie-sandbox.rhba-cluster-0ad6762cc85bcef5745bb684498c2436-0000.us-south.containers.appdomain.cloud
+    token: YOUR TOKEN HERE
+    clusterUrl: YOUR CLUSTER URL HERE
+    proxyUrl: https://kie-sandbox-extended-services-kie-sandbox.rhba-cluster-0ad6762cc85bcef5745bb684498c2436-0000.us-south.containers.appdomain.cloud/devsandbox
 datasets:
 - uuid: events
   url: ${proxyUrl}
   expression: >-
                 [$.items.[metadata.name, metadata.namespace]]
+  cacheEnabled: "true"
   headers:
     Authorization: Bearer ${token}
     Content-Type: application/json
@@ -23,8 +24,13 @@ pages:
       properties:
         font-size: xx-large
     - settings:
-        type: BARCHART
-        dataSetLookup:
+        component: echarts
+        external:
+            width: 100%
+        echarts:
+            series:
+                type: bar
+        lookup:
           uuid: events
           group:
             - columnGroup:
@@ -38,7 +44,7 @@ pages:
         font-size: xx-large
     - settings:
         type: EXTERNAL_COMPONENT
-        external_component_id: filtered-table
+        external_component_id: table
         external:
             external_component_width: 100%
             external_component_height: 500px
