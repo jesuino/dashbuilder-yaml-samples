@@ -1,0 +1,38 @@
+datasets:
+    - uuid: data      
+      url: https://www.jbang.dev/assets/data/jbang-versionchecks.csv
+      content: >-
+                [
+                  ["-15.7750656", "-48.0773013", "212"],
+                  ["-23.533773", "-46.625290", "20"],
+                  ["40.7128", "-74.006", "30"],     
+            
+                  ["38.8938672", "-77.0846156", "300"],
+                  ["55.5815245", "36.8251412", "120"],
+                  ["39.9390731", "116.1172793", "1200"]
+                ]
+      columns:
+          - id: lat
+            type: number    
+          - id: long
+            type: number    
+          - id: value
+            type: number    
+pages:
+    - components:
+          - settings:
+                component: map
+                map:
+                    enableZoom: "true"
+                    minBubbleSize: "1.5"
+                    maxBubbleSize: "15"
+                external:
+                    width: 1200px
+                    height: 900px
+                lookup:
+                    uuid: data
+                    group:
+                        - functions:
+                              - source: lat                              
+                              - source: long
+                              - source: value
