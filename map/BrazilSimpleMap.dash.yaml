@@ -1,0 +1,43 @@
+datasets:
+    - uuid: data      
+      content: >-
+                [
+                    ["SP", 1], 
+                    ["RJ", 90],
+                    ["MG", 5],
+                    ["PA", 50],
+                    ["AM", 2],
+                    ["RS", 100]
+                ]
+      columns:
+          - id: name
+            type: label
+          - id: value
+            type: number
+pages:
+    - components:
+          - settings:
+                component: map
+                map:
+                    geoUrl: https://raw.githubusercontent.com/sjcdigital/geo-json/main/Brasil.json
+                    enableZoom: "true"
+                    minZoom: "4"
+                    maxZoom: "20"
+                    zoom: "4"
+                    fill: white
+                    background: lightgray
+                    strokeWidth: "0.2"
+                    zoomCenterLat: "-12.749997"
+                    zoomCenterLong: "-50.9499962"
+                    fillBegin: lightgreen
+                    fillEnd: darkgreen
+                    geoKey: "UF"
+                external:
+                    width: 100%
+                    height: 800px
+                lookup:
+                    uuid: data
+                    group:
+                        - functions:
+                              - source: name
+                              - source: value
