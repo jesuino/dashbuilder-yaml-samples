@@ -21,14 +21,14 @@ pages:
                 map:
                     geoUrl: https://raw.githubusercontent.com/sjcdigital/geo-json/main/Brasil.json
                     enableZoom: "true"
-                    minZoom: "4"
+                    minZoom: "1"
                     maxZoom: "20"
-                    zoom: "4"
+                    zoom: "2"
                     fill: white
                     background: lightgray
                     strokeWidth: "0.2"
-                    zoomCenterLat: "-12.749997"
-                    zoomCenterLong: "-50.9499962"
+                    zoomCenterLat: "-28.749997"
+                    zoomCenterLong: "-47.9499962"
                     fillBegin: lightgreen
                     fillEnd: darkgreen
                     geoKey: "UF"
