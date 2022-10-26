@@ -1,0 +1,13 @@
+# mocked model mesh metrics based on ModelMeshMetrics https://github.com/kserve/modelmesh/blob/main/src/test/java/com/ibm/watson/modelmesh/ModelMeshMetricsTest.java
+modelmesh_api_request_milliseconds_bucket{method="predict",code="OK",le="2000.0",} 40.0
+modelmesh_invoke_model_milliseconds_bucket{method="predict",code="OK",le="200.0",} 40.0
+modelmesh_model_sizing_milliseconds_bucket{le="200.0",} 1.0
+modelmesh_model_sizing_milliseconds_bucket{le="50.0",} 0.0
+modelmesh_loaded_model_size_bytes_bucket{le="6.7108864E7",} 0.0
+modelmesh_loaded_model_size_bytes_bucket{le="2.68435456E8",} 1.0
+modelmesh_models_loaded_total 1.0
+modelmesh_instance_models_total 1.0
+modelmesh_request_size_bytes_bucket{method="predict",code="OK",le="128.0",} 30
+modelmesh_request_size_bytes_bucket{method="predict",code="OK",le="2097152.0",} 40
+modelmesh_response_size_bytes_bucket{method="predict",code="OK",le="128.0",} 30
+modelmesh_response_size_bytes_bucket{method="predict",code="OK",le="2097152.0",} 40
