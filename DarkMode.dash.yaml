@@ -1,0 +1,32 @@
+datasets:
+- uuid: test
+  content: >- 
+                [
+                    ["Hello", 20, 12],
+                    ["World", 10, 25],
+                ]
+pages:
+- properties:
+    background-color: "rgba(0,0,40,1)"
+  components:
+    - settings:
+        component: echarts
+        external:
+            width: 100%
+            height: 400px
+        echarts:
+            series:
+                type: bar
+            title:
+                text: Testing Dark Mode
+                left: center
+            theme: "dark"
+        lookup:
+          uuid: test
+          group:
+            - columnGroup:
+                source: Column 0
+              groupFunctions:
+                - source: Column 0
+                - source: Column 1
+                - source: Column 2
