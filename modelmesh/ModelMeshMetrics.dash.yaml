@@ -1,0 +1,221 @@
+properties:
+  modelMeshMetricsUrl: https://raw.githubusercontent.com/jesuino/dashbuilder-yaml-samples/main/modelmesh/metrics
+  titleFontSize: 40px
+  defaultOptionForEcharts: >-
+    >-
+                          {
+                            "color": [
+                              "#007090",
+                              "#009040",
+                              "#e0a000",
+                              "#a02020"
+                            ]
+                          }
+  cardTemplate: >-
+    >-
+                                     <div id="${this}" style="width: 95%;text-align: center">
+                                       <p style="font-weight: 500; font-size: medium; margin: 0" id="${this}Title">${title}</p>
+                                       <p style="font-weight: 700; font-size: 45px;" id="${this}Value">${value} </p>
+                                     </div>
+datasets:
+  - uuid: metrics
+    url: ${modelMeshMetricsUrl}
+    columns:
+      - id: metric
+        type: LABEL
+      - id: labels
+        type: LABEL
+      - id: value
+        type: number
+
+  - uuid: request_response_size
+    url: ${modelMeshMetricsUrl}
+    expression: >-
+      (
+          $requestSize := $number($[$[0] = "modelmesh_request_size_bytes_sum"][0][2]);
+          $requestCount := $number($[$[0] = "modelmesh_request_size_bytes_count"][0][2]);
+          $responseSize := $number($[$[0] = "modelmesh_response_size_bytes_sum"][0][2]);
+          $responseCount := $number($[$[0] = "modelmesh_response_size_bytes_count"][0][2]);
+
+          [ "Size", $requestSize / $requestCount,  $responseSize / $responseCount]
+      )
+    columns:
+      - id: Metric
+        type: LABEL
+      - id: Request
+        type: number
+      - id: Response
+        type: number
+  - uuid: jvm_memory
+    url: ${modelMeshMetricsUrl}
+    expression: >-
+              (
+                  $metrics := $[$[0] in ["jvm_memory_pool_bytes_used", "jvm_memory_pool_bytes_committed"]].[
+                      {
+                              "metric": $[0],
+                              "label": $[1],
+                              "value": $[2]
+                          }
+                  ];
+                  $map($distinct($metrics.label), function($l) {
+                      (
+                          $used := $metrics[label = $l and metric = "jvm_memory_pool_bytes_used"].value;
+                          $committed := $metrics[label = $l and metric = "jvm_memory_pool_bytes_committed"].value;
+                          [
+                            $l,
+                            $used ?  $used : "-1",
+                            $committed ?  $committed : -1
+                          ] 
+                    )
+                  })
+              )
+    columns:
+      - id: Pool
+        type: LABEL
+      - id: Used
+        type: number
+      - id: Committed
+        type: number
+
+
+
+pages:
+  - properties:
+      padding: "10px"
+    rows:
+      - columns:
+          - components:
+              - html: >-
+                  <p>Model Mesh Metrics</p> <hr />
+                properties:
+                  font-size: ${titleFontSize}
+      - columns:
+          - span: "3"
+            components:
+              - settings:
+                  type: METRIC
+                  general:
+                    visible: "true"
+                    title: "Managed Models"
+                  html:
+                    html: ${cardTemplate}
+                  columns:
+                    - id: value
+                      pattern: "#"
+                  lookup:
+                    uuid: metrics
+                    filter:
+                      - column: metric
+                        function: EQUALS_TO
+                        args:
+                          - modelmesh_models_managed_total
+                    group:
+                      - functions:
+                          - source: value
+          - span: "3"
+            components:
+              - settings:
+                  type: METRIC
+                  general:
+                    visible: "true"
+                    title: "Models with Failure"
+                  html:
+                    html: ${cardTemplate}
+                  columns:
+                    - id: value
+                      pattern: "#"
+                  lookup:
+                    uuid: metrics
+                    filter:
+                      - column: metric
+                        function: EQUALS_TO
+                        args:
+                          - modelmesh_models_with_failure_total
+                    group:
+                      - functions:
+                          - source: value
+          - span: "3"
+            components:
+              - settings:
+                  type: METRIC
+                  general:
+                    visible: "true"
+                    title: "Load Model (ms)"
+                  html:
+                    html: ${cardTemplate}
+                  columns:
+                    - id: value
+                      pattern: "#"
+                  lookup:
+                    uuid: metrics
+                    filter:
+                      - column: metric
+                        function: EQUALS_TO
+                        args:
+                          - modelmesh_loadmodel_milliseconds_sum
+                    group:
+                      - functions:
+                          - source: value
+          - span: "3"
+            components:
+              - settings:
+                  type: METRIC
+                  general:
+                    visible: "true"
+                    title: "Models Size (kb)"
+                  html:
+                    html: ${cardTemplate}
+                  columns:
+                    - id: value
+                      pattern: "#"
+                      expression: value /1024
+                  lookup:
+                    uuid: metrics
+                    filter:
+                      - column: metric
+                        function: EQUALS_TO
+                        args:
+                          - modelmesh_loaded_model_size_bytes_sum
+                    group:
+                      - functions:
+                          - source: value
+      - columns:
+          - components:
+              - html: <hr />
+      - columns:
+          - components:
+              - html: >-
+                      <p style="font-size: 25px; font-weight: 600"> JVM Memory </p> 
+              - settings:
+                  component: echarts
+                  #component: victory-charts
+                  external:
+                    width: 100%
+                    height: 400px
+                  victory-charts:
+                    title: "JVM USed Bytes"
+                    width: "1000"
+                    height: "300"
+                    fixLabelsOverlap: "true"
+                  echarts:
+                    option: ${defaultOptionForEcharts}
+                    legend:
+                      show: "true"
+                      top: bottom
+                    series:
+                      type: bar
+                    xAxis:
+                      axisLabel:
+                        rotate: "12"
+                  columns:
+                    - id: Pool
+                      expression: value.replace("pool=\"", "").replace("\",", "")
+                  lookup:
+                    uuid: jvm_memory
+                    group:
+                      - columnGroup:
+                          source: Pool
+                        functions:
+                          - source: Pool
+                          - source: Used
+                          - source: Committed
