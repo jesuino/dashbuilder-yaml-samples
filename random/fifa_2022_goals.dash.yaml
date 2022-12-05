@@ -18,8 +18,8 @@ global:
                 y: false
         html:
             html: >-
-                    <div id="${this}" class="card-pf card-pf-aggregate-status" style="margin: 15px; background-color: ${bgColor}; height: 80px">
-                        <h2 style="font-weight: 600; font-size: large" id="${this}Value">${value}</h2>
+                    <div id="${this}" class="card-pf card-pf-aggregate-status" style="margin: 15px; background-color: ${bgColor}; height: 85px; border-radius: 10px">
+                        <h2 style="font-weight: 600; font-size: x-large" id="${this}Value">${value}</h2>
                         <p style="font-weight: 400" id="${this}Title"><em id="${this}Icon" class=""></em> ${title}</p>
                     </div>
         export:
@@ -32,29 +32,30 @@ datasets:
       cacheEnabled: "true"
       expression: >-
           $.Results.[
-              ([
-                  $.IdMatch,
-                  $.LocalDate = null ? "" : $.LocalDate, 
-                  $toMillis($.LocalDate) ~>  $fromMillis('[D]-[M]-[Y]'),
-                  $toMillis($.LocalDate) ~>  $fromMillis('[H]:[m]'),
-                  $.Weather.Humidity != null ? $.Weather.Humidity : "-1",
-                  $.Weather.Temperature != null ? $.Weather.Temperature : "-1", 
-                  $.Weather.WindSpeed != null ? $.Weather.WindSpeed :  "-1",
-                  $.Weather.TypeLocalized[0].Description != null ? $.Weather.TypeLocalized[0].Description :  "",
-                  $.Home.IdCountry != null ? $.Home.IdCountry : "", 
-                  $.Home.ShortClubName != null ? $.Home.ShortClubName : "", 
-                  $.HomeTeamScore != null ? $.HomeTeamScore : "-1",
-                  $.Away.IdCountry != null ? $.Away.IdCountry : "", 
-                  $.Away.ShortClubName != null ? $.Away.ShortClubName : "", 
-                  $.Away.Score != null ? $.Away.Score : "-1",
-                  $.Stadium.Name[0].Description,
-                  $.Stadium.CityName[0].Description,
-                  $.Attendance != null ? $.Attendance :  "-1",
-                  $.MatchStatus,
-                  $.MatchStatus = 0 ?  $.HomeTeamScore + $.AwayTeamScore : "-1",
-                  $.MatchStatus = 0 ? $join([$.Home.ShortClubName, $.Away.ShortClubName], ' vs ') : "-1"
-                  
-              ])
+              ( $.MatchStatus = 0 ? 
+                    [
+                        $.IdMatch,
+                        $.LocalDate = null ? "" : $.LocalDate, 
+                        $toMillis($.LocalDate) ~>  $fromMillis('[D]-[M]-[Y]'),
+                        $toMillis($.LocalDate) ~>  $fromMillis('[H]:[m]'),
+                        $.Weather.Humidity != null ? $.Weather.Humidity : "-1",
+                        $.Weather.Temperature != null ? $.Weather.Temperature : "-1", 
+                        $.Weather.WindSpeed != null ? $.Weather.WindSpeed :  "-1",
+                        $.Weather.TypeLocalized[0].Description != null ? $.Weather.TypeLocalized[0].Description :  "",
+                        $.Home.IdCountry != null ? $.Home.IdCountry : "", 
+                        $.Home.ShortClubName != null ? $.Home.ShortClubName : "", 
+                        $.HomeTeamScore != null ? $.HomeTeamScore : "-1",
+                        $.Away.IdCountry != null ? $.Away.IdCountry : "", 
+                        $.Away.ShortClubName != null ? $.Away.ShortClubName : "", 
+                        $.Away.Score != null ? $.Away.Score : "-1",
+                        $.Stadium.Name[0].Description,
+                        $.Stadium.CityName[0].Description,
+                        $.Attendance != null ? $.Attendance :  "-1",                        
+                        $.HomeTeamScore + $.AwayTeamScore,
+                        $join([$.Home.ShortClubName, $.Away.ShortClubName], ' vs ')
+                        
+                    ]
+              )
           ]
       columns:
           - id: ID
@@ -91,8 +92,6 @@ datasets:
             type: LABEL
           - id: Attendance
             type: NUMBER
-          - id: Match Status
-            type: NUMBER
           - id: Total Goals
             type: NUMBER
           - id: Match Name
@@ -111,7 +110,10 @@ pages:
                                 </small>
                                 <hr />
                             </p>
-          - columns:
+          - properties:
+              margin-bottom: 100px
+              margin-top: 50px
+            columns:
                 - span: 3
                   components:
                       - settings:
@@ -123,11 +125,6 @@ pages:
                                   pattern: "#"
                             lookup:
                                 uuid: fifa_matches
-                                filter:
-                                    - column: Match Status
-                                      function: EQUALS_TO
-                                      args:
-                                          - 0
                                 group:
                                     - functions:
                                           - source: Total Goals
@@ -141,11 +138,6 @@ pages:
                                 title: Average Goals by Match
                             lookup:
                                 uuid: fifa_matches
-                                filter:
-                                    - column: Match Status
-                                      function: EQUALS_TO
-                                      args:
-                                          - 0
                                 group:                                    
                                     - functions:
                                           - source: Total Goals
@@ -158,11 +150,6 @@ pages:
                                 title: Average Temperature
                             lookup:
                                 uuid: fifa_matches
-                                filter:
-                                    - column: Match Status
-                                      function: EQUALS_TO
-                                      args:
-                                          - 0
                                 group:
                                     - functions:
                                           - source: Temperature
@@ -176,11 +163,6 @@ pages:
                                 title: Average Attendance
                             lookup:
                                 uuid: fifa_matches
-                                filter:
-                                    - column: Match Status
-                                      function: EQUALS_TO
-                                      args:
-                                          - 0
                                 group:
                                     - functions:
                                           - source: Attendance
@@ -197,11 +179,6 @@ pages:
                                 x:
                                     labels_angle: 30
                             lookup:
-                                filter:
-                                    - column: Match Status
-                                      function: EQUALS_TO
-                                      args:
-                                          - 0
                                 group:
                                     - columnGroup:
                                           source: Day
@@ -244,11 +221,6 @@ pages:
                             general:
                                 title: Goals by Weather
                             lookup:
-                                filter:
-                                    - column: Match Status
-                                      function: EQUALS_TO
-                                      args:
-                                          - 0
                                 sort:
                                     - column: TOTAL MATCHES
                                       order: ASCENDING
@@ -281,11 +253,6 @@ pages:
                                 y:
                                     title: Attendance
                             lookup:
-                                filter:
-                                    - column: Match Status
-                                      function: EQUALS_TO
-                                      args:
-                                          - 0
                                 group:
                                     - columnGroup:
                                           source: Match Name
@@ -323,11 +290,6 @@ pages:
                                 - id: Team 2 Score
                                   pattern: "#"
                             lookup:
-                                filter:
-                                    - column: Match Status
-                                      function: EQUALS_TO
-                                      args:
-                                          - 0
                                 group:
                                     - functions:
                                           - source: Temperature
