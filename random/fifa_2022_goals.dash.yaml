@@ -16,6 +16,7 @@ global:
             height: 300
             grid:
                 y: false
+                x: false
         html:
             html: >-
                     <div id="${this}" class="card-pf card-pf-aggregate-status" style="margin: 15px; background-color: ${bgColor}; height: 85px; border-radius: 10px">
