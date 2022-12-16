@@ -125,12 +125,10 @@ pages:
                                 - id: Total Goals
                                   pattern: "#"
                             lookup:
-                                uuid: fifa_matches
                                 group:
                                     - functions:
                                           - source: Total Goals
                                             function: SUM
-
                 - span: 3
                   components:
                       - settings:
@@ -138,7 +136,6 @@ pages:
                             general:
                                 title: Average Goals by Match
                             lookup:
-                                uuid: fifa_matches
                                 group:                                    
                                     - functions:
                                           - source: Total Goals
@@ -150,12 +147,10 @@ pages:
                             general:
                                 title: Average Temperature
                             lookup:
-                                uuid: fifa_matches
                                 group:
                                     - functions:
                                           - source: Temperature
                                             function: AVERAGE
-                                            
                 - span: 3
                   components:
                       - settings:
@@ -163,11 +158,10 @@ pages:
                             general:
                                 title: Average Attendance
                             lookup:
-                                uuid: fifa_matches
                                 group:
                                     - functions:
                                           - source: Attendance
-                                            function: Average
+                                            function: AVERAGE
           - columns:
                 - span: 6
                   components:
@@ -199,7 +193,6 @@ pages:
                                     labels_angle: 15
 
                             lookup:
-                                uuid: fifa_matches                                
                                 sort:
                                     - column: Goals
                                       order: DESCENDING
@@ -221,6 +214,7 @@ pages:
                             type: bubblechart
                             general:
                                 title: Goals by Weather
+                                subtitle: Bubble shows total matches
                             lookup:
                                 sort:
                                     - column: TOTAL MATCHES
@@ -245,7 +239,7 @@ pages:
                             type: bubblechart
                             general:
                                 title: Goals by Attendance
-                                subtitle: Bubble shows average goals
+                                subtitle: Bubble shows total goals
                             chart:
                                 zoom: true
                             axis:
@@ -259,14 +253,11 @@ pages:
                                           source: Match Name
                                       functions:
                                           - source: Match Name
-                                          - source: Attendance
-                                            function: MAX
+                                          - source: Attendance                                            
                                             column: Attendance
-                                          - source: Total Goals
-                                            function: ${GoalsFunction}
+                                          - source: Total Goals                                            
                                             column: Goals
-                                          - source: Total Goals
-                                            function: ${GoalsFunction}
+                                          - source: Total Goals                                            
                                             column: Goals
 
           - columns:
