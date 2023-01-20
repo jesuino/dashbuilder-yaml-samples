@@ -1,3 +1,5 @@
+global:
+    mode: dark
 datasets:
     - uuid: timeseries
       url: https://gist.githubusercontent.com/jesuino/0b14e3d7ae84676792d1acf61b2d13e8/raw/0e6b0512e08976f705ea4275a73433a81edfdf27/sample_timeseries.json
@@ -10,17 +12,21 @@ pages:
                     title:
                         text: Sample Time Series
                         left: center
+                        textStyle:
+                            color: white
                     legend:
                         show: "true"
                         left: "left"
                         top: "bottom"
                         itemHeight: "20"
+                        textStyle:
+                            color: white
                     toolbox:
                         feature:
                             dataZoom:
                                 yAxisIndex: "none"
                 external:
-                    width: 900px
+                    width: 100%
                     height: 400px
                 lookup:
                     uuid: timeseries
