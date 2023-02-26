@@ -1,16 +1,13 @@
 properties:
   # use -1 to cancel auto refresh
-  refreshInterval: 5
+  refreshInterval: 10
   # Change to your quarkus installation URL e.g. http://localhost:8080/q/metrics
-  url: https://raw.githubusercontent.com/jesuino/dashbuilder-yaml-samples/main/Micrometer/data/quarkus/metrics
+  metricsUrl: http://localhost:8080/q/metrics
 global:
-  mode: dark
+  mode: dark  
   settings:
     refresh:
       interval: ${refreshInterval}
-    axis:
-      x:
-        labels_angle: 12
     chart:
       resizable: true
       height: 350
@@ -31,7 +28,9 @@ global:
       uuid: all_metrics
 datasets:
   - uuid: all_metrics
-    url: ${url}
+    url: ${metricsUrl}
+    cacheEnabled: true
+    refreshTime: 5second
     columns:
       - id: Metric
         type: LABEL
@@ -96,13 +95,12 @@ pages:
                           - source: Value
                             function: MAX
                             column: Total
-
           - span: 3
             components:
               - settings:
                   type: METRIC
                   general:
-                    visible: "true"
+                    visible: true
                     title: "Uptime"
                   html:
                     javascript: >-
@@ -142,9 +140,10 @@ pages:
                       - functions:
                           - source: Value
       - properties:
-          margin-top: 20px
+          margin-top: 50px
         columns:
-          - components:
+          - span: 6
+            components:
               - settings:
                   type: BARCHART
                   extraConfiguration: >-
@@ -152,13 +151,54 @@ pages:
                       "color" : ["#5ec962"]
                     }
                   general:
-                    title: JVM Memory Used Bytes
+                    title: JVM Memory Used Bytes (heap)
+                  columns:
+                    - id: Labels
+                      expression: value.replaceAll("area=\"heap\",id=\"", "").replace("\",", "");
                   lookup:
                     filter:
                       - column: Metric
                         function: EQUALS_TO
                         args:
                           - "jvm_memory_used_bytes"
+                      - column: labels
+                        function: LIKE_TO
+                        args:
+                          - 'area="heap"%'
+                    sort:
+                      - column: Total
+                        sortOrder: DESCENDING
+                    group:
+                      - columnGroup:
+                          source: Labels
+                        functions:
+                          - source: Labels
+                          - source: Value
+                            function: MAX
+                            column: Total
+          - span: 6
+            components:
+              - settings:
+                  type: BARCHART
+                  extraConfiguration: >-
+                    {
+                      "color" : ["#5ec962"]
+                    }
+                  general:
+                    title: JVM Memory Used Bytes (nonheap)
+                  columns:
+                    - id: Labels
+                      expression: value.replaceAll("area=\"nonheap\",id=\"", "").replace("\",", "");
+                  lookup:
+                    filter:
+                      - column: Metric
+                        function: EQUALS_TO
+                        args:
+                          - "jvm_memory_used_bytes"
+                      - column: labels
+                        function: LIKE_TO
+                        args:
+                          - 'area="nonheap"%'
                     sort:
                       - column: Total
                         sortOrder: DESCENDING
@@ -183,6 +223,10 @@ pages:
                     }
                   general:
                     title: Threads
+                  columns:
+                    - id: Labels
+                      expression:
+                        value.replaceAll("state=\"", "").replace("\",", "");
                   lookup:
                     filter:
                       - column: Metric
