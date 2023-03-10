@@ -1,109 +1,98 @@
+global:
+  settings:
+    refresh:
+      interval: 5
+    html:
+      html: >-
+        <div id="${this}" class="card-pf card-pf-aggregate-status" style="background-color: ${bgColor}; width: 90%; height: 80px;margin: 10px; border-radius: 10px">
+          <h2 style="font-weight: 600; font-size: large" id="${this}Value">${value} <span id="${this}Suffix" class=""></span></h2>
+          <p style="font-weight: 400" id="${this}Title"><em id="${this}Icon" class=""></em> ${title}</p>
+        </div>
 datasets:
   - uuid: threads
-    expression: '$reduce($map($.data.result, function($v) {$map($v.values, function($r, $i) {[$v.metric.instance, $v.metric.state, $r[0] * 1000, $r[1]]})}), $append)'
+    expression: "$reduce($map($.data.result, function($v) {$map($v.values, function($r, $i) {[$v.metric.instance, $v.metric.state, $r[0] * 1000, $r[1]]})}), $append)"
     url: http://localhost:9090/api/v1/query?query=jvm_threads_states_threads[10m:1s]
   - uuid: live_threads
-    expression: '$.data.result.[metric.instance, value[1]]'
+    expression: "$.data.result.[metric.instance, value[1]]"
     url: http://localhost:9090/api/v1/query?query=jvm_threads_live_threads
   - uuid: daemon_threads
-    expression: '$.data.result.[metric.instance, value[1]]'
+    expression: "$.data.result.[metric.instance, value[1]]"
     url: http://localhost:9090/api/v1/query?query=jvm_threads_daemon_threads
   - uuid: peak_threads
-    expression: '$.data.result.[metric.instance, value[1]]'
-    url: http://localhost:9090/api/v1/query?query=jvm_threads_peak_threads    
-layoutTemplates:
+    expression: "$.data.result.[metric.instance, value[1]]"
+    url: http://localhost:9090/api/v1/query?query=jvm_threads_peak_threads
+pages:
   - name: Threads
     rows:
-      - layoutColumns:
-          - span: '2'
-            layoutComponents:
-                - type: HTML
-                  properties:
-                    HTML_CODE: Threads <hr />
-                    font-size: xx-large
-      - layoutColumns:
-          - span: '2'
-            layoutComponents:
+      - columns:
+          - span: 4
+            components:
+              - html: Threads <hr />
+                properties:                  
+                  font-size: x-large
+      - columns:
+          - span: 4
+            components:
               - settings:
                   type: METRIC
                   general:
                     title: Live
-                    visible: 'true'
-                  chart:
-                    width: '150'
-                    height: '90'
-                  refresh:
-                    interval: '5'
                   columns:
                     - id: Column 1
-                      pattern: '#'
+                      pattern: "#"
                   dataSetLookup:
-                    dataSetUuid: live_threads
+                    uuid: live_threads
                     groupOps:
-                        - groupFunctions:
+                      - groupFunctions:
                           - source: Column 1
-          - span: '2'
-            layoutComponents:
+          - span: 4
+            components:
               - settings:
                   type: METRIC
                   general:
                     title: Daemon
-                    visible: 'true'
-                  chart:
-                    width: '150'
-                    height: '90'
                   columns:
                     - id: Column 1
-                      pattern: '#'                    
+                      pattern: "#"
                   refresh:
-                    interval: '5'
-                  dataSetLookup:
-                    dataSetUuid: daemon_threads
+                    interval: "5"
+                  lookup:
+                    uuid: daemon_threads
                     groupOps:
-                        - groupFunctions:
+                      - groupFunctions:
                           - source: Column 1
-          - span: '2'
-            layoutComponents:                          
+          - span: 4
+            components:
               - settings:
                   type: METRIC
                   general:
                     title: Peak
-                    visible: 'true'
-                  chart:
-                    width: '150'
-                    height: '90'
                   columns:
                     - id: Column 1
-                      pattern: '#'                    
-                  refresh:
-                    interval: '5'
-                  dataSetLookup:
-                    dataSetUuid: peak_threads
-                    groupOps:
-                        - groupFunctions:
-                          - source: Column 1       
-      - layoutColumns:
-          - layoutComponents:
-              - type: HTML
+                      pattern: "#"
+                  lookup:
+                    uuid: peak_threads
+                    group:
+                      - functions:
+                          - source: Column 1
+      - columns:
+          - components:
+              - html: <br /> Thread States<hr />
                 properties:
-                    HTML_CODE: <br /> <strong>Thread States</strong><hr />
-                    font-size: large
-          - layoutComponents:
+                  font-size: large
+          - components:
               - settings:
-                  type: EXTERNAL_COMPONENT
-                  external_component_id: timeseries
+                  component: timeseries
                   timeseries:
                     legend:
-                        bottom: '5%'
+                      bottom: "5%"
                   external:
-                    external_component_width: 1200px
-                    external_component_height: 400px
-                  refresh:
-                    interval: '5'
-                  dataSetLookup:
-                    dataSetUuid: threads
-                    groupOps:
-                        - groupFunctions:
+                    width: 100%
+                    height: 400px
+                  lookup:
+                    uuid: threads
+                    group:
+                      - functions:
                           - source: Column 1
                           - source: Column 2
                           - source: Column 3
