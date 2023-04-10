@@ -1,0 +1,136 @@
+global:
+  settings:
+    refresh:
+      interval: 5
+datasets:
+  - uuid: metrics
+    url: http://localhost:8080/q/metrics
+    accumulate: true
+    cacheMaxRows: 30000
+    expression: >-
+      $map($, function($v){
+          [$v[0], $v[1], $v[2], $now() ~> $toMillis()]
+      })
+    columns:
+      - id: metric
+        type: label
+      - id: labels
+        type: label
+      - id: value
+        type: number
+      - id: register
+        type: label
+
+pages:
+  - properties:
+      margin-left: 10px
+    rows:
+      - columns:
+          - components:
+              - html: >-
+                  <strong style="font-size: x-large; margin: 10px">Java VM Summary </strong> <hr />
+      - columns:
+          - span: 6
+            components:
+              - settings:
+                  component: timeseries
+                  timeseries:
+                    title:
+                      text: Heap Memory Usage
+                  chart:
+                    resizable: true
+                  lookup:
+                    uuid: metrics
+                    filter:
+                      - column: metric
+                        function: EQUALS_TO
+                        args:
+                          - jvm_memory_used_bytes
+                      - column: labels
+                        function: LIKE_TO
+                        args:
+                          - '%area="heap"%'
+                    group:
+                      - columnGroup:
+                          source: register
+                        groupFunctions:
+                          - source: metric
+                          - source: register
+                          - source: value
+                            function: SUM
+          - span: 6
+            components:
+              - settings:
+                  component: timeseries
+                  timeseries:
+                    title:
+                      text: Live Threads
+                  chart:
+                    resizable: true
+                  lookup:
+                    uuid: metrics
+                    filter:
+                      - column: metric
+                        function: EQUALS_TO
+                        args:
+                          - jvm_threads_states_threads
+                    group:
+                      - columnGroup:
+                          source: register
+                        groupFunctions:
+                          - source: metric
+                            column: Heap Memory Usage
+                          - source: register
+                          - source: value
+                            function: SUM
+      - properties:
+          margin-top: 50px
+        columns:
+          - span: 6
+            components:
+              - settings:
+                  component: timeseries
+                  timeseries:
+                    title:
+                      text: Loaded Classes
+                  chart:
+                    resizable: true
+                  lookup:
+                    uuid: metrics
+                    filter:
+                      - column: metric
+                        function: EQUALS_TO
+                        args:
+                          - jvm_classes_loaded_classes
+                    group:
+                      - columnGroup:
+                          source: register
+                        groupFunctions:
+                          - source: metric
+                          - source: register
+                          - source: value
+                            function: SUM
+          - span: 6
+            components:
+              - settings:
+                  component: timeseries
+                  timeseries:
+                    title:
+                      text: CPU USAGE
+                  chart:
+                    resizable: true
+                  lookup:
+                    uuid: metrics
+                    filter:
+                      - column: metric
+                        function: EQUALS_TO
+                        args:
+                          - system_cpu_usage
+                    group:
+                      - columnGroup:
+                          source: register
+                        groupFunctions:
+                          - source: metric
+                          - source: register
+                          - source: value
+                            function: SUM
