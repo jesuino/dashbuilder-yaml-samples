@@ -1,0 +1,294 @@
+properties:
+    ### User properties (you can modify this)
+    prometheus_url: http://localhost:9090
+    job: keycloak
+    refresh_seconds: -1
+    period: 1h
+    window: 5s
+
+    ### Internal Properties
+    time_window: "[${period}:${window}]"
+    global_filter: 'job="${job}"'
+    query_url: ${prometheus_url}/api/v1/query?query=
+global:
+    mode: dark_
+    settings:
+        refresh:
+            interval: ${refresh_seconds}
+        chart:
+            resizable: true
+            height: 230
+            zoom: true
+        html:
+            html: >-
+                <div id="${this}" class="card-pf card-pf-aggregate-status" style="background-color: ${bgColor}; width: 90%; height: 80px;margin: 10px; border-radius: 10px;">
+                    <p style="font-weight: 600; font-size: medium" id="${this}Title"><em id="${this}Icon" class=""></em> ${title}</p>
+                    <h2 style="margin: 10px; font-weight: 600; font-size: x-large" id="${this}Value">${value} <span id="${this}Suffix" class=""></span></h2>
+                </div>
+datasets:
+    ## cards Datasets
+    - uuid: uptime
+      type: prometheus
+      url: ${query_url}process_uptime_seconds{${global_filter}}
+    - uuid: start_time
+      type: prometheus
+      url: ${query_url}process_start_time_seconds{${global_filter}}
+    - uuid: heap_used
+      type: prometheus
+      url: ${query_url}sum(jvm_memory_used_bytes{${global_filter},area="heap"})*100/sum(jvm_memory_max_bytes{${global_filter},area="heap"})
+    - uuid: system_cpu_usage
+      type: prometheus
+      url: ${query_url}system_cpu_usage{${global_filter}}
+
+    ## Timeseries datasets
+
+    # Memory
+    - uuid: heap_used_bytes
+      type: prometheus
+      url: ${query_url}jvm_memory_used_bytes{${global_filter}, area="heap"}${time_window}
+    - uuid: nonheap_used_bytes
+      type: prometheus
+      url: ${query_url}jvm_memory_used_bytes{${global_filter}, area="nonheap"}${time_window}
+    - uuid: used_bytes_total
+      type: prometheus
+      url: ${query_url}sum by (instance) (jvm_memory_used_bytes{${global_filter}})${time_window}
+
+    # Threads
+    - uuid: threads_states
+      type: prometheus
+      url: ${query_url}jvm_threads_states_threads{${global_filter}}${time_window}
+    - uuid: live_threads
+      type: prometheus
+      url: ${query_url}jvm_threads_live_threads{${global_filter}}${time_window}
+    - uuid: daemon_threads
+      type: prometheus
+      url: ${query_url}jvm_threads_daemon_threads{${global_filter}}${time_window}
+pages:
+    - rows:
+          - _columns:
+                - components:
+                      - settings:
+                            lookup:
+                                uuid: live_threads
+          - columns:
+                - components:
+                      - html: >-
+                            <p style="font-size: x-large; margin: 10px">
+                                JVM Monitoring
+                                <hr />
+                            </p>
+          - columns:
+                - span: 3
+                  components:
+                      - settings:
+                            type: METRIC
+                            general:
+                                title: Uptime
+                            columns:
+                                - id: value
+                                  expression: value / 60
+                                  pattern: "#.000 min"
+                            lookup:
+                                uuid: uptime
+                                group:
+                                    - functions:
+                                          - source: value
+                - span: 3
+                  components:
+                      - settings:
+                            type: METRIC
+                            general:
+                                title: Start Time
+                            columns:
+                                - id: value
+                                  expression: >-
+                                      const d = new Date(value * 1000);
+                                      const year = d.getFullYear();
+                                      const day = d.getDay();
+                                      const month = d.getMonth();
+                                      const hour = d.getHours();
+                                      const minute = `${d.getMinutes()}`.padStart(2, 0);
+                                      const second = `${d.getSeconds()}`.padStart(2, 0);
+                                      `${hour}:${minute}:${second} ${day}/${month}/${year}`
+                            lookup:
+                                uuid: start_time
+                                group:
+                                    - functions:
+                                          - source: value
+                - span: 3
+                  components:
+                      - settings:
+                            type: METRIC
+                            general:
+                                title: Heap Used
+                            columns:
+                                - id: value
+                                  expression: value / 60
+                                  pattern: "#.00 %"
+                            lookup:
+                                uuid: heap_used
+                                group:
+                                    - functions:
+                                          - source: value
+                - span: 3
+                  components:
+                      - settings:
+                            type: METRIC
+                            general:
+                                title: System CPU Usage
+                            columns:
+                                - id: value
+                                  pattern: "# %"
+                            lookup:
+                                uuid: system_cpu_usage
+                                group:
+                                    - functions:
+                                          - source: value
+          - properties:
+                margin-top: 5px
+            columns:
+                - components:
+                      - html: >-
+                            <p style="font-size: large; font-weight: bolder; margin: 10px">
+                                Memory
+                            </p> 
+                            <hr style="margin: 10px; opacity: 0.2"/>
+          - properties:
+                margin-top: 30px
+            columns:
+                - span: 4
+                  components:
+                      - settings:
+                            type: timeseries
+                            general:
+                                title: Heap Memory Used Bytes
+                            chart:
+                                legend:
+                                    show: true
+                                margin:
+                                    left: 90
+                            columns:
+                                - id: value
+                                  expression: "#"
+                            lookup:
+                                uuid: heap_used_bytes
+                                group:
+                                    - functions:
+                                          - source: id
+                                          - source: timestamp
+                                          - source: value
+                - span: 4
+                  components:
+                      - settings:
+                            type: timeseries
+                            general:
+                                title: NonHeap Memory Used Bytes
+                            chart:
+                                legend:
+                                    show: true
+                                margin:
+                                    left: 90
+                            columns:
+                                - id: value
+                                  pattern: "#"
+                            lookup:
+                                uuid: nonheap_used_bytes
+                                group:
+                                    - functions:
+                                          - source: id
+                                          - source: timestamp
+                                          - source: value
+                - span: 4
+                  components:
+                      - settings:
+                            type: timeseries
+                            general:
+                                title: Memory Used Bytes Total
+                            chart:
+                                legend:
+                                    show: true
+                                margin:
+                                    left: 90
+                            columns:
+                                - id: dummy
+                                  expression: "_"
+                            lookup:
+                                uuid: used_bytes_total
+                                group:
+                                    - functions:
+                                          - source: instance
+                                          - source: timestamp
+                                          - source: value
+          - properties:
+                margin-top: 10px
+            columns:
+                - components:
+                      - html: >-
+                            <p style="font-size: large; font-weight: bolder; margin: 10px">
+                                Threads
+                            </p> 
+                            <hr style="margin: 10px; opacity: 0.2"/>
+          - properties:
+                margin-top: 30px
+            columns:
+                - span: 4
+                  components:
+                      - settings:
+                            type: timeseries
+                            general:
+                                title: Threads States
+                            chart:
+                                legend:
+                                    show: true
+
+                            columns:
+                                - id: value
+                                  expression: "#"
+                            lookup:
+                                uuid: threads_states
+                                group:
+                                    - functions:
+                                          - source: state
+                                          - source: timestamp
+                                          - source: value
+                - span: 4
+                  components:
+                      - settings:
+                            type: timeseries
+                            general:
+                                title: Live Threads
+                            chart:
+                                legend:
+                                    show: true
+                                margin:
+                                    left: 90
+                            columns:
+                                - id: value
+                                  expression: "#"
+                            lookup:
+                                uuid: live_threads
+                                group:
+                                    - functions:
+                                          - source: instance
+                                          - source: timestamp
+                                          - source: value
+                - span: 4
+                  components:
+                      - settings:
+                            type: timeseries
+                            general:
+                                title: Daemon Threads
+                            chart:
+                                legend:
+                                    show: true
+
+                            columns:
+                                - id: value
+                                  expression: "#"
+                            lookup:
+                                uuid: daemon_threads
+                                group:
+                                    - functions:
+                                          - source: instance
+                                          - source: timestamp
+                                          - source: value
