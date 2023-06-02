@@ -2,9 +2,13 @@ properties:
     ### User properties (you can modify this)
     prometheus_url: http://localhost:9090
     job: keycloak
-    refresh_seconds: -1
+    refresh_seconds: 10
     period: 1h
     window: 5s
+
+    # style
+    subTitleStyle: "font-size: large; font-weight: bolder; margin: 10px"
+    titleStyle: "font-size: x-large; margin: 10px"
 
     ### Internal Properties
     time_window: "[${period}:${window}]"
@@ -19,6 +23,8 @@ global:
             resizable: true
             height: 230
             zoom: true
+            legend:
+                show: false
         html:
             html: >-
                 <div id="${this}" class="card-pf card-pf-aggregate-status" style="background-color: ${bgColor}; width: 90%; height: 80px;margin: 10px; border-radius: 10px;">
@@ -73,7 +79,7 @@ pages:
           - columns:
                 - components:
                       - html: >-
-                            <p style="font-size: x-large; margin: 10px">
+                            <p style="${titleStyle}">
                                 JVM Monitoring
                                 <hr />
                             </p>
@@ -87,7 +93,7 @@ pages:
                             columns:
                                 - id: value
                                   expression: value / 60
-                                  pattern: "#.000 min"
+                                  pattern: "# min"
                             lookup:
                                 uuid: uptime
                                 group:
@@ -149,7 +155,7 @@ pages:
             columns:
                 - components:
                       - html: >-
-                            <p style="font-size: large; font-weight: bolder; margin: 10px">
+                            <p style="${subTitleStyle}">
                                 Memory
                             </p> 
                             <hr style="margin: 10px; opacity: 0.2"/>
@@ -163,8 +169,6 @@ pages:
                             general:
                                 title: Heap Memory Used Bytes
                             chart:
-                                legend:
-                                    show: true
                                 margin:
                                     left: 90
                             columns:
@@ -184,8 +188,6 @@ pages:
                             general:
                                 title: NonHeap Memory Used Bytes
                             chart:
-                                legend:
-                                    show: true
                                 margin:
                                     left: 90
                             columns:
@@ -205,8 +207,6 @@ pages:
                             general:
                                 title: Memory Used Bytes Total
                             chart:
-                                legend:
-                                    show: true
                                 margin:
                                     left: 90
                             columns:
@@ -224,7 +224,7 @@ pages:
             columns:
                 - components:
                       - html: >-
-                            <p style="font-size: large; font-weight: bolder; margin: 10px">
+                            <p style="${subTitleStyle}">
                                 Threads
                             </p> 
                             <hr style="margin: 10px; opacity: 0.2"/>
@@ -237,10 +237,6 @@ pages:
                             type: timeseries
                             general:
                                 title: Threads States
-                            chart:
-                                legend:
-                                    show: true
-
                             columns:
                                 - id: value
                                   expression: "#"
@@ -258,8 +254,6 @@ pages:
                             general:
                                 title: Live Threads
                             chart:
-                                legend:
-                                    show: true
                                 margin:
                                     left: 90
                             columns:
@@ -278,10 +272,6 @@ pages:
                             type: timeseries
                             general:
                                 title: Daemon Threads
-                            chart:
-                                legend:
-                                    show: true
-
                             columns:
                                 - id: value
                                   expression: "#"
