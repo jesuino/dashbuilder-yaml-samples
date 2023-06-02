@@ -1,0 +1,47 @@
+properties:
+  dataIndexUrl: http://localhost:8180
+  refresh_interval: -1
+global:
+  settings:
+    refresh:
+      interval: ${refresh_interval}      
+datasets:
+  - uuid: variables
+    expression: >-
+      { 
+          "columns": ["Workflow", "Instance ID", $.data.ProcessInstances.variables.[ $ ~> $eval ].workflowdata ~> $keys].({ "id": $ }), 
+          "values": 
+              $.data.ProcessInstances.(                
+                      $id := $.id; 
+                      $workflowId :=  $.processId;
+                      $.variables.[ $ ~> $eval ].workflowdata.[ $workflowId, $id,  $each($, function($v, $k) { $v })]
+              )
+      }
+    url: ${dataIndexUrl}/graphql/?query=%7BProcessInstances%7Bid%2CprocessId%2Cvariables%7D%7D
+    cacheEnabled: true
+    refreshTime: "30second"
+
+pages:
+  - components:
+      - html: >-
+          <h2>
+            Workflow Variables
+          </h2>
+          <hr />
+          <p style="font-size: small">
+            In this example we should how to map workflow variables into datasets that can be used to build dashboards. Below we have a table that can be filtered by Workflow. 
+            Clicking on a workflow instance ID filters the table. To use this dashboard you must:
+              <ul>
+                <li> Make sure that the property *dataIndexUrl* points to your installation</li>
+                <li> There's at least one workflow started</li>
+              </ul>
+              You can configure a better cache and a refresh interval and use the variables to build your own Dashboard.
+          </p>
+      - settings:
+          chart:
+            resizable: true
+          filter:
+            selfapply: true
+            enabled: true
+          lookup:
+            uuid: variables
