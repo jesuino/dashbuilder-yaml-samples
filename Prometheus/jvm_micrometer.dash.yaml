@@ -7,8 +7,8 @@ properties:
     window: 5s
 
     # style
-    subTitleStyle: "font-size: large; font-weight: bolder; margin: 10px"
-    titleStyle: "font-size: x-large; margin: 10px"
+    subTitleStyle: "padding: 5px; background-color: #F1F1F1; font-size: medium; font-weight: bolder; margin: 5px"
+    titleStyle: "font-size: x-large; margin: 5px; font-weight: bold"
 
     ### Internal Properties
     time_window: "[${period}:${window}]"
@@ -19,17 +19,31 @@ global:
     settings:
         refresh:
             interval: ${refresh_seconds}
+        extraConfiguration: >-
+            {
+                "xAxis": {
+                    "splitNumber": 5
+                },
+                "title": {
+                    "textStyle" : { 
+                        "fontSize" : 15
+                    }
+                }
+            }
         chart:
             resizable: true
-            height: 230
+            height: 180
             zoom: true
+            margin:
+                bottom: 20
+                top: 35
             legend:
                 show: false
         html:
             html: >-
-                <div id="${this}" class="card-pf card-pf-aggregate-status" style="background-color: ${bgColor}; width: 90%; height: 80px;margin: 10px; border-radius: 10px;">
-                    <p style="font-weight: 600; font-size: medium" id="${this}Title"><em id="${this}Icon" class=""></em> ${title}</p>
-                    <h2 style="margin: 10px; font-weight: 600; font-size: x-large" id="${this}Value">${value} <span id="${this}Suffix" class=""></span></h2>
+                <div id="${this}" class="card-pf card-pf-aggregate-status" style="background-color: ${bgColor}; width: 90%; height: 58px;margin: 10px; border-radius: 10px;">
+                    <p style="font-weight: 600; font-size: small" id="${this}Title"><em id="${this}Icon" class=""></em> ${title}</p>
+                    <h2 style="margin: 5px; font-weight: 600; font-size: large" id="${this}Value">${value} <span id="${this}Suffix" class=""></span></h2>
                 </div>
 datasets:
     ## cards Datasets
@@ -92,7 +106,27 @@ pages:
                                 title: Uptime
                             columns:
                                 - id: value
-                                  expression: value / 60
+                                  expression: >-
+                                      var round = Math.round;                                    
+                                      var seconds = value;
+                                      var minutes = 0;
+                                      var hours = 0;
+                                      var days = 0;
+                                      output = `${seconds}s`;
+                                      if (seconds >= 60) {
+                                          minutes = round(seconds / 60);
+                                          seconds = round(seconds % 60);
+                                          if (minutes >= 60) {
+                                              hours = round(minutes / 60);
+                                              minutes = round(minutes % 60);
+                                              if (hours >= 24) {
+                                                  days = round(hours / 24);
+                                                  hours = round(hours % 60);
+                                              }
+                                          }
+                                      }
+                                      `${days}d ${hours}h ${minutes}m ${seconds}s`
+
                                   pattern: "# min"
                             lookup:
                                 uuid: uptime
@@ -170,7 +204,7 @@ pages:
                                 title: Heap Memory Used Bytes
                             chart:
                                 margin:
-                                    left: 90
+                                    left: 80
                             columns:
                                 - id: value
                                   expression: "#"
@@ -189,7 +223,7 @@ pages:
                                 title: NonHeap Memory Used Bytes
                             chart:
                                 margin:
-                                    left: 90
+                                    left: 80
                             columns:
                                 - id: value
                                   pattern: "#"
@@ -208,7 +242,7 @@ pages:
                                 title: Memory Used Bytes Total
                             chart:
                                 margin:
-                                    left: 90
+                                    left: 80
                             columns:
                                 - id: dummy
                                   expression: "_"
@@ -253,9 +287,6 @@ pages:
                             type: timeseries
                             general:
                                 title: Live Threads
-                            chart:
-                                margin:
-                                    left: 90
                             columns:
                                 - id: value
                                   expression: "#"
