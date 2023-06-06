@@ -102,13 +102,7 @@ datasets:
       type: prometheus
       cacheEnabled: true
       refreshTime: "1second"
-      url: ${query_url}jvm_threads_daemon_threads{${global_filter}}${time_window}
-    - uuid: live_threads
-      type: prometheus
-      cacheEnabled: true
-      refreshTime: "1second"
-      url: ${query_url}jvm_threads_live_threads{${global_filter}}${time_window}
-      
+      url: ${query_url}jvm_threads_daemon_threads{${global_filter}}${time_window}      
 
       # GC
     - uuid: gc_pause_sum
