@@ -102,7 +102,7 @@ datasets:
       type: prometheus
       cacheEnabled: true
       refreshTime: "1second"
-      url: ${query_url}jvm_threads_daemon_threads{${global_filter}}${time_window}      
+      url: ${query_url}jvm_threads_daemon_threads{${global_filter}}${time_window}
 
       # GC
     - uuid: gc_pause_sum
@@ -124,7 +124,8 @@ datasets:
       url: ${query_url}system_cpu_usage{${global_filter}}${time_window}
 
 pages:
-    - rows:
+    - name: index
+      rows:
           - _columns:
                 - components:
                       - settings:
@@ -224,15 +225,12 @@ pages:
                                 group:
                                     - functions:
                                           - source: value
-          - properties:
-                margin-top: 5px
-            columns:
+          - columns:
                 - components:
-                      - html: >-
-                            <p style="${subTitleStyle}">
-                                JVM
-                            </p> 
-                            <hr style="margin: 10px; opacity: 0.2"/>
+                      - panel: JVM
+                      - panel: SYSTEM
+    - name: JVM
+      rows:
           - properties:
                 margin-top: 30px
             columns:
@@ -303,15 +301,8 @@ pages:
                                           - source: state
                                           - source: timestamp
                                           - source: value
-          - properties:
-                margin-top: 10px
-            columns:
-                - components:
-                      - html: >-
-                            <p style="${subTitleStyle}">
-                                System
-                            </p> 
-                            <hr style="margin: 10px; opacity: 0.2"/>
+    - name: SYSTEM
+      rows:
           - properties:
                 margin-top: 30px
             columns:
@@ -370,9 +361,6 @@ pages:
                             type: timeseries
                             general:
                                 title: Live Threads
-                            columns:
-                                - id: value
-                                  expression: "#"
                             lookup:
                                 uuid: live_threads
                                 group:
