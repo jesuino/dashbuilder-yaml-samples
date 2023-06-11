@@ -18,6 +18,7 @@ global:
     mode: dark_
     settings:
         refresh:
+        
             interval: ${refresh_seconds}
         extraConfiguration: >-
             {
@@ -102,7 +103,7 @@ datasets:
       type: prometheus
       cacheEnabled: true
       refreshTime: "1second"
-      url: ${query_url}jvm_threads_daemon_threads{${global_filter}}${time_window}
+      url: ${query_url}jvm_threads_daemon_threads{${global_filter}}${time_window}      
 
       # GC
     - uuid: gc_pause_sum
@@ -227,10 +228,16 @@ pages:
                                           - source: value
           - columns:
                 - components:
-                      - panel: JVM
-                      - panel: SYSTEM
+                    - html: <hr />    
+                    - panel: JVM
+                      properties:
+                        margin-top: 20px
+                    - panel: SYSTEM
+                      properties:
+                        margin-top: 20px
     - name: JVM
       rows:
+
           - properties:
                 margin-top: 30px
             columns:
