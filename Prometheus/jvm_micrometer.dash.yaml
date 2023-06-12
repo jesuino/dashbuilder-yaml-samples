@@ -15,10 +15,9 @@ properties:
     global_filter: 'job="${job}"'
     query_url: ${prometheus_url}/api/v1/query?query=
 global:
-    mode: dark_
+    mode: dark
     settings:
         refresh:
-        
             interval: ${refresh_seconds}
         extraConfiguration: >-
             {
@@ -35,6 +34,8 @@ global:
             resizable: true
             height: 180
             zoom: true
+            grid:
+                y: false
             margin:
                 bottom: 20
                 top: 35
@@ -103,7 +104,7 @@ datasets:
       type: prometheus
       cacheEnabled: true
       refreshTime: "1second"
-      url: ${query_url}jvm_threads_daemon_threads{${global_filter}}${time_window}      
+      url: ${query_url}jvm_threads_daemon_threads{${global_filter}}${time_window}
 
       # GC
     - uuid: gc_pause_sum
@@ -228,16 +229,15 @@ pages:
                                           - source: value
           - columns:
                 - components:
-                    - html: <hr />    
-                    - panel: JVM
-                      properties:
-                        margin-top: 20px
-                    - panel: SYSTEM
-                      properties:
-                        margin-top: 20px
+                      - html: <hr />
+                      - panel: JVM
+                        properties:
+                            margin-top: 20px
+                      - panel: SYSTEM
+                        properties:
+                            margin-top: 20px
     - name: JVM
       rows:
-
           - properties:
                 margin-top: 30px
             columns:
@@ -249,7 +249,7 @@ pages:
                                 title: Heap Memory Used Bytes
                             chart:
                                 margin:
-                                    left: 80
+                                    left: 100
                             lookup:
                                 uuid: heap_used_bytes
                                 group:
@@ -265,7 +265,7 @@ pages:
                                 title: NonHeap Memory Used Bytes
                             chart:
                                 margin:
-                                    left: 80
+                                    left: 100
                             columns:
                                 - id: value
                                   pattern: "#"
@@ -284,7 +284,7 @@ pages:
                                 title: GC Pause
                             chart:
                                 margin:
-                                    left: 35
+                                    left: 40
                             lookup:
                                 uuid: gc_pause_sum
                                 group:
@@ -321,7 +321,7 @@ pages:
                                 title: Heap Total Used Bytes
                             chart:
                                 margin:
-                                    left: 85
+                                    left: 100
 
                             lookup:
                                 uuid: used_bytes_total
