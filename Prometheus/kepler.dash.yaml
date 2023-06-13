@@ -1,0 +1,299 @@
+properties:
+  ### User properties (you can modify this)
+  prometheus_url: http://localhost:9090
+  job: keycloak
+  refresh_seconds: -1
+
+  period: 1h
+  window: 1m
+
+  # parameters
+  coal: 2.23
+  petroleum: 2.13
+  natural_gas: 0.91
+
+  # 1W*s = 1J and 1J = (1/3600000)kWh
+  watt_per_second_to_kWh: 0.000000277777777777778
+
+  ## queries
+
+  # Carbon Emissions
+  co2CoalQuery: >-
+    %28sum%28%28increase%28kepler_container_package_joules_total%5B1h%5D%29*${watt_per_second_to_kWh}%29*%28count_over_time%28kepler_container_package_joules_total%5B24h%5D%29%2Fcount_over_time%28kepler_container_package_joules_total%5B1h%5D%29%29%29*${coal}%29%2B%28sum%28%28increase%28kepler_container_dram_joules_total%5B1h%5D%29*${watt_per_second_to_kWh}%29*%28count_over_time%28kepler_container_dram_joules_total%5B24h%5D%29%2Fcount_over_time%28kepler_container_dram_joules_total%5B1h%5D%29%29%29*${coal}%29
+  co2PetroleumQuery: >-
+    %28sum%28%28increase%28kepler_container_package_joules_total%5B1h%5D%29*${watt_per_second_to_kWh}%29*%28count_over_time%28kepler_container_package_joules_total%5B24h%5D%29%2Fcount_over_time%28kepler_container_package_joules_total%5B1h%5D%29%29%29*${petroleum}%29%2B%28sum%28%28increase%28kepler_container_dram_joules_total%5B1h%5D%29*${watt_per_second_to_kWh}%29*%28count_over_time%28kepler_container_dram_joules_total%5B24h%5D%29%2Fcount_over_time%28kepler_container_dram_joules_total%5B1h%5D%29%29%29*${petroleum}%29
+  co2NaturalGasQuery: >-
+    %28sum%28%28increase%28kepler_container_package_joules_total%5B1h%5D%29*${watt_per_second_to_kWh}%29*%28count_over_time%28kepler_container_package_joules_total%5B24h%5D%29%2Fcount_over_time%28kepler_container_package_joules_total%5B1h%5D%29%29%29*${natural_gas}%29%2B%28sum%28%28increase%28kepler_container_dram_joules_total%5B1h%5D%29*${watt_per_second_to_kWh}%29*%28count_over_time%28kepler_container_dram_joules_total%5B24h%5D%29%2Fcount_over_time%28kepler_container_dram_joules_total%5B1h%5D%29%29%29*${natural_gas}%29
+
+  # Power Consumption
+  powerConsumptionQuery: >-
+    sum+by%28container_namespace%29%28%28increase%28kepler_container_package_joules_total%5B1h%5D%29*${watt_per_second_to_kWh}%29*%28count_over_time%28kepler_container_package_joules_total%5B24h%5D%29%2Fcount_over_time%28kepler_container_package_joules_total%5B1h%5D%29%29%29%2Bsum+by%28container_namespace%29%28%28increase%28kepler_container_dram_joules_total%5B1h%5D%29*${watt_per_second_to_kWh}%29*%28count_over_time%28kepler_container_dram_joules_total%5B24h%5D%29%2Fcount_over_time%28kepler_container_dram_joules_total%5B1h%5D%29%29%29%0A
+
+  # pod/process Power Consumption
+  packagesPowerConsumption: >-
+    sum%20by%20(pod_name,%20container_namespace)%20(irate(kepler_container_package_joules_total[1m]))
+  dramPowerConsumption: >-
+    sum%20by%20(pod_name,%20container_namespace)%20(irate(kepler_container_dram_joules_total[1m]))
+  otherPowerConsumption: >-
+    sum%20by%20(pod_name,%20container_namespace)%20(irate(kepler_container_other_host_joules_total[1m]))
+  gpuPowerConsumption: >-
+    sum%20by%20(pod_name,%20container_namespace)%20(irate(kepler_container_gpu_joules_total[1m]))
+
+  # power consumption by day
+  pkgPowerConsumptionByDay: >-
+    sum%28%28increase%28kepler_container_package_joules_total%5B1h%5D%29*${watt_per_second_to_kWh}%29*%28count_over_time%28kepler_container_package_joules_total%5B24h%5D%29%2Fcount_over_time%28kepler_container_package_joules_total%5B1h%5D%29%29%29
+  dramPowerConsumptionByDay: >-
+    sum%28%28increase%28kepler_container_package_joules_total%5B1h%5D%29*${watt_per_second_to_kWh}%29*%28count_over_time%28kepler_container_package_joules_total%5B24h%5D%29%2Fcount_over_time%28kepler_container_package_joules_total%5B1h%5D%29%29%29
+
+  ### Internal Properties
+  time_window: "[${period}:${window}]"
+  global_filter: 'job="${job}"'
+  query_url: ${prometheus_url}/api/v1/query?query=
+
+global:
+  mode: dark
+  settings:
+    chart:
+      grid:
+        y: false
+    meter:
+      critical: "8"
+      warning: "5"
+      start: "0"
+      end: "10"
+datasets:
+  # Gauges Datasets
+  - uuid: co2Coal
+    type: prometheus
+    cacheEnabled: true
+    url: ${query_url}${co2CoalQuery}
+  - uuid: co2Petroleum
+    type: prometheus
+    cacheEnabled: true
+    url: ${query_url}${co2PetroleumQuery}
+  - uuid: co2NaturalGas
+    type: prometheus
+    cacheEnabled: true
+    url: ${query_url}${co2NaturalGasQuery}
+  # Total PowerConsumption
+  - uuid: totalPowerConsumption
+    type: prometheus
+    cacheEnabled: true
+    url: ${query_url}${powerConsumptionQuery}
+
+  # Power By
+  - uuid: packagesPowerConsumption
+    type: prometheus
+    cacheEnabled: true
+    url: ${query_url}${packagesPowerConsumption}${time_window}
+  - uuid: dramPowerConsumption
+    type: prometheus
+    cacheEnabled: true
+    url: ${query_url}${dramPowerConsumption}${time_window}
+  - uuid: otherPowerConsumption
+    type: prometheus
+    cacheEnabled: true
+    url: ${query_url}${otherPowerConsumption}${time_window}
+  - uuid: gpuPowerConsumption
+    type: prometheus
+    cacheEnabled: true
+    url: ${query_url}${gpuPowerConsumption}
+  - uuid: byPowerConsumption
+    join:
+      - packagesPowerConsumption
+      - dramPowerConsumption
+
+  - uuid: PKG by Day
+    type: prometheus
+    url: ${query_url}${pkgPowerConsumptionByDay}${time_window}
+    cacheEnabled: true
+  - uuid: DRAM by Day
+    type: prometheus
+    url: ${query_url}${dramPowerConsumptionByDay}${time_window}
+    cacheEnabled: true
+  - uuid: powerConsumptionByDay
+    join:
+      - PKG by Day
+      - DRAM by Day
+
+pages:
+  - name: index
+    components:
+      - _settings:
+          lookup:
+            uuid: powerConsumptionByDay
+      - panel: Carbon Emissions
+      - panel: Total Power Consumption (kWh per day)
+      # - panel: Pod/Service Power Consumption
+      - panel: Total Power Consumption
+  - name: Total Power Consumption (kWh per day)
+
+    components:
+      - properties:
+          margin-top: 20px
+        settings:
+          type: timeseries
+          general:
+            title: Total Power Consumption (kWh per day)
+          chart:
+            resizable: true
+            zoom: true
+
+            legend:
+              show: true
+          lookup:
+            uuid: powerConsumptionByDay
+            group:
+              - functions:
+                  - source: dataset
+                  - source: timestamp
+                  - source: value
+  - name: Pod/Service Power Consumption
+    rows:
+      - columns:
+          - components:
+              - markdown: >-
+                  ### Total Power Consumption (PKG+DRAM) by Namespace (kWh per day)
+                  <hr />
+
+              - settings:
+                  type: barchart
+                  extraConfiguration: >-
+                    {
+                        "series": [{
+                        }]
+                    }
+
+                  chart:
+                    resizable: true
+                  lookup:
+                    uuid: byPowerConsumption
+                    group:
+                      - functions:
+                          - source: dataset
+                          - source: timestamp
+                          - source: value
+  - name: Total Power Consumption
+    rows:
+      - columns:
+          - components:
+              - properties:
+                  margin-top: 20px
+                settings:
+                  type: barchart
+                  general:
+                    title: Total Power Consumption (PKG+DRAM) by Namespace (kWh per day)
+                  extraConfiguration: >-
+                    {
+                        "color": ["lightgreen"],
+                        "title": {
+                            "left": 0
+                        },
+                        "series": {
+                            "barCategoryGap": "1%",
+                            "itemStyle": {
+                                "normal": {
+                                    "label": {
+                                        "show": true,
+                                        "position": "top",
+                                        "fontSize": 25,
+                                        "fontWeight": "bold",
+                                        "color": "darkgreen"
+                                    }
+                                }
+                            }
+                        }
+
+                    }
+                  axis:
+                    y:
+                      labels_show: false
+                  chart:
+                    resizable: true
+                    height: 380
+                    grid:
+                      x: false
+                      y: false
+                    margin:
+                      top: 100
+                  columns:
+                    - id: value
+                      expression: >-
+                        new Number(value).toFixed(4)
+                  lookup:
+                    uuid: totalPowerConsumption
+                    group:
+                      - columnGroup:
+                          source: container_namespace
+                        groupFunctions:
+                          - source: container_namespace
+                          - source: value
+  - name: Carbon Emissions
+    properties:
+      margin: 10px
+    rows:
+      - columns:
+          - components:
+              - markdown: >-
+                  ##### Carbon Footprint (pounds per kWh per day) in Namespace: All (PKG+DRAM)
+
+                  <hr />
+      - properties:
+          margin-left: 50px
+          margin-right: 50px
+        columns:
+          - span: 4
+            components:
+              - settings:
+                  type: meterchart
+                  extraConfiguration: >-
+                    {
+                        "tooltip": {
+                            "formatter": "{c}"
+                        },
+                        "title": {
+                            "top": 150
+                            
+                        },
+                        "series": [{
+                            "detail": {
+                                "show": true,
+                                "formatter": "",
+                                "fontSize": 10,
+                                "offsetCenter": ["50%"],
+                                "backgroundColor": "transparent"
+                            }
+                           
+                        }]
+                    }
+                  chart:
+                    resizable: true
+                    height: 180
+                    legend:
+                      position: in
+                  general:
+                    title: CO2 Coal
+                  lookup:
+                    uuid: co2Coal
+          - span: 4
+            components:
+              - settings:
+                  type: meterchart
+                  chart:
+                    resizable: true
+                    height: 180
+                  general:
+                    title: CO2 Petroleum
+                  lookup:
+                    uuid: co2Petroleum
+          - span: 4
+            components:
+              - settings:
+                  type: meterchart
+                  chart:
+                    resizable: true
+                    height: 180
+                  general:
+                    title: CO2 Natural Gas
+                  lookup:
+                    uuid: co2NaturalGas
