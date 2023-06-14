@@ -1,7 +1,6 @@
 properties:
   ### User properties (you can modify this)
   prometheus_url: http://localhost:9090
-  job: keycloak
   refresh_seconds: -1
 
   period: 1h
@@ -25,10 +24,6 @@ properties:
   co2NaturalGasQuery: >-
     %28sum%28%28increase%28kepler_container_package_joules_total%5B1h%5D%29*${watt_per_second_to_kWh}%29*%28count_over_time%28kepler_container_package_joules_total%5B24h%5D%29%2Fcount_over_time%28kepler_container_package_joules_total%5B1h%5D%29%29%29*${natural_gas}%29%2B%28sum%28%28increase%28kepler_container_dram_joules_total%5B1h%5D%29*${watt_per_second_to_kWh}%29*%28count_over_time%28kepler_container_dram_joules_total%5B24h%5D%29%2Fcount_over_time%28kepler_container_dram_joules_total%5B1h%5D%29%29%29*${natural_gas}%29
 
-  # Power Consumption
-  powerConsumptionQuery: >-
-    sum+by%28container_namespace%29%28%28increase%28kepler_container_package_joules_total%5B1h%5D%29*${watt_per_second_to_kWh}%29*%28count_over_time%28kepler_container_package_joules_total%5B24h%5D%29%2Fcount_over_time%28kepler_container_package_joules_total%5B1h%5D%29%29%29%2Bsum+by%28container_namespace%29%28%28increase%28kepler_container_dram_joules_total%5B1h%5D%29*${watt_per_second_to_kWh}%29*%28count_over_time%28kepler_container_dram_joules_total%5B24h%5D%29%2Fcount_over_time%28kepler_container_dram_joules_total%5B1h%5D%29%29%29%0A
-
   # pod/process Power Consumption
   packagesPowerConsumption: >-
     sum%20by%20(pod_name,%20container_namespace)%20(irate(kepler_container_package_joules_total[1m]))
@@ -39,19 +34,14 @@ properties:
   gpuPowerConsumption: >-
     sum%20by%20(pod_name,%20container_namespace)%20(irate(kepler_container_gpu_joules_total[1m]))
 
-  # power consumption by day
-  pkgPowerConsumptionByDay: >-
-    sum%28%28increase%28kepler_container_package_joules_total%5B1h%5D%29*${watt_per_second_to_kWh}%29*%28count_over_time%28kepler_container_package_joules_total%5B24h%5D%29%2Fcount_over_time%28kepler_container_package_joules_total%5B1h%5D%29%29%29
-  dramPowerConsumptionByDay: >-
-    sum%28%28increase%28kepler_container_package_joules_total%5B1h%5D%29*${watt_per_second_to_kWh}%29*%28count_over_time%28kepler_container_package_joules_total%5B24h%5D%29%2Fcount_over_time%28kepler_container_package_joules_total%5B1h%5D%29%29%29
-
   ### Internal Properties
   time_window: "[${period}:${window}]"
   global_filter: 'job="${job}"'
   query_url: ${prometheus_url}/api/v1/query?query=
+  dataset_url: ${prometheus_url}/api/v1/query
 
 global:
-  mode: dark
+  mode: dark_
   settings:
     chart:
       grid:
@@ -75,13 +65,127 @@ datasets:
     type: prometheus
     cacheEnabled: true
     url: ${query_url}${co2NaturalGasQuery}
-  # Total PowerConsumption
+
+  # Total PowerConsumption Bar Chart
   - uuid: totalPowerConsumption
     type: prometheus
     cacheEnabled: true
-    url: ${query_url}${powerConsumptionQuery}
+    url: ${dataset_url}
+    query:
+      query: >-
+        sum by (container_namespace) (
+              (increase(kepler_container_package_joules_total[1h])
+                *${watt_per_second_to_kWh}
+              ) *
+              (count_over_time(kepler_container_package_joules_total[24h])/
+                count_over_time(kepler_container_package_joules_total[1h])
+              )
+            )
+            +
+            sum by (container_namespace) (
+              (increase(kepler_container_dram_joules_total[1h])
+                *${watt_per_second_to_kWh}
+              ) *
+              (count_over_time(kepler_container_dram_joules_total[24h])/
+                count_over_time(kepler_container_dram_joules_total[1h])
+              )
+            )
 
-  # Power By
+  # Total Power Consumption By Day
+  - uuid: PKG by Day
+    type: prometheus
+    url: ${dataset_url}
+    cacheEnabled: true
+    query:
+      query: >-
+        sum(
+          (increase(kepler_container_package_joules_total[1h])
+            *${watt_per_second_to_kWh}
+          ) *
+          (count_over_time(kepler_container_package_joules_total[24h])/
+            count_over_time(kepler_container_package_joules_total[1h])
+          )
+        )${time_window}
+  - uuid: DRAM by Day
+    type: prometheus
+    url: ${dataset_url}
+    cacheEnabled: true
+    query:
+      query: >-
+        sum(
+          (increase(kepler_container_dram_joules_total[1h])
+            *${watt_per_second_to_kWh}
+          ) *
+          (count_over_time(kepler_container_dram_joules_total[24h])/
+            count_over_time(kepler_container_dram_joules_total[1h])
+          )
+        )${time_window}
+  - uuid: Other by Day
+    type: prometheus
+    url: ${dataset_url}
+    cacheEnabled: true
+    query:
+      query: >-
+        sum(
+          (increase(
+            kepler_container_other_host_components_joules_total[1h])
+            *${watt_per_second_to_kWh}
+          ) *
+          (count_over_time(
+            kepler_container_other_host_components_joules_total[24h])/
+            count_over_time(
+              kepler_container_other_host_components_joules_total[1h])
+          )
+        )${time_window}
+  - uuid: GPU by Day
+    type: prometheus
+    url: ${dataset_url}
+    cacheEnabled: true
+    query:
+      query: >-
+        sum(
+          (increase(kepler_container_gpu_joules_total[1h])
+            *${watt_per_second_to_kWh}
+          ) *
+          (count_over_time(kepler_container_gpu_joules_total[24h])/
+            count_over_time(kepler_container_gpu_joules_total[1h])
+          )
+        )${time_window}
+  - uuid: powerConsumptionByDay
+    join:
+      - PKG by Day
+      - DRAM by Day
+      - Other by Day
+      - GPU by Day
+
+  # TOtal Power Consumption (W)
+  - uuid: PKG (W)
+    type: prometheus
+    url: ${dataset_url}
+    query:
+      query: sum(irate(kepler_container_package_joules_total[1m]))${time_window}
+  - uuid: DRAM (W)
+    type: prometheus
+    url: ${dataset_url}
+    query:
+      query: sum(irate(kepler_container_dram_joules_total[1m]))${time_window}
+  - uuid: OTHER (W)
+    type: prometheus
+    url: ${dataset_url}
+    query:
+      query: sum(irate(kepler_container_other_host_components_joules_total[1m]))${time_window}
+  - uuid: GPU (W)
+    type: prometheus
+    url: ${dataset_url}
+    query:
+      query: sum(irate(kepler_container_gpu_joules_total[1m]))${time_window}
+  - uuid: totalPowerConsumptionW
+    join:
+      - PKG (W)
+      - DRAM (W)
+      - OTHER (W)
+      - GPU (W)
+  # Power By  (NOT USED)
   - uuid: packagesPowerConsumption
     type: prometheus
     cacheEnabled: true
@@ -102,52 +206,159 @@ datasets:
     join:
       - packagesPowerConsumption
       - dramPowerConsumption
-
-  - uuid: PKG by Day
-    type: prometheus
-    url: ${query_url}${pkgPowerConsumptionByDay}${time_window}
-    cacheEnabled: true
-  - uuid: DRAM by Day
-    type: prometheus
-    url: ${query_url}${dramPowerConsumptionByDay}${time_window}
-    cacheEnabled: true
-  - uuid: powerConsumptionByDay
-    join:
-      - PKG by Day
-      - DRAM by Day
+      - otherPowerConsumption
+      - gpuPowerConsumption
 
 pages:
   - name: index
     components:
+      - html: >-
+          <p style="font-size: xx-large; font-weight: bold">
+              <img src="https://sustainable-computing.io/logo.png" style="width: 80px; height: auto" />
+              <span style="margin-left: 20px">Kepler Metrics</span>
+          </p>
+          <hr />
+
       - _settings:
           lookup:
-            uuid: powerConsumptionByDay
+            uuid: totalPowerConsumptionW
+
       - panel: Carbon Emissions
-      - panel: Total Power Consumption (kWh per day)
+      - panel: Power Consumption
       # - panel: Pod/Service Power Consumption
       - panel: Total Power Consumption
-  - name: Total Power Consumption (kWh per day)
-
-    components:
+  - name: Power Consumption
+    rows:
       - properties:
           margin-top: 20px
-        settings:
-          type: timeseries
-          general:
-            title: Total Power Consumption (kWh per day)
-          chart:
-            resizable: true
-            zoom: true
-
-            legend:
-              show: true
-          lookup:
-            uuid: powerConsumptionByDay
-            group:
-              - functions:
-                  - source: dataset
-                  - source: timestamp
-                  - source: value
+        columns:
+          - span: 5
+            components:
+              - settings:
+                  type: timeseries
+                  extraConfiguration: >-
+                    {
+                        "xAxis": {
+                            "splitNumber": 5
+                        },
+                        "toolbox": {
+                            "feature": {
+                                "dataZoom": {},
+                                "magicType": {
+                                    "type": ["line", "bar"]
+                                }
+                            }   
+                        }
+                                                
+                    }
+                  general:
+                    title: Total Power Consumption (W)
+                  chart:
+                    resizable: true
+                    zoom: true
+                    legend:
+                      show: true
+                  lookup:
+                    uuid: totalPowerConsumptionW
+                    group:
+                      - functions:
+                          - source: dataset
+                          - source: timestamp
+                          - source: value
+              - settings:
+                  component: table
+                  external:
+                    height: 170px
+                  table:
+                    hideHeader: true
+                  lookup:
+                    uuid: totalPowerConsumptionW
+                    group:
+                      - columnGroup:
+                          source: dataset
+                        functions:
+                          - source: dataset
+                            column: ""
+                          - source: value
+                            function: AVERAGE
+                            column: Mean
+                          - source: value
+                            function: AVERAGE
+                            column: Max
+          - span: 1
+          - span: 5
+            components:
+              - settings:
+                  type: timeseries
+                  extraConfiguration: >-
+                    {
+                        "xAxis": {
+                            "splitNumber": 5
+                        },
+                        "toolbox": {
+                            "feature": {
+                                "dataZoom": {},
+                                "magicType": {
+                                    "type": ["line", "bar"]
+                                }
+                            }   
+                        },
+                        "series": [
+                                { 
+                                    "type": "line",
+                                    "markLine": {
+                                        "symbol": "none",
+                                        "data": [
+                                            { "type": "average"  }
+                                        ]
+                                    } 
+                                },
+                                { 
+                                    "type": "line",
+                                    "markLine": {
+                                        "symbol": "none",
+                                        "data": [
+                                            { "type": "average"}
+                                        ]
+                                    } 
+                                }
+                        ]
+                                                
+                    }
+                  general:
+                    title: Total Power Consumption (kWh per day)
+                  chart:
+                    resizable: true
+                    zoom: true
+                    legend:
+                      show: true
+                  lookup:
+                    uuid: powerConsumptionByDay
+                    group:
+                      - functions:
+                          - source: dataset
+                          - source: timestamp
+                          - source: value
+              - settings:
+                  component: table
+                  external:
+                    height: 170px
+                  table:
+                    hideHeader: true
+                  lookup:
+                    uuid: powerConsumptionByDay
+                    group:
+                      - columnGroup:
+                          source: dataset
+                        functions:
+                          - source: dataset
+                            column: ""
+                          - source: value
+                            function: AVERAGE
+                            column: Mean
+                          - source: value
+                            function: AVERAGE
+                            column: Max
   - name: Pod/Service Power Consumption
     rows:
       - columns:
@@ -252,7 +463,7 @@ pages:
                             "formatter": "{c}"
                         },
                         "title": {
-                            "top": 150
+                            "top": 160
                             
                         },
                         "series": [{
@@ -269,8 +480,6 @@ pages:
                   chart:
                     resizable: true
                     height: 180
-                    legend:
-                      position: in
                   general:
                     title: CO2 Coal
                   lookup:
@@ -279,6 +488,26 @@ pages:
             components:
               - settings:
                   type: meterchart
+                  extraConfiguration: >-
+                    {
+                        "tooltip": {
+                            "formatter": "{c}"
+                        },
+                        "title": {
+                            "top": 160
+                            
+                        },
+                        "series": [{
+                            "detail": {
+                                "show": true,
+                                "formatter": "",
+                                "fontSize": 10,
+                                "offsetCenter": ["50%"],
+                                "backgroundColor": "transparent"
+                            }
+                           
+                        }]
+                    }
                   chart:
                     resizable: true
                     height: 180
@@ -290,6 +519,26 @@ pages:
             components:
               - settings:
                   type: meterchart
+                  extraConfiguration: >-
+                    {
+                        "tooltip": {
+                            "formatter": "{c}"
+                        },
+                        "title": {
+                            "top": 160
+                            
+                        },
+                        "series": [{
+                            "detail": {
+                                "show": true,
+                                "formatter": "",
+                                "fontSize": 10,
+                                "offsetCenter": ["50%"],
+                                "backgroundColor": "transparent"
+                            }
+                           
+                        }]
+                    }
                   chart:
                     resizable: true
                     height: 180
