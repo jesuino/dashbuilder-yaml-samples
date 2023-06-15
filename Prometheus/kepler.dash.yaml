@@ -36,7 +36,7 @@ properties:
 
 global:
   mode: ${mode}
-  allowUrlParameters: true
+  allowUrlProperties: true
   settings:
     chart:
       grid:
