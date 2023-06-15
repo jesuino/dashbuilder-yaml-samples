@@ -1,10 +1,10 @@
 properties:
   ### User properties (you can modify this)
-  prometheus_url: http://localhost:9090
-  refresh_seconds: -1
+  prom_url: http://localhost:9090
+  refresh: -1
 
   period: 1h
-  window: 1m
+  window: 5m
 
   # parameters
   coal: 2.23
@@ -13,6 +13,7 @@ properties:
 
   # 1W*s = 1J and 1J = (1/3600000)kWh
   watt_per_second_to_kWh: 0.000000277777777777778
+
 
   ## queries
 
@@ -27,13 +28,15 @@ properties:
   ### Internal Properties
   time_window: "[${period}:${window}]"
   global_filter: 'job="${job}"'
-  query_url: ${prometheus_url}/api/v1/query?query=
-  dataset_url: ${prometheus_url}/api/v1/query
-
+  query_url: ${prom_url}/api/v1/query?query=
+  dataset_url: ${prom_url}/api/v1/query
+  
   cache: true
+  mode: dark
 
 global:
-  mode: dark
+  mode: ${mode}
+  allowUrlParameters: true
   settings:
     chart:
       grid:
@@ -213,26 +216,26 @@ datasets:
         sum by (pod_name) (irate(kepler_container_gpu_joules_total[1m]))${time_window}
   - uuid: byPowerConsumption
     expression: >-
-      $.[
-          $[0], 
-          $[2], 
-          $[3] = "packagesPowerConsumption" ? $[1] : "0",
-          $[3] = "dramPowerConsumption" ? $[1] : "0",
-          $[3] = "otherPowerConsumption" ? $[1] : "0",
-          $[3] = "gpuPowerConsumption" ? $[1] : "0"
-      ]
+        $.[
+            $[0], 
+            $[2], 
+            $[3] = "packagesPowerConsumption" ? $[1] : "0",
+            $[3] = "dramPowerConsumption" ? $[1] : "0",
+            $[3] = "otherPowerConsumption" ? $[1] : "0",
+            $[3] = "gpuPowerConsumption" ? $[1] : "0"
+        ]
     join:
       - packagesPowerConsumption
       - dramPowerConsumption
       - otherPowerConsumption
       - gpuPowerConsumption
     columns:
-      - id: timestamp
-      - id: Pod Name
-      - id: PKG
-      - id: DRAM
-      - id: OTHER
-      - id: GPU
+        - id: timestamp
+        - id: Pod Name
+        - id: PKG
+        - id: DRAM
+        - id: OTHER
+        - id: GPU
 
 pages:
   - name: index
@@ -292,8 +295,8 @@ pages:
                           - source: timestamp
                           - source: value
               - properties:
-                  margin-left: 50px
-                  margin-right: 50px
+                    margin-left: 50px
+                    margin-right: 50px
                 settings:
                   component: table
                   external:
@@ -368,8 +371,8 @@ pages:
                           - source: timestamp
                           - source: value
               - properties:
-                  margin-left: 50px
-                  margin-right: 50px
+                    margin-left: 50px
+                    margin-right: 50px
                 settings:
                   component: table
                   external:
@@ -394,54 +397,54 @@ pages:
     rows:
       - columns:
           - properties:
-              margin: 20px
+                margin: 20px
             components:
               - properties:
-                  width: 160px
+                    width: 160px
                 settings:
-                  type: selector
-                  filter:
-                    notification: true
-                  lookup:
-                    uuid: byPowerConsumption
-                    group:
-                      - columnGroup:
-                          source: Pod Name
-                        functions:
-                          - source: Pod Name
+                    type: selector
+                    filter:
+                        notification: true
+                    lookup:
+                        uuid: byPowerConsumption
+                        group:
+                            - columnGroup:
+                                source: Pod Name
+                              functions:
+                                - source: Pod Name
               - settings:
                   type: BARCHART
                   subtype: AREA_STACKED
                   general:
                     title: Pod/Service Power Consumption
                   filter:
-                    listening: true
+                        listening: true
                   axis:
                     x:
-                      labels_show: false
+                        labels_show: false
                   chart:
                     resizable: true
                     grid:
-                      x: false
-                      y: true
+                        x: false
+                        y: true
                     legend:
-                      show: true
+                        show: true
                   lookup:
                     uuid: byPowerConsumption
                     group:
-                      - columnGroup:
-                          source: timestamp
-                        functions:
-                          - source: timestamp
-                          - source: PKG
-                            function: SUM
-                          - source: DRAM
-                            function: SUM
-                          - source: OTHER
-                            function: SUM
-                            column: OTHER
-                          - source: GPU
-                            function: SUM
+                        - columnGroup:
+                            source: timestamp
+                          functions:
+                            - source: timestamp
+                            - source: PKG
+                              function: SUM
+                            - source: DRAM
+                              function: SUM
+                            - source: OTHER
+                              function: SUM
+                              column: OTHER
+                            - source: GPU
+                              function: SUM
 
   - name: Total Power Consumption
     rows:
