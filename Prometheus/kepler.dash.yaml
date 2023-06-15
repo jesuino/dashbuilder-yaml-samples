@@ -1,10 +1,10 @@
 properties:
   ### User properties (you can modify this)
   prom_url: http://localhost:9090
-  refresh: 1
+  refresh: -1
   
-  period: 1m
-  window: 1s
+  period: 5m
+  window: 10s
 
   # parameters
   coal: 2.23
