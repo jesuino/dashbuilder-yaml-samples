@@ -323,7 +323,7 @@ pages:
                             "feature": {
                                 "dataZoom": {},
                                 "magicType": {
-                                    "type": ["line", "bar"]
+                                    "type": ["line", "bar", "stack"]
                                 }
                             }   
                         }
@@ -467,6 +467,37 @@ pages:
               - settings:
                   type: BARCHART
                   subtype: AREA_STACKED
+                  extraConfiguration: >-
+                    {
+                        "series": [{
+                            "barCategoryGap": "5%",
+                            "itemStyle": {
+                                "normal": {
+                                    "label": {
+                                        "show": true,
+                                        "position": "inside",
+                                        "fontSize": 9
+                                        
+                                    }
+                                }
+                            }
+                        },
+                        {
+                            
+                            "itemStyle": {
+                                "normal": {
+                                    "label": {
+                                        "show": true,
+                                        "position": "inside",
+                                        "fontSize": 9
+                                        
+                                    }
+                                }
+                            }
+                        }
+                        ]
+
+                    }
                   general:
                     title: Pod/Service Power Consumption
                   filter:
@@ -478,7 +509,7 @@ pages:
                     resizable: true
                     grid:
                         x: false
-                        y: true
+                        y: false
                     legend:
                         show: true
                   lookup:
