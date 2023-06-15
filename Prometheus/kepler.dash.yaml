@@ -24,24 +24,16 @@ properties:
   co2NaturalGasQuery: >-
     %28sum%28%28increase%28kepler_container_package_joules_total%5B1h%5D%29*${watt_per_second_to_kWh}%29*%28count_over_time%28kepler_container_package_joules_total%5B24h%5D%29%2Fcount_over_time%28kepler_container_package_joules_total%5B1h%5D%29%29%29*${natural_gas}%29%2B%28sum%28%28increase%28kepler_container_dram_joules_total%5B1h%5D%29*${watt_per_second_to_kWh}%29*%28count_over_time%28kepler_container_dram_joules_total%5B24h%5D%29%2Fcount_over_time%28kepler_container_dram_joules_total%5B1h%5D%29%29%29*${natural_gas}%29
 
-  # pod/process Power Consumption
-  packagesPowerConsumption: >-
-    sum%20by%20(pod_name,%20container_namespace)%20(irate(kepler_container_package_joules_total[1m]))
-  dramPowerConsumption: >-
-    sum%20by%20(pod_name,%20container_namespace)%20(irate(kepler_container_dram_joules_total[1m]))
-  otherPowerConsumption: >-
-    sum%20by%20(pod_name,%20container_namespace)%20(irate(kepler_container_other_host_joules_total[1m]))
-  gpuPowerConsumption: >-
-    sum%20by%20(pod_name,%20container_namespace)%20(irate(kepler_container_gpu_joules_total[1m]))
-
   ### Internal Properties
   time_window: "[${period}:${window}]"
   global_filter: 'job="${job}"'
   query_url: ${prometheus_url}/api/v1/query?query=
   dataset_url: ${prometheus_url}/api/v1/query
 
+  cache: true
+
 global:
-  mode: dark_
+  mode: dark
   settings:
     chart:
       grid:
@@ -55,21 +47,21 @@ datasets:
   # Gauges Datasets
   - uuid: co2Coal
     type: prometheus
-    cacheEnabled: true
+    cacheEnabled: ${cache}
     url: ${query_url}${co2CoalQuery}
   - uuid: co2Petroleum
     type: prometheus
-    cacheEnabled: true
+    cacheEnabled: ${cache}
     url: ${query_url}${co2PetroleumQuery}
   - uuid: co2NaturalGas
     type: prometheus
-    cacheEnabled: true
+    cacheEnabled: ${cache}
     url: ${query_url}${co2NaturalGasQuery}
 
   # Total PowerConsumption Bar Chart
   - uuid: totalPowerConsumption
     type: prometheus
-    cacheEnabled: true
+    cacheEnabled: ${cache}
     url: ${dataset_url}
     query:
       query: >-
@@ -95,7 +87,7 @@ datasets:
   - uuid: PKG by Day
     type: prometheus
     url: ${dataset_url}
-    cacheEnabled: true
+    cacheEnabled: ${cache}
     query:
       query: >-
         sum(
@@ -109,7 +101,7 @@ datasets:
   - uuid: DRAM by Day
     type: prometheus
     url: ${dataset_url}
-    cacheEnabled: true
+    cacheEnabled: ${cache}
     query:
       query: >-
         sum(
@@ -123,7 +115,7 @@ datasets:
   - uuid: Other by Day
     type: prometheus
     url: ${dataset_url}
-    cacheEnabled: true
+    cacheEnabled: ${cache}
     query:
       query: >-
         sum(
@@ -140,7 +132,7 @@ datasets:
   - uuid: GPU by Day
     type: prometheus
     url: ${dataset_url}
-    cacheEnabled: true
+    cacheEnabled: ${cache}
     query:
       query: >-
         sum(
@@ -162,21 +154,25 @@ datasets:
   - uuid: PKG (W)
     type: prometheus
     url: ${dataset_url}
+    cacheEnabled: ${cache}
     query:
       query: sum(irate(kepler_container_package_joules_total[1m]))${time_window}
   - uuid: DRAM (W)
     type: prometheus
     url: ${dataset_url}
+    cacheEnabled: ${cache}
     query:
       query: sum(irate(kepler_container_dram_joules_total[1m]))${time_window}
   - uuid: OTHER (W)
     type: prometheus
     url: ${dataset_url}
+    cacheEnabled: ${cache}
     query:
       query: sum(irate(kepler_container_other_host_components_joules_total[1m]))${time_window}
   - uuid: GPU (W)
     type: prometheus
     url: ${dataset_url}
+    cacheEnabled: ${cache}
     query:
       query: sum(irate(kepler_container_gpu_joules_total[1m]))${time_window}
   - uuid: totalPowerConsumptionW
@@ -185,29 +181,58 @@ datasets:
       - DRAM (W)
       - OTHER (W)
       - GPU (W)
+
   # Power By  (NOT USED)
   - uuid: packagesPowerConsumption
     type: prometheus
-    cacheEnabled: true
-    url: ${query_url}${packagesPowerConsumption}${time_window}
+    url: ${dataset_url}
+    cacheEnabled: ${cache}
+    query:
+      query: >-
+        sum by (pod_name) (irate(kepler_container_package_joules_total[1m]))${time_window}
   - uuid: dramPowerConsumption
     type: prometheus
-    cacheEnabled: true
-    url: ${query_url}${dramPowerConsumption}${time_window}
+    url: ${dataset_url}
+    cacheEnabled: ${cache}
+    query:
+      query: >-
+        sum by (pod_name) (irate(kepler_container_dram_joules_total[1m]))${time_window}
   - uuid: otherPowerConsumption
     type: prometheus
-    cacheEnabled: true
-    url: ${query_url}${otherPowerConsumption}${time_window}
+    url: ${dataset_url}
+    cacheEnabled: ${cache}
+    query:
+      query: >-
+        sum by (pod_name) (irate(kepler_container_other_host_joules_total[1m]))${time_window}
   - uuid: gpuPowerConsumption
     type: prometheus
-    cacheEnabled: true
-    url: ${query_url}${gpuPowerConsumption}
+    url: ${dataset_url}
+    cacheEnabled: ${cache}
+    query:
+      query: >-
+        sum by (pod_name) (irate(kepler_container_gpu_joules_total[1m]))${time_window}
   - uuid: byPowerConsumption
+    expression: >-
+      $.[
+          $[0], 
+          $[2], 
+          $[3] = "packagesPowerConsumption" ? $[1] : "0",
+          $[3] = "dramPowerConsumption" ? $[1] : "0",
+          $[3] = "otherPowerConsumption" ? $[1] : "0",
+          $[3] = "gpuPowerConsumption" ? $[1] : "0"
+      ]
     join:
       - packagesPowerConsumption
       - dramPowerConsumption
       - otherPowerConsumption
       - gpuPowerConsumption
+    columns:
+      - id: timestamp
+      - id: Pod Name
+      - id: PKG
+      - id: DRAM
+      - id: OTHER
+      - id: GPU
 
 pages:
   - name: index
@@ -219,20 +244,21 @@ pages:
           </p>
           <hr />
 
-      - _settings:
+      - .settings:
+          chart:
+            resizable: true
           lookup:
-            uuid: totalPowerConsumptionW
-
+            uuid: byPowerConsumption
       - panel: Carbon Emissions
+      - panel: Pod/Service Power Consumption
       - panel: Power Consumption
-      # - panel: Pod/Service Power Consumption
       - panel: Total Power Consumption
   - name: Power Consumption
     rows:
       - properties:
           margin-top: 20px
         columns:
-          - span: 5
+          - span: 6
             components:
               - settings:
                   type: timeseries
@@ -265,7 +291,10 @@ pages:
                           - source: dataset
                           - source: timestamp
                           - source: value
-              - settings:
+              - properties:
+                  margin-left: 50px
+                  margin-right: 50px
+                settings:
                   component: table
                   external:
                     height: 170px
@@ -285,8 +314,7 @@ pages:
                           - source: value
                             function: AVERAGE
                             column: Max
-          - span: 1
-          - span: 5
+          - span: 6
             components:
               - settings:
                   type: timeseries
@@ -299,7 +327,7 @@ pages:
                             "feature": {
                                 "dataZoom": {},
                                 "magicType": {
-                                    "type": ["line", "bar"]
+                                    "type": ["line", "bar", "stack"]
                                 }
                             }   
                         },
@@ -339,7 +367,10 @@ pages:
                           - source: dataset
                           - source: timestamp
                           - source: value
-              - settings:
+              - properties:
+                  margin-left: 50px
+                  margin-right: 50px
+                settings:
                   component: table
                   external:
                     height: 170px
@@ -362,28 +393,56 @@ pages:
   - name: Pod/Service Power Consumption
     rows:
       - columns:
-          - components:
-              - markdown: >-
-                  ### Total Power Consumption (PKG+DRAM) by Namespace (kWh per day)
-                  <hr />
-
-              - settings:
-                  type: barchart
-                  extraConfiguration: >-
-                    {
-                        "series": [{
-                        }]
-                    }
-
-                  chart:
-                    resizable: true
+          - properties:
+              margin: 20px
+            components:
+              - properties:
+                  width: 160px
+                settings:
+                  type: selector
+                  filter:
+                    notification: true
                   lookup:
                     uuid: byPowerConsumption
                     group:
-                      - functions:
-                          - source: dataset
+                      - columnGroup:
+                          source: Pod Name
+                        functions:
+                          - source: Pod Name
+              - settings:
+                  type: BARCHART
+                  subtype: AREA_STACKED
+                  general:
+                    title: Pod/Service Power Consumption
+                  filter:
+                    listening: true
+                  axis:
+                    x:
+                      labels_show: false
+                  chart:
+                    resizable: true
+                    grid:
+                      x: false
+                      y: true
+                    legend:
+                      show: true
+                  lookup:
+                    uuid: byPowerConsumption
+                    group:
+                      - columnGroup:
+                          source: timestamp
+                        functions:
                           - source: timestamp
-                          - source: value
+                          - source: PKG
+                            function: SUM
+                          - source: DRAM
+                            function: SUM
+                          - source: OTHER
+                            function: SUM
+                            column: OTHER
+                          - source: GPU
+                            function: SUM
+
   - name: Total Power Consumption
     rows:
       - columns:
