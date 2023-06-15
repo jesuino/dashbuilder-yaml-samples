@@ -4,7 +4,7 @@ properties:
   refresh: -1
 
   period: 1h
-  window: 5m
+  window: 10m
 
   # parameters
   coal: 2.23
@@ -41,6 +41,10 @@ global:
     chart:
       grid:
         y: false
+    refresh:
+        interval: ${refresh}
+        
+        
     meter:
       critical: "8"
       warning: "5"
