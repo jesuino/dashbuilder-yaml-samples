@@ -1,10 +1,10 @@
 properties:
   ### User properties (you can modify this)
   prom_url: http://localhost:9090
-  refresh: -1
-
-  period: 1h
-  window: 10m
+  refresh: 1
+  
+  period: 1m
+  window: 1s
 
   # parameters
   coal: 2.23
@@ -14,25 +14,14 @@ properties:
   # 1W*s = 1J and 1J = (1/3600000)kWh
   watt_per_second_to_kWh: 0.000000277777777777778
 
-
-  ## queries
-
-  # Carbon Emissions
-  co2CoalQuery: >-
-    %28sum%28%28increase%28kepler_container_package_joules_total%5B1h%5D%29*${watt_per_second_to_kWh}%29*%28count_over_time%28kepler_container_package_joules_total%5B24h%5D%29%2Fcount_over_time%28kepler_container_package_joules_total%5B1h%5D%29%29%29*${coal}%29%2B%28sum%28%28increase%28kepler_container_dram_joules_total%5B1h%5D%29*${watt_per_second_to_kWh}%29*%28count_over_time%28kepler_container_dram_joules_total%5B24h%5D%29%2Fcount_over_time%28kepler_container_dram_joules_total%5B1h%5D%29%29%29*${coal}%29
-  co2PetroleumQuery: >-
-    %28sum%28%28increase%28kepler_container_package_joules_total%5B1h%5D%29*${watt_per_second_to_kWh}%29*%28count_over_time%28kepler_container_package_joules_total%5B24h%5D%29%2Fcount_over_time%28kepler_container_package_joules_total%5B1h%5D%29%29%29*${petroleum}%29%2B%28sum%28%28increase%28kepler_container_dram_joules_total%5B1h%5D%29*${watt_per_second_to_kWh}%29*%28count_over_time%28kepler_container_dram_joules_total%5B24h%5D%29%2Fcount_over_time%28kepler_container_dram_joules_total%5B1h%5D%29%29%29*${petroleum}%29
-  co2NaturalGasQuery: >-
-    %28sum%28%28increase%28kepler_container_package_joules_total%5B1h%5D%29*${watt_per_second_to_kWh}%29*%28count_over_time%28kepler_container_package_joules_total%5B24h%5D%29%2Fcount_over_time%28kepler_container_package_joules_total%5B1h%5D%29%29%29*${natural_gas}%29%2B%28sum%28%28increase%28kepler_container_dram_joules_total%5B1h%5D%29*${watt_per_second_to_kWh}%29*%28count_over_time%28kepler_container_dram_joules_total%5B24h%5D%29%2Fcount_over_time%28kepler_container_dram_joules_total%5B1h%5D%29%29%29*${natural_gas}%29
-
+  cache: true
+  mode: dark
+  
   ### Internal Properties
   time_window: "[${period}:${window}]"
   global_filter: 'job="${job}"'
   query_url: ${prom_url}/api/v1/query?query=
   dataset_url: ${prom_url}/api/v1/query
-  
-  cache: true
-  mode: dark
 
 global:
   mode: ${mode}
@@ -43,8 +32,6 @@ global:
         y: false
     refresh:
         interval: ${refresh}
-        
-        
     meter:
       critical: "8"
       warning: "5"
@@ -55,16 +42,78 @@ datasets:
   - uuid: co2Coal
     type: prometheus
     cacheEnabled: ${cache}
-    url: ${query_url}${co2CoalQuery}
+    url: ${dataset_url}
+    query:
+        query: >-
+            (sum(
+                (increase(kepler_container_package_joules_total[1h])
+                 *${watt_per_second_to_kWh}
+                ) *
+               (count_over_time(kepler_container_package_joules_total[24h])/
+                  count_over_time(kepler_container_package_joules_total[1h])
+               )
+              ) * ${coal}
+            )
+            +
+            (sum(
+                (increase(kepler_container_dram_joules_total[1h])
+                 *${watt_per_second_to_kWh}
+                ) *
+               (count_over_time(kepler_container_dram_joules_total[24h])/
+                  count_over_time(kepler_container_dram_joules_total[1h])
+               )
+              ) * ${coal}
+            )
   - uuid: co2Petroleum
     type: prometheus
     cacheEnabled: ${cache}
-    url: ${query_url}${co2PetroleumQuery}
+    url: ${dataset_url}
+    query:
+        query: >-
+            (sum(
+                (increase(kepler_container_package_joules_total[1h])
+                 *${watt_per_second_to_kWh}
+                ) *
+               (count_over_time(kepler_container_package_joules_total[24h])/
+                  count_over_time(kepler_container_package_joules_total[1h])
+               )
+              ) * ${petroleum}
+            )
+            +
+            (sum(
+                (increase(kepler_container_dram_joules_total[1h])
+                 *${watt_per_second_to_kWh}
+                ) *
+               (count_over_time(kepler_container_dram_joules_total[24h])/
+                  count_over_time(kepler_container_dram_joules_total[1h])
+               )
+              ) * ${petroleum}
+            )
   - uuid: co2NaturalGas
     type: prometheus
     cacheEnabled: ${cache}
-    url: ${query_url}${co2NaturalGasQuery}
-
+    url: ${dataset_url}
+    query:
+      query: >-
+        (sum(
+            (increase(kepler_container_package_joules_total[1h])
+             *${watt_per_second_to_kWh}
+            ) *
+           (count_over_time(kepler_container_package_joules_total[24h])/
+              count_over_time(kepler_container_package_joules_total[1h])
+           )
+          ) * ${natural_gas}
+        )
+        +
+        (sum(
+            (increase(kepler_container_dram_joules_total[1h])
+             *${watt_per_second_to_kWh}
+            ) *
+           (count_over_time(kepler_container_dram_joules_total[24h])/
+              count_over_time(kepler_container_dram_joules_total[1h])
+           )
+          ) * ${natural_gas}
+        )
   # Total PowerConsumption Bar Chart
   - uuid: totalPowerConsumption
     type: prometheus
@@ -89,7 +138,6 @@ datasets:
                 count_over_time(kepler_container_dram_joules_total[1h])
               )
             )
-
   # Total Power Consumption By Day
   - uuid: PKG by Day
     type: prometheus
@@ -156,8 +204,7 @@ datasets:
       - DRAM by Day
       - Other by Day
       - GPU by Day
-
-  # TOtal Power Consumption (W)
+  # Total Power Consumption (W)
   - uuid: PKG (W)
     type: prometheus
     url: ${dataset_url}
@@ -188,8 +235,7 @@ datasets:
       - DRAM (W)
       - OTHER (W)
       - GPU (W)
-
-  # Power By  (NOT USED)
+  # Power By
   - uuid: packagesPowerConsumption
     type: prometheus
     url: ${dataset_url}
@@ -250,7 +296,6 @@ pages:
               <span style="margin-left: 20px">Kepler Metrics</span>
           </p>
           <hr />
-
       - .settings:
           chart:
             resizable: true
@@ -411,6 +456,9 @@ pages:
                         notification: true
                     lookup:
                         uuid: byPowerConsumption
+                        sort:
+                            - order: ASCENDING
+                              column: Pod Name
                         group:
                             - columnGroup:
                                 source: Pod Name
@@ -449,7 +497,6 @@ pages:
                               column: OTHER
                             - source: GPU
                               function: SUM
-
   - name: Total Power Consumption
     rows:
       - columns:
