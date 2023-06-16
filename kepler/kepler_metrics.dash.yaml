@@ -1,0 +1,47 @@
+
+datasets:
+  - uuid: pop
+    url: http://localhost:3001/kepler_metrics
+pages:
+  - components:
+      - settings:
+                    
+          lookup:
+            uuid: pop
+
+      - settings:
+          type: BARCHART
+          general:
+            title: kepler_container_core_joules_total
+            
+          chart:
+            resizable: true
+          columns:
+            - id: labels
+              expression: >-
+                    var i = value.indexOf('container_name=');
+                    var j = value.indexOf(',container_namespace=');
+                    value.substring(i, j).replace("container_name=", "")
+                                         .replaceAll("\"", "")
+                    
+          lookup:
+            uuid: pop
+            sort:
+                - order: DESCENDING
+                  column: value
+            filter:
+                - column: metric
+                  function: EQUALS_TO
+                  args:
+                    - kepler_container_core_joules_total
+                - column: value
+                  function: GREATER_THAN
+                  args:
+                    - 0
+            group:
+                - columnGroup:
+                    source: labels
+                  functions:
+                    - source: labels
+                    - source: value
+                      function: SUM
