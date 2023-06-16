@@ -26,6 +26,10 @@ properties:
 global:
   mode: ${mode}
   allowUrlProperties: true
+  dataset:
+    url: ${dataset_url}
+    type: prometheus
+    cacheEnabled: ${cache}
   settings:
     chart:
       grid:
@@ -40,9 +44,6 @@ global:
 datasets:
   # Gauges Datasets
   - uuid: co2Coal
-    type: prometheus
-    cacheEnabled: ${cache}
-    url: ${dataset_url}
     query:
         query: >-
             (sum(
@@ -65,9 +66,6 @@ datasets:
               ) * ${coal}
             )
   - uuid: co2Petroleum
-    type: prometheus
-    cacheEnabled: ${cache}
-    url: ${dataset_url}
     query:
         query: >-
             (sum(
@@ -90,9 +88,6 @@ datasets:
               ) * ${petroleum}
             )
   - uuid: co2NaturalGas
-    type: prometheus
-    cacheEnabled: ${cache}
-    url: ${dataset_url}
     query:
       query: >-
         (sum(
@@ -116,9 +111,6 @@ datasets:
         )
   # Total PowerConsumption Bar Chart
   - uuid: totalPowerConsumption
-    type: prometheus
-    cacheEnabled: ${cache}
-    url: ${dataset_url}
     query:
       query: >-
         sum by (container_namespace) (
@@ -128,6 +120,7 @@ datasets:
               (count_over_time(kepler_container_package_joules_total[24h])/
                 count_over_time(kepler_container_package_joules_total[1h])
               )
+              
             )
             +
             sum by (container_namespace) (
@@ -140,9 +133,6 @@ datasets:
             )
   # Total Power Consumption By Day
   - uuid: PKG by Day
-    type: prometheus
-    url: ${dataset_url}
-    cacheEnabled: ${cache}
     query:
       query: >-
         sum(
@@ -154,9 +144,6 @@ datasets:
           )
         )${time_window}
   - uuid: DRAM by Day
-    type: prometheus
-    url: ${dataset_url}
-    cacheEnabled: ${cache}
     query:
       query: >-
         sum(
@@ -168,9 +155,6 @@ datasets:
           )
         )${time_window}
   - uuid: Other by Day
-    type: prometheus
-    url: ${dataset_url}
-    cacheEnabled: ${cache}
     query:
       query: >-
         sum(
@@ -185,9 +169,6 @@ datasets:
           )
         )${time_window}
   - uuid: GPU by Day
-    type: prometheus
-    url: ${dataset_url}
-    cacheEnabled: ${cache}
     query:
       query: >-
         sum(
@@ -206,27 +187,15 @@ datasets:
       - GPU by Day
   # Total Power Consumption (W)
   - uuid: PKG (W)
-    type: prometheus
-    url: ${dataset_url}
-    cacheEnabled: ${cache}
     query:
       query: sum(irate(kepler_container_package_joules_total[1m]))${time_window}
   - uuid: DRAM (W)
-    type: prometheus
-    url: ${dataset_url}
-    cacheEnabled: ${cache}
     query:
       query: sum(irate(kepler_container_dram_joules_total[1m]))${time_window}
   - uuid: OTHER (W)
-    type: prometheus
-    url: ${dataset_url}
-    cacheEnabled: ${cache}
     query:
       query: sum(irate(kepler_container_other_host_components_joules_total[1m]))${time_window}
   - uuid: GPU (W)
-    type: prometheus
-    url: ${dataset_url}
-    cacheEnabled: ${cache}
     query:
       query: sum(irate(kepler_container_gpu_joules_total[1m]))${time_window}
   - uuid: totalPowerConsumptionW
@@ -237,30 +206,18 @@ datasets:
       - GPU (W)
   # Power By
   - uuid: packagesPowerConsumption
-    type: prometheus
-    url: ${dataset_url}
-    cacheEnabled: ${cache}
     query:
       query: >-
         sum by (pod_name) (irate(kepler_container_package_joules_total[1m]))${time_window}
   - uuid: dramPowerConsumption
-    type: prometheus
-    url: ${dataset_url}
-    cacheEnabled: ${cache}
     query:
       query: >-
         sum by (pod_name) (irate(kepler_container_dram_joules_total[1m]))${time_window}
   - uuid: otherPowerConsumption
-    type: prometheus
-    url: ${dataset_url}
-    cacheEnabled: ${cache}
     query:
       query: >-
         sum by (pod_name) (irate(kepler_container_other_host_joules_total[1m]))${time_window}
   - uuid: gpuPowerConsumption
-    type: prometheus
-    url: ${dataset_url}
-    cacheEnabled: ${cache}
     query:
       query: >-
         sum by (pod_name) (irate(kepler_container_gpu_joules_total[1m]))${time_window}
