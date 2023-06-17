@@ -3,13 +3,15 @@ properties:
   prom_url: http://localhost:9090
   refresh: -1
   
-  period: 5m
+  period: 10m
   window: 10s
 
   # parameters
   coal: 2.23
   petroleum: 2.13
   natural_gas: 0.91
+  
+  namespace: ".*"
 
   # 1W*s = 1J and 1J = (1/3600000)kWh
   watt_per_second_to_kWh: 0.000000277777777777778
@@ -19,8 +21,6 @@ properties:
   
   ### Internal Properties
   time_window: "[${period}:${window}]"
-  global_filter: 'job="${job}"'
-  query_url: ${prom_url}/api/v1/query?query=
   dataset_url: ${prom_url}/api/v1/query
 
 global:
@@ -243,6 +243,11 @@ datasets:
         - id: DRAM
         - id: OTHER
         - id: GPU
+        
+    ## Aux queries
+  - uuid: namespaces
+    query:
+        query: sum by (container_namespace) (kepler_container_package_joules_total)
 
 pages:
   - name: index
@@ -253,11 +258,42 @@ pages:
               <span style="margin-left: 20px">Kepler Metrics</span>
           </p>
           <hr />
-      - .settings:
-          chart:
-            resizable: true
+      - settings:
+          type: METRIC
+          html:
+            html: >-
+                <div id="${this}" class="form" style= "margin: 10px">
+                    <label>Namespace</label><select id="${this}Select" class="form-control"></select>
+                </div>
+            javascript: >-
+                namespaces = "${value}".split(", ");
+                namespacesSelect = document.getElementById(${this}.id + "Select" );
+                
+                options = [];
+                option = document.createElement("option");
+                option.text = "All";
+                option.value = ".*";
+                option.selected = option.value === "${namespace}" ? "selected" : "";
+                options.push(option);
+                
+                namespaces.forEach(v => {
+                    var option = document.createElement("option");
+                    option.text = v;
+                    option.value = v;
+                    option.selected = option.value === "${namespace}" ? "selected" : "";
+                    options.push(option);
+                });
+                
+                options.forEach(op => namespacesSelect.appendChild(op));
+                
           lookup:
-            uuid: byPowerConsumption
+            uuid: namespaces
+            group:
+                - columnGroup:
+                    source: timestamp
+                  functions:
+                    - source: container_namespace
+                      function: JOIN_COMMA
       - panel: Carbon Emissions
       - panel: Pod/Service Power Consumption
       - panel: Power Consumption
