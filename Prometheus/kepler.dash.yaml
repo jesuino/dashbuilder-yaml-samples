@@ -9,7 +9,7 @@ properties:
   petroleum: 2.13
   natural_gas: 0.91
   
-  namespace: "system"
+  namespace: ".*"
 
   # 1W*s = 1J and 1J = (1/3600000)kWh
   watt_per_second_to_kWh: 0.000000277777777777778
@@ -357,6 +357,8 @@ pages:
                   
                   window.location.href = destination.toString();
                 };
+          refresh:
+            interval: -1
           lookup:
             uuid: namespaces
             group:
