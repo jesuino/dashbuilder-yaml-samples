@@ -15,10 +15,10 @@ properties:
   watt_per_second_to_kWh: 0.000000277777777777778
   
   # gauges limits
-  gauge_critical: 2
-  gauge_warning: 1
+  gauge_critical: 8
+  gauge_warning: 5
   gauge_start: 0
-  gauge_end: 3
+  gauge_end: 10
 
   cache: true
   mode: dark.
@@ -122,8 +122,6 @@ datasets:
             $.($[2] = "co2Coal" ? $[1]),
             $.($[2] = "co2NaturalGas" ? $[1])
         ]
-        
-        
     columns:
         - id: value
         - id: CO2 Petroleum
@@ -287,7 +285,6 @@ pages:
       - panel: Total Power Consumption
   - name: Control
     components:
-
       - settings:
           type: METRIC
           html:
@@ -703,9 +700,9 @@ pages:
                             "center": ["50%", "90%"],
                             "detail": {
                                 "show": true,
-                                "fontSize": 15,
+                                "fontSize": 25,
                                 "formatter":"{value}\n\n\n\n\n",
-                                "padding": [1,1,1,300],
+                                "padding": [0,0,0,300],
                                 "color": ""
                             }
                         }]
@@ -715,6 +712,9 @@ pages:
                     height: 200
                   general:
                     title: CO2 Coal
+                  columns:
+                    - id: CO2 Coal
+                      expression: new Number(value).toFixed(4)
                   lookup:
                     uuid: gauges
                     group:
@@ -740,9 +740,9 @@ pages:
                                 "center": ["50%", "90%"],
                                 "detail": {
                                     "show": true,
-                                    "fontSize": 15,
+                                    "fontSize": 25,
                                     "formatter":"{value}\n\n\n\n\n",
-                                    "padding": [1,1,1,300],
+                                    "padding": [0,0,0,300],
                                     "color": ""
                                 }
                         }]
@@ -752,6 +752,9 @@ pages:
                     height: 200
                   general:
                     title: CO2 Petroleum
+                  columns:
+                    - id: CO2 Petroleum
+                      expression: new Number(value).toFixed(4)
                   lookup:
                     uuid: gauges
                     group:
@@ -774,9 +777,9 @@ pages:
                             "center": ["50%", "90%"],
                             "detail": {
                                 "show": true,
-                                "fontSize": 15,
+                                "fontSize": 25,
                                 "formatter":"{value}\n\n\n\n\n",
-                                "padding": [1,1,1,300],
+                                "padding": [0,0,0,300],
                                 "color": ""
                             }
                         }]
@@ -786,6 +789,9 @@ pages:
                     height: 200
                   general:
                     title: CO2 Natural Gas
+                  columns:
+                    - id: CO2 Natural Gas
+                      expression: new Number(value).toFixed(4)
                   lookup:
                     uuid: gauges
                     group:
