@@ -25,7 +25,6 @@ properties:
 
     ### Internal Properties
     dataset_url: ${prom_url}/api/v1/query
-
 global:
     mode: ${mode}
     allowUrlProperties: true
@@ -328,9 +327,17 @@ pages:
                                     <label for="${this}PetroleumInput" >Petroleum Coeff</label>
                                     <input name="${this}PetroleumInput" id="${this}PetroleumInput" class="form-control" value="${petroleum}"></input>                              
                                 </div>
+                                
+                                <div class="col-sm-1">
+                                    <label for="${this}ModeInput">Mode</label>
+                                    <select name="${this}ModeInput" id="${this}ModeInput" class="form-control" value="${petroleum}">
+                                        <option value="light">Light</option>
+                                        <option value="Dark">Dark</option>
+                                    </select>
+                                </div>
                             
                             
-                                <div class="col-sm-2" style="margin-top: 25px">
+                                <div class="col-sm-1" style="margin-top: 25px">
                                 
                                 <button class="btn btn-primary" id="${this}Update">
                                     Update
@@ -365,15 +372,21 @@ pages:
                             var op = periodOptions[i];
                             op.selected = op.value === "${time_window}" ? "selected" : "";
                         }
-
+                        var modeSelect = document.getElementById(${this}.id + "ModeInput");
+                        var modeOptions = modeSelect.options;
+                        for (var i =0; i < modeOptions.length; i++) {
+                            var op = modeOptions[i];
+                            op.selected = op.value === "${mode}" ? "selected" : "";
+                        }
+                        
                         document.getElementById(${this}.id + "Update").onclick = e => {
 
                           var destination = new URL(window.location.href);
                           var params = destination.searchParams;
-                          
-                          
+
                           params.set("namespace", namespacesSelect.value);
                           params.set("time_window", periodSelect.value);
+                          params.set("mode", modeSelect.value);
                           params.set("coal", document.getElementById(${this}.id + "CoalInput").value);
                           params.set("natural_gas", document.getElementById(${this}.id + "NaturalGasInput").value);
                           params.set("petroleum", document.getElementById(${this}.id + "PetroleumInput").value);
