@@ -1,7 +1,7 @@
 properties:
   ### User properties (you can modify this)
   prom_url: http://localhost:9090
-  refresh: -1
+  refresh: 10
   time_window: "[15m:30s]"
 
   # parameters
@@ -13,9 +13,15 @@ properties:
 
   # 1W*s = 1J and 1J = (1/3600000)kWh
   watt_per_second_to_kWh: 0.000000277777777777778
+  
+  # gauges limits
+  gauge_critical: 2
+  gauge_warning: 1
+  gauge_start: 0
+  gauge_end: 3
 
   cache: true
-  mode: dark
+  mode: dark.
   
   ### Internal Properties
   dataset_url: ${prom_url}/api/v1/query
@@ -34,10 +40,10 @@ global:
     refresh:
         interval: ${refresh}
     meter:
-      critical: "8"
-      warning: "5"
-      start: "0"
-      end: "10"
+      critical: ${gauge_critical}
+      warning: ${gauge_warning}
+      start: ${gauge_start}
+      end: ${gauge_end}
 datasets:
   # Gauges Datasets
   - uuid: co2Coal
@@ -84,6 +90,7 @@ datasets:
                )
               ) * ${petroleum}
             )
+    
   - uuid: co2NaturalGas
     query:
       query: >-
@@ -106,6 +113,25 @@ datasets:
            )
           ) * ${natural_gas}
         )
+  - uuid: gauges
+    join: [co2Petroleum, co2NaturalGas, co2Coal]
+    expression: >-
+        [   
+            "value", 
+            $.($[2] = "co2Petroleum" ? $[1]),
+            $.($[2] = "co2Coal" ? $[1]),
+            $.($[2] = "co2NaturalGas" ? $[1])
+        ]
+        
+        
+    columns:
+        - id: value
+        - id: CO2 Petroleum
+          type: number
+        - id: CO2 Natural Gas
+          type: number
+        - id: CO2 Coal
+          type: number
   # Total PowerConsumption Bar Chart
   - uuid: totalPowerConsumption
     query:
@@ -248,6 +274,33 @@ datasets:
 pages:
   - name: index
     components:
+      - settings:
+            .component: echarts
+            echarts:
+                option: >-
+                    {
+                      
+                      "yAxis": {},
+                      "grid":  [{ "left": "10%" }, { "left": "30%" }],
+                      "series": [
+                            { 
+                                "type": "gauge",
+                                "encode": {
+                                    "x": "CO2 Coal"
+                                },
+                                "name": "assaas"
+                            }, 
+                            { "type": "gauge" }, 
+                            { "type": "gauge" }
+                      ]
+                    }
+            lookup: 
+                uuid: gauges
+                .group:
+                    - functions:
+                        - source: CO2 Coal
+                        - source: CO2 Petroleum
+                        - source: CO2 Natural Gas
       - html: >-
           <p style="font-size: xx-large; font-weight: bold">
               <img src="https://sustainable-computing.io/logo.png" style="width: 80px; height: auto" />
@@ -267,54 +320,54 @@ pages:
           html:
             html: >-
                 <div id="${this}" class="form" style= "margin: 10px">
-                    <form>
-                        <div class="form-group row">
-                            <div class="col-sm-2">
-                                <label for="${this}SelectNamespace" >Namespace</label>
-                                <select name="${this}SelectNamespace" id="${this}SelectNamespace" class="form-control"></select>
-                            </div>
-                            
-                            
-                            <div class="col-sm-2">
-                                <label for="${this}PeriodInput"><span style="margin-right: 5px" class="fa fa-clock-o"></span>Period</label>
-                                <select name="${this}PeriodInput" id="${this}PeriodInput" class="form-control" value="${petroleum}">
-                                    <option value="[5m:15s]">Last 5 minutes</option>
-                                    <option value="[15m:30s]">Last 15 minutes</option>
-                                    <option value="[1h:1m]">Last 1 hour</option>
-                                    <option value="[6h:10m]">Last 6 hours</option>
-                                    <option value="[12h:30m]">Last 12 hours</option>
-                                    <option value="[24h:1h]">Last 24 hours</option>
-                                    <option value="[48h:2h]">Last 2 days</option>
-                                </select>
-                            </div>
-                        
-                        
-                        
-                            <div class="col-sm-2">
-                                <label for="${this}CoalInput" >Coal Coeff</label>
-                                <input name="${this}CoalInput" id="${this}CoalInput" class="form-control" value="${coal}"></input>
-                            </div>
-                            
-                            
-                            <div class="col-sm-2">
-                                <label for="${this}NaturalGasInput" >Natural Gas Coeff</label>
-                                <input name="${this}NaturalGasInput" id="${this}NaturalGasInput" class="form-control" value="${natural_gas}"></input>
-                            </div>
-                            
-                            <div class="col-sm-2">
-                                <label for="${this}PetroleumInput" >Petroleum Coeff</label>
-                                <input name="${this}PetroleumInput" id="${this}PetroleumInput" class="form-control" value="${petroleum}"></input>                              
-                            </div>
-                        
-                        
-                            <div class="col-sm-2" style="margin-top: 25px">
-                            
-                            <button class="btn btn-primary" id="${this}Update">
-                                Update
-                            </button>
-                            </div>
+
+                    <div class="form-group row">
+                        <div class="col-sm-2">
+                            <label for="${this}SelectNamespace" >Namespace</label>
+                            <select name="${this}SelectNamespace" id="${this}SelectNamespace" class="form-control"></select>
                         </div>
-                    <form>
+                        
+                        
+                        <div class="col-sm-2">
+                            <label for="${this}PeriodInput"><span style="margin-right: 5px" class="fa fa-clock-o"></span>Period</label>
+                            <select name="${this}PeriodInput" id="${this}PeriodInput" class="form-control" value="${petroleum}">
+                                <option value="[5m:15s]">Last 5 minutes</option>
+                                <option value="[15m:30s]">Last 15 minutes</option>
+                                <option value="[1h:1m]">Last 1 hour</option>
+                                <option value="[6h:10m]">Last 6 hours</option>
+                                <option value="[12h:30m]">Last 12 hours</option>
+                                <option value="[24h:1h]">Last 24 hours</option>
+                                <option value="[48h:2h]">Last 2 days</option>
+                            </select>
+                        </div>
+                    
+                    
+                    
+                        <div class="col-sm-2">
+                            <label for="${this}CoalInput" >Coal Coeff</label>
+                            <input name="${this}CoalInput" id="${this}CoalInput" class="form-control" value="${coal}"></input>
+                        </div>
+                        
+                        
+                        <div class="col-sm-2">
+                            <label for="${this}NaturalGasInput" >Natural Gas Coeff</label>
+                            <input name="${this}NaturalGasInput" id="${this}NaturalGasInput" class="form-control" value="${natural_gas}"></input>
+                        </div>
+                        
+                        <div class="col-sm-2">
+                            <label for="${this}PetroleumInput" >Petroleum Coeff</label>
+                            <input name="${this}PetroleumInput" id="${this}PetroleumInput" class="form-control" value="${petroleum}"></input>                              
+                        </div>
+                    
+                    
+                        <div class="col-sm-2" style="margin-top: 25px">
+                        
+                        <button class="btn btn-primary" id="${this}Update">
+                            Update
+                        </button>
+                        </div>
+                    </div>
+
                 </div>
             javascript: >-
                 namespaces = "${value}".split(", ");
@@ -355,7 +408,8 @@ pages:
                   params.set("natural_gas", document.getElementById(${this}.id + "NaturalGasInput").value);
                   params.set("petroleum", document.getElementById(${this}.id + "PetroleumInput").value);
                   
-                  window.location.href = destination.toString();
+                  console.log(destination.toString());
+                  //window.location.href = destination.toString();
                 };
           refresh:
             interval: -1
@@ -425,7 +479,7 @@ pages:
                             function: AVERAGE
                             column: Mean
                           - source: value
-                            function: AVERAGE
+                            function: MAX
                             column: Max
           - span: 6
             components:
@@ -449,6 +503,7 @@ pages:
                                     "type": "line",
                                     "markLine": {
                                         "symbol": "none",
+                                        "name": "Mean",
                                         "data": [
                                             { "type": "average"  }
                                         ]
@@ -464,7 +519,6 @@ pages:
                                     } 
                                 }
                         ]
-                                                
                     }
                   general:
                     title: Total Power Consumption (kWh per day)
@@ -501,7 +555,7 @@ pages:
                             function: AVERAGE
                             column: Mean
                           - source: value
-                            function: AVERAGE
+                            function: MAX
                             column: Max
   - name: Pod/Service Power Consumption
     rows:
@@ -538,7 +592,6 @@ pages:
                                         "show": true,
                                         "position": "inside",
                                         "fontSize": 9
-                                        
                                     }
                                 }
                             }
@@ -671,27 +724,30 @@ pages:
                             "formatter": "{c}"
                         },
                         "title": {
-                            "top": 160
-                            
+                            "top": "0"
                         },
                         "series": [{
+                            "center": ["50%", "90%"],
                             "detail": {
                                 "show": true,
-                                "formatter": "",
-                                "fontSize": 10,
-                                "offsetCenter": ["50%"],
-                                "backgroundColor": "transparent"
+                                "fontSize": 15,
+                                "formatter":"{value}\n\n\n\n\n",
+                                "padding": [1,1,1,300],
+                                "color": ""
                             }
-                           
                         }]
                     }
                   chart:
                     resizable: true
-                    height: 180
+                    height: 200
                   general:
                     title: CO2 Coal
                   lookup:
-                    uuid: co2Coal
+                    uuid: gauges
+                    group:
+                        - functions:
+                            - source: value
+                            - source: CO2 Coal
           - span: 4
             components:
               - settings:
@@ -702,27 +758,33 @@ pages:
                             "formatter": "{c}"
                         },
                         "title": {
-                            "top": 160
-                            
+                            "top": 0
+                        },
+                        "grid": {
+                            "top": 100
                         },
                         "series": [{
-                            "detail": {
-                                "show": true,
-                                "formatter": "",
-                                "fontSize": 10,
-                                "offsetCenter": ["50%"],
-                                "backgroundColor": "transparent"
-                            }
-                           
+                                "center": ["50%", "90%"],
+                                "detail": {
+                                    "show": true,
+                                    "fontSize": 15,
+                                    "formatter":"{value}\n\n\n\n\n",
+                                    "padding": [1,1,1,300],
+                                    "color": ""
+                                }
                         }]
                     }
                   chart:
                     resizable: true
-                    height: 180
+                    height: 200
                   general:
                     title: CO2 Petroleum
                   lookup:
-                    uuid: co2Petroleum
+                    uuid: gauges
+                    group:
+                        - functions:
+                            - source: value
+                            - source: CO2 Petroleum
           - span: 4
             components:
               - settings:
@@ -733,24 +795,27 @@ pages:
                             "formatter": "{c}"
                         },
                         "title": {
-                            "top": 160
-                            
+                            "top": "0"
                         },
                         "series": [{
+                            "center": ["50%", "90%"],
                             "detail": {
                                 "show": true,
-                                "formatter": "",
-                                "fontSize": 10,
-                                "offsetCenter": ["50%"],
-                                "backgroundColor": "transparent"
+                                "fontSize": 15,
+                                "formatter":"{value}\n\n\n\n\n",
+                                "padding": [1,1,1,300],
+                                "color": ""
                             }
-                           
                         }]
                     }
                   chart:
                     resizable: true
-                    height: 180
+                    height: 200
                   general:
                     title: CO2 Natural Gas
                   lookup:
-                    uuid: co2NaturalGas
+                    uuid: gauges
+                    group:
+                        - functions:
+                            - source: value
+                            - source: CO2 Natural Gas
