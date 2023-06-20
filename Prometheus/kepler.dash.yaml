@@ -274,33 +274,6 @@ datasets:
 pages:
   - name: index
     components:
-      - settings:
-            .component: echarts
-            echarts:
-                option: >-
-                    {
-                      
-                      "yAxis": {},
-                      "grid":  [{ "left": "10%" }, { "left": "30%" }],
-                      "series": [
-                            { 
-                                "type": "gauge",
-                                "encode": {
-                                    "x": "CO2 Coal"
-                                },
-                                "name": "assaas"
-                            }, 
-                            { "type": "gauge" }, 
-                            { "type": "gauge" }
-                      ]
-                    }
-            lookup: 
-                uuid: gauges
-                .group:
-                    - functions:
-                        - source: CO2 Coal
-                        - source: CO2 Petroleum
-                        - source: CO2 Natural Gas
       - html: >-
           <p style="font-size: xx-large; font-weight: bold">
               <img src="https://sustainable-computing.io/logo.png" style="width: 80px; height: auto" />
@@ -409,7 +382,7 @@ pages:
                   params.set("petroleum", document.getElementById(${this}.id + "PetroleumInput").value);
                   
                   console.log(destination.toString());
-                  //window.location.href = destination.toString();
+                  window.location.href = destination.toString();
                 };
           refresh:
             interval: -1
