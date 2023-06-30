@@ -1,0 +1,15 @@
+datasets:
+    - uuid: search
+      # point here to the search URL (using REST API and JSON response)
+      url: http://127.0.0.1:3000/hosts_uptime
+      # This expression will be internal in a next Dashbuilder release
+      expression: >-
+          {
+              "columns": $.fields.name.({"id": $} ),
+              "values": $map($.results, function($r) { $.fields.name.( $lookup($r, $)) } )
+          }
+pages:
+    - components:
+          - settings:
+                lookup:
+                    uuid: search
