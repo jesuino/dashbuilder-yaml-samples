@@ -1,7 +1,9 @@
 properties:
-  kepler_url: https://raw.githubusercontent.com/jesuino/dashbuilder-yaml-samples/main/kepler/metrics
+  kepler_url: https://raw.githubusercontent.com/jesuino/dashbuilder-yaml-samples/main/kepler
+  kepler_metrics_url: ${kepler_url}/metrics
 global:
   mode: dark
+  allowUrlProperties: true
   settings:
     extraConfiguration: >-
       {
@@ -34,7 +36,7 @@ global:
           <p style="font-weight: 400" id="${this}Title"><em id="${this}Icon" class=""></em> ${title}</p>
         </div>
   dataset:
-    url: ${kepler_url}
+    url: ${kepler_metrics_url}
     .cacheEnabled: true
 datasets:
   - uuid: metrics
