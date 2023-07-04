@@ -1,10 +1,10 @@
 properties:
     ### User properties (you can modify this)
     prometheus_url: http://localhost:9090
-    job: keycloak
-    refresh_seconds: 10
-    period: 1h
-    window: 5s
+    job: "quarkus-app"
+    refresh_seconds: 30
+    period: 15m
+    window: 30s
 
     # style
     subTitleStyle: "padding: 5px; background-color: #F1F1F1; font-size: medium; font-weight: bolder; margin: 5px"
@@ -13,16 +13,21 @@ properties:
     ### Internal Properties
     time_window: "[${period}:${window}]"
     global_filter: 'job="${job}"'
-    query_url: ${prometheus_url}/api/v1/query?query=
+    query_url: ${prometheus_url}/api/v1/query
 global:
     mode: dark
+    dataset:
+        url: ${query_url}
+        type: prometheus
+        cacheEnabled: true
+        refreshTime: "1second"
     settings:
         refresh:
             interval: ${refresh_seconds}
         extraConfiguration: >-
             {
                 "xAxis": {
-                    "splitNumber": 5
+                    "splitNumber": 3
                 },
                 "title": {
                     "textStyle" : { 
@@ -35,7 +40,7 @@ global:
             height: 180
             zoom: true
             grid:
-                y: false
+                x: false
             margin:
                 bottom: 20
                 top: 35
@@ -50,80 +55,54 @@ global:
 datasets:
     ## cards Datasets
     - uuid: uptime
-      type: prometheus
-      cacheEnabled: true
-      refreshTime: "1second"
-      url: ${query_url}process_uptime_seconds{${global_filter}}
+      query:
+          query: process_uptime_seconds{${global_filter}}
     - uuid: start_time
-      type: prometheus
-      cacheEnabled: true
-      refreshTime: "1second"
-      url: ${query_url}process_start_time_seconds{${global_filter}}
+      query:
+          query: process_start_time_seconds{${global_filter}}
     - uuid: heap_used
-      type: prometheus
-      cacheEnabled: true
-      refreshTime: "1second"
-      url: ${query_url}sum(jvm_memory_used_bytes{${global_filter},area="heap"})*100/sum(jvm_memory_max_bytes{${global_filter},area="heap"})
+      query:
+          query: sum(jvm_memory_used_bytes{${global_filter},area="heap"})*100/sum(jvm_memory_max_bytes{${global_filter},area="heap"})
     - uuid: system_cpu_usage
-      type: prometheus
-      cacheEnabled: true
-      refreshTime: "1second"
-      url: ${query_url}system_cpu_usage{${global_filter}}
+      query:
+          query: system_cpu_usage{${global_filter}}
 
     ## Timeseries datasets
 
     # Memory
     - uuid: heap_used_bytes
-      type: prometheus
-      url: ${query_url}jvm_memory_used_bytes{${global_filter}, area="heap"}${time_window}
-      cacheEnabled: true
-      refreshTime: "1second"
+      query:
+          query: jvm_memory_used_bytes{${global_filter}, area="heap"}${time_window}
     - uuid: nonheap_used_bytes
-      type: prometheus
-      cacheEnabled: true
-      refreshTime: "1second"
-      url: ${query_url}jvm_memory_used_bytes{${global_filter}, area="nonheap"}${time_window}
+      query:
+          query: jvm_memory_used_bytes{${global_filter}, area="nonheap"}${time_window}
     - uuid: used_bytes_total
-      type: prometheus
-      cacheEnabled: true
-      refreshTime: "1second"
-      url: ${query_url}sum by (instance) (jvm_memory_used_bytes{${global_filter}})${time_window}
+      query:
+          query: sum by (instance) (jvm_memory_used_bytes{${global_filter}})${time_window}
 
     # Threads
     - uuid: threads_states
-      type: prometheus
-      cacheEnabled: true
-      refreshTime: "1second"
-      url: ${query_url}jvm_threads_states_threads{${global_filter}}${time_window}
+      query:
+          query: jvm_threads_states_threads{${global_filter}}${time_window}
     - uuid: live_threads
-      type: prometheus
-      cacheEnabled: true
-      refreshTime: "1second"
-      url: ${query_url}jvm_threads_live_threads{${global_filter}}${time_window}
+      query:
+          query: jvm_threads_live_threads{${global_filter}}${time_window}
     - uuid: daemon_threads
-      type: prometheus
-      cacheEnabled: true
-      refreshTime: "1second"
-      url: ${query_url}jvm_threads_daemon_threads{${global_filter}}${time_window}
+      query:
+          query: jvm_threads_daemon_threads{${global_filter}}${time_window}
 
       # GC
     - uuid: gc_pause_sum
-      type: prometheus
-      cacheEnabled: true
-      refreshTime: "1second"
-      url: ${query_url}jvm_gc_pause_seconds_sum{${global_filter}}${time_window}
+      query:
+          query: jvm_gc_pause_seconds_sum{${global_filter}}${time_window}
 
     # System
     - uuid: open_files
-      type: prometheus
-      cacheEnabled: true
-      refreshTime: "1second"
-      url: ${query_url}process_files_open_files{${global_filter}}${time_window}
+      query:
+          query: process_files_open_files{${global_filter}}${time_window}
     - uuid: system_cpu
-      type: prometheus
-      cacheEnabled: true
-      refreshTime: "1second"
-      url: ${query_url}system_cpu_usage{${global_filter}}${time_window}
+      query:
+          query: system_cpu_usage{${global_filter}}${time_window}
 
 pages:
     - name: index
@@ -337,13 +316,12 @@ pages:
                             general:
                                 title: System CPU
                             extraConfiguration: >-
-                                {
-                                    
+                                {                                    
                                     "yAxis": {
-                                        "max": 1
+                                        "max": 100
                                     },
                                     "xAxis": {
-                                        "splitNumber": 5
+                                        "splitNumber": 3
                                     },
                                     "title": {
                                         "textStyle" : { 
@@ -352,9 +330,10 @@ pages:
                                     }
                                     
                                 }
+
                             columns:
                                 - id: value
-                                  expression: "value * 100"
+                                  expression: (new Number(value) *  100).toFixed(3)
                             lookup:
                                 uuid: system_cpu
                                 group:
@@ -381,9 +360,6 @@ pages:
                             type: timeseries
                             general:
                                 title: Open Files
-                            columns:
-                                - id: value
-                                  expression: "#"
                             lookup:
                                 uuid: open_files
                                 group:
