@@ -1,6 +1,6 @@
 datasets:
     - uuid: traces
-      url: http://localhost:3000/traces.json
+      url: https://raw.githubusercontent.com/jesuino/dashbuilder-yaml-samples/main/OpenTelemetry/traces.json
       expression: >-
           $.data.spans.[
               $.traceID,
