@@ -1,0 +1,18 @@
+global:
+    dataset:
+        url: https://raw.githubusercontent.com/jesuino/dashbuilder-yaml-samples/main/
+datasets:
+    - uuid: micrometer_metrics
+      path: Micrometer/data/quarkus/metrics
+    - uuid: jupyterhub_metrics
+      path: jupyterhub/metrics/metrics
+pages:
+    - components:
+        - markdown: "# Micrometer Metrics"
+        - displayer:
+            lookup:
+                uuid: micrometer_metrics
+        - markdown: "# Jupyter Metrics"
+        - displayer:
+            lookup:
+                uuid: jupyterhub_metrics
