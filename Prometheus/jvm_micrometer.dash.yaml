@@ -8,20 +8,20 @@ properties:
 
     # style
     subTitleStyle: "padding: 5px; background-color: #F1F1F1; font-size: medium; font-weight: bolder; margin: 5px"
-    titleStyle: "font-size: x-large; margin: 5px; font-weight: bold"
+    titleStyle: "font-size: x-large; margin: 10px; font-weight: bold"
 
     ### Internal Properties
     time_window: "[${period}:${window}]"
     global_filter: 'job="${job}"'
-    query_url: ${prometheus_url}/api/v1/query
 global:
     mode: dark
     dataset:
-        url: ${query_url}
+        url: ${prometheus_url}
         type: prometheus
+        path: /api/v1/query
         cacheEnabled: true
         refreshTime: "1second"
-    settings:
+    displayer:
         refresh:
             interval: ${refresh_seconds}
         extraConfiguration: >-
@@ -66,9 +66,7 @@ datasets:
     - uuid: system_cpu_usage
       query:
           query: system_cpu_usage{${global_filter}}
-
-    ## Timeseries datasets
-
+    ## TIMESERIES datasets
     # Memory
     - uuid: heap_used_bytes
       query:
@@ -79,7 +77,6 @@ datasets:
     - uuid: used_bytes_total
       query:
           query: sum by (instance) (jvm_memory_used_bytes{${global_filter}})${time_window}
-
     # Threads
     - uuid: threads_states
       query:
@@ -90,12 +87,10 @@ datasets:
     - uuid: daemon_threads
       query:
           query: jvm_threads_daemon_threads{${global_filter}}${time_window}
-
       # GC
     - uuid: gc_pause_sum
       query:
           query: jvm_gc_pause_seconds_sum{${global_filter}}${time_window}
-
     # System
     - uuid: open_files
       query:
@@ -107,11 +102,6 @@ datasets:
 pages:
     - name: index
       rows:
-          - _columns:
-                - components:
-                      - settings:
-                            lookup:
-                                uuid: live_threads
           - columns:
                 - components:
                       - html: >-
@@ -122,7 +112,7 @@ pages:
           - columns:
                 - span: 3
                   components:
-                      - settings:
+                      - displayer:
                             type: METRIC
                             general:
                                 title: Uptime
@@ -157,7 +147,7 @@ pages:
                                           - source: value
                 - span: 3
                   components:
-                      - settings:
+                      - displayer:
                             type: METRIC
                             general:
                                 title: Start Time
@@ -179,7 +169,7 @@ pages:
                                           - source: value
                 - span: 3
                   components:
-                      - settings:
+                      - displayer:
                             type: METRIC
                             general:
                                 title: Heap Used
@@ -194,7 +184,7 @@ pages:
                                           - source: value
                 - span: 3
                   components:
-                      - settings:
+                      - displayer:
                             type: METRIC
                             general:
                                 title: System CPU Usage
@@ -222,8 +212,8 @@ pages:
             columns:
                 - span: 3
                   components:
-                      - settings:
-                            type: timeseries
+                      - displayer:
+                            type: TIMESERIES
                             general:
                                 title: Heap Memory Used Bytes
                             chart:
@@ -238,8 +228,8 @@ pages:
                                           - source: value
                 - span: 3
                   components:
-                      - settings:
-                            type: timeseries
+                      - displayer:
+                            type: TIMESERIES
                             general:
                                 title: NonHeap Memory Used Bytes
                             chart:
@@ -257,8 +247,8 @@ pages:
                                           - source: value
                 - span: 3
                   components:
-                      - settings:
-                            type: timeseries
+                      - displayer:
+                            type: TIMESERIES
                             general:
                                 title: GC Pause
                             chart:
@@ -273,8 +263,8 @@ pages:
                                           - source: value
                 - span: 3
                   components:
-                      - settings:
-                            type: timeseries
+                      - displayer:
+                            type: TIMESERIES
                             general:
                                 title: Threads States
                             chart:
@@ -294,14 +284,13 @@ pages:
             columns:
                 - span: 3
                   components:
-                      - settings:
-                            type: timeseries
+                      - displayer:
+                            type: TIMESERIES
                             general:
                                 title: Heap Total Used Bytes
                             chart:
                                 margin:
                                     left: 100
-
                             lookup:
                                 uuid: used_bytes_total
                                 group:
@@ -311,8 +300,8 @@ pages:
                                           - source: value
                 - span: 3
                   components:
-                      - settings:
-                            type: timeseries
+                      - displayer:
+                            type: TIMESERIES
                             general:
                                 title: System CPU
                             extraConfiguration: >-
@@ -343,8 +332,8 @@ pages:
                                           - source: value
                 - span: 3
                   components:
-                      - settings:
-                            type: timeseries
+                      - displayer:
+                            type: TIMESERIES
                             general:
                                 title: Live Threads
                             lookup:
@@ -356,8 +345,8 @@ pages:
                                           - source: value
                 - span: 3
                   components:
-                      - settings:
-                            type: timeseries
+                      - displayer:
+                            type: TIMESERIES
                             general:
                                 title: Open Files
                             lookup:
