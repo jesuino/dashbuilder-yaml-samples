@@ -19,18 +19,19 @@ global:
                 x: false
         html:
             html: >-
-                    <div id="${this}" class="card-pf card-pf-aggregate-status" style="margin: 15px; background-color: ${bgColor}; height: 85px; border-radius: 10px">
-                        <h2 style="font-weight: 600; font-size: x-large" id="${this}Value">${value}</h2>
-                        <p style="font-weight: 400" id="${this}Title"><em id="${this}Icon" class=""></em> ${title}</p>
-                    </div>
+                    <div id="gwt-uid-363_this" style="width: 95%;height: auto;margin-top:0px;margin-right:0px;margin-bottom:0px;margin-left:0px;">
+                    <div class="pf-v5-c-card pf-m-compact pf-m-rounded">    
+                            <div class="pf-v5-c-card__title"><div class="pf-v5-c-title pf-m-2xl">${value}</div></div>
+                            <div class="pf-v5-c-card__footer">
+                                ${title}
+                            </div>    
+                    </div></div>
         export:
             png: true
-        lookup:
-            uuid: fifa_matches
 datasets:
     - uuid: fifa_matches
       url: https://api.fifa.com/api/v3/calendar/matches?from=2022-11-20T00%3A00%3A00Z&to=2022-12-20T23%3A59%3A59Z&language=en&count=500&idSeason=255711
-      cacheEnabled: "true"
+      cacheEnabled: true
       expression: >-
           $.Results.[
               ( $.MatchStatus = 0 ? 
@@ -64,11 +65,11 @@ datasets:
           - id: Date
             type: LABEL
           - id: Day
-            type: Label
+            type: LABEL
           - id: Hour
-            type: Label
+            type: LABEL
           - id: Humidity
-            type: Number
+            type: NUMBER
           - id: Temperature
             type: NUMBER
           - id: WindSpeed
@@ -112,12 +113,12 @@ pages:
                                 <hr />
                             </p>
           - properties:
-              margin-bottom: 100px
-              margin-top: 50px
+                margin-bottom: 100px
+                margin-top: 50px
             columns:
                 - span: 3
                   components:
-                      - settings:
+                      - displayer:
                             type: METRIC
                             general:
                                 title: Total Goals
@@ -125,39 +126,43 @@ pages:
                                 - id: Total Goals
                                   pattern: "#"
                             lookup:
+                                uuid: fifa_matches
                                 group:
                                     - functions:
                                           - source: Total Goals
                                             function: SUM
                 - span: 3
                   components:
-                      - settings:
+                      - displayer:
                             type: METRIC
                             general:
                                 title: Average Goals by Match
                             lookup:
-                                group:                                    
+                                uuid: fifa_matches
+                                group:
                                     - functions:
                                           - source: Total Goals
                                             function: AVERAGE
                 - span: 3
                   components:
-                      - settings:
+                      - displayer:
                             type: METRIC
                             general:
                                 title: Average Temperature
                             lookup:
+                                uuid: fifa_matches
                                 group:
                                     - functions:
                                           - source: Temperature
                                             function: AVERAGE
                 - span: 3
                   components:
-                      - settings:
+                      - displayer:
                             type: METRIC
                             general:
                                 title: Average Attendance
                             lookup:
+                                uuid: fifa_matches
                                 group:
                                     - functions:
                                           - source: Attendance
@@ -165,8 +170,8 @@ pages:
           - columns:
                 - span: 6
                   components:
-                      - settings:
-                            type: linechart
+                      - displayer:
+                            type: LINECHART
 
                             general:
                                 title: Goals by Day
@@ -174,6 +179,7 @@ pages:
                                 x:
                                     labels_angle: 30
                             lookup:
+                                uuid: fifa_matches
                                 group:
                                     - columnGroup:
                                           source: Day
@@ -184,8 +190,8 @@ pages:
                                             function: ${GoalsFunction}
                 - span: 6
                   components:
-                      - settings:
-                            type: barchart
+                      - displayer:
+                            type: BARCHART
                             general:
                                 title: Goals by Stadium
                             axis:
@@ -193,6 +199,7 @@ pages:
                                     labels_angle: 15
 
                             lookup:
+                                uuid: fifa_matches
                                 sort:
                                     - column: Goals
                                       order: DESCENDING
@@ -210,12 +217,13 @@ pages:
             columns:
                 - span: 6
                   components:
-                      - settings:
-                            type: bubblechart
+                      - displayer:
+                            type: BUBBLECHART
                             general:
                                 title: Goals by Weather
                                 subtitle: Bubble shows total matches
                             lookup:
+                                uuid: fifa_matches
                                 sort:
                                     - column: TOTAL MATCHES
                                       order: ASCENDING
@@ -235,8 +243,8 @@ pages:
                                             column: TOTAL MATCHES
                 - span: 6
                   components:
-                      - settings:
-                            type: bubblechart
+                      - displayer:
+                            type: BUBBLECHART
                             general:
                                 title: Goals by Attendance
                                 subtitle: Bubble shows total goals
@@ -248,16 +256,17 @@ pages:
                                 y:
                                     title: Attendance
                             lookup:
+                                uuid: fifa_matches
                                 group:
                                     - columnGroup:
                                           source: Match Name
                                       functions:
                                           - source: Match Name
-                                          - source: Attendance                                            
+                                          - source: Attendance
                                             column: Attendance
-                                          - source: Total Goals                                            
+                                          - source: Total Goals
                                             column: Goals
-                                          - source: Total Goals                                            
+                                          - source: Total Goals
                                             column: Goals
 
           - columns:
@@ -268,11 +277,9 @@ pages:
 
                                 <strong>All Matches</strong>
                             </p>
-                      - settings:
-                            component: table
-                            external:
-                                width: 100%
-                                height: 500px
+                      - displayer:
+                            chart:
+                                resizable: true
                             columns:
                                 - id: Date
                                   expression: >-
@@ -282,6 +289,7 @@ pages:
                                 - id: Team 2 Score
                                   pattern: "#"
                             lookup:
+                                uuid: fifa_matches
                                 group:
                                     - functions:
                                           - source: Temperature
