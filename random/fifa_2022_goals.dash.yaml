@@ -19,7 +19,7 @@ global:
                 x: false
         html:
             html: >-
-                    <div id="gwt-uid-363_this" style="width: 95%;height: auto;margin-top:0px;margin-right:0px;margin-bottom:0px;margin-left:0px;">
+                    <div style="width: 95%;height: auto;margin-top:0px;margin-right:0px;margin-bottom:0px;margin-left:0px;">
                     <div class="pf-v5-c-card pf-m-compact pf-m-rounded">    
                             <div class="pf-v5-c-card__title"><div class="pf-v5-c-title pf-m-2xl">${value}</div></div>
                             <div class="pf-v5-c-card__footer">
