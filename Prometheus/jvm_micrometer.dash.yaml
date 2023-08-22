@@ -2,9 +2,9 @@ properties:
     ### User properties (you can modify this)
     prometheus_url: http://localhost:9090
     job: "quarkus-app"
-    refresh_seconds: 30
-    period: 15m
-    window: 30s
+    refresh_seconds: 10
+    period: 10m
+    window: 10s
 
     # style
     subTitleStyle: "padding: 5px; background-color: #F1F1F1; font-size: medium; font-weight: bolder; margin: 5px"
@@ -35,6 +35,9 @@ global:
                     }
                 }
             }
+        axis:
+            y:
+                labels_show: false
         chart:
             resizable: true
             height: 180
@@ -46,12 +49,16 @@ global:
                 top: 35
             legend:
                 show: false
+
         html:
             html: >-
-                <div id="${this}" class="card-pf card-pf-aggregate-status" style="background-color: ${bgColor}; width: 90%; height: 58px;margin: 10px; border-radius: 10px;">
-                    <p style="font-weight: 600; font-size: small" id="${this}Title"><em id="${this}Icon" class=""></em> ${title}</p>
-                    <h2 style="margin: 5px; font-weight: 600; font-size: large" id="${this}Value">${value} <span id="${this}Suffix" class=""></span></h2>
-                </div>
+                    <div style="width: 95%;height: auto;margin-top:0px;margin-right:0px;margin-bottom:0px;margin-left:0px;">
+                    <div class="pf-v5-c-card pf-m-compact pf-m-rounded">    
+                            <div class="pf-v5-c-card__title"><div class="pf-v5-c-title pf-m-2xl">${value}</div></div>
+                            <div class="pf-v5-c-card__footer">
+                                ${title}
+                            </div>    
+                    </div></div>
 datasets:
     ## cards Datasets
     - uuid: uptime
@@ -104,11 +111,11 @@ pages:
       rows:
           - columns:
                 - components:
-                      - html: >-
-                            <p style="${titleStyle}">
-                                JVM Monitoring
-                                <hr />
-                            </p>
+                      - title: JVM Monitoring
+                        properties:
+                            size: 4xl
+                            margin-bottom: 30px
+
           - columns:
                 - span: 3
                   components:
@@ -198,10 +205,9 @@ pages:
                                           - source: value
           - columns:
                 - components:
-                      - html: <hr />
                       - panel: JVM
                         properties:
-                            margin-top: 20px
+                            margin-top: 30px
                       - panel: SYSTEM
                         properties:
                             margin-top: 20px
@@ -218,7 +224,7 @@ pages:
                                 title: Heap Memory Used Bytes
                             chart:
                                 margin:
-                                    left: 100
+                                    left: 10
                             lookup:
                                 uuid: heap_used_bytes
                                 group:
@@ -234,7 +240,7 @@ pages:
                                 title: NonHeap Memory Used Bytes
                             chart:
                                 margin:
-                                    left: 100
+                                    left: 10
                             columns:
                                 - id: value
                                   pattern: "#"
@@ -253,7 +259,7 @@ pages:
                                 title: GC Pause
                             chart:
                                 margin:
-                                    left: 40
+                                    left: 10
                             lookup:
                                 uuid: gc_pause_sum
                                 group:
@@ -269,7 +275,7 @@ pages:
                                 title: Threads States
                             chart:
                                 margin:
-                                    left: 35
+                                    left: 10
                             lookup:
                                 uuid: threads_states
                                 group:
@@ -290,7 +296,7 @@ pages:
                                 title: Heap Total Used Bytes
                             chart:
                                 margin:
-                                    left: 100
+                                    left: 10
                             lookup:
                                 uuid: used_bytes_total
                                 group:
