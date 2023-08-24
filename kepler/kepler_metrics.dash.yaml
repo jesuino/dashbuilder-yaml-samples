@@ -30,11 +30,14 @@ global:
       grid:
         x: false
     html:
-      html: >-
-        <div id="${this}" class="card-pf card-pf-aggregate-status" style="background-color: ${bgColor}; width: 90%; height: 80px;margin: 10px; border-radius: 10px">
-          <h2 style="font-weight: 600; font-size: large" id="${this}Value">${value} <span id="${this}Suffix" class=""></span></h2>
-          <p style="font-weight: 400" id="${this}Title"><em id="${this}Icon" class=""></em> ${title}</p>
-        </div>
+            html: >-
+                    <div style="width: 95%;height: auto;margin-top:0px;margin-right:0px;margin-bottom:0px;margin-left:0px;">
+                    <div class="pf-v5-c-card pf-m-compact pf-m-rounded">    
+                            <div class="pf-v5-c-card__title"><div class="pf-v5-c-title pf-m-2xl">${value}</div></div>
+                            <div class="pf-v5-c-card__footer">
+                                ${title}
+                            </div>    
+                    </div></div>
   dataset:
     url: ${kepler_metrics_url}
     .cacheEnabled: true
@@ -124,8 +127,7 @@ pages:
     properties:
       margin: 10px
     components:
-      - markdown: >-
-          # Kepler Metrics <hr />
+      - title: Kepler Metrics
       - type: TABS
         properties:
           navGroupId: Metrics
@@ -172,8 +174,11 @@ pages:
                   - source: Node
       - properties:
           margin-top: 30px
-        settings:
+          width: 330px
+          text-align: center
+        displayer:
           type: METRIC
+          chart:
           general:
             title: Total Joules by Node
           filter:
